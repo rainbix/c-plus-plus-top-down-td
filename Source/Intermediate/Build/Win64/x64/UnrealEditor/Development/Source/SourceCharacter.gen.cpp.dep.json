@@ -1,0 +1,23 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\unrealeditor\\inc\\source\\uht\\sourcecharacter.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\x64\\sourceeditor\\development\\unrealed\\sharedpch.unrealed.cpp20.h.pch",
+        "Includes": [
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\source\\definitions.source.h",
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\source\\source\\sourcecharacter.h",
+            "g:\\ue_5.3\\engine\\source\\runtime\\engine\\classes\\gameframework\\character.h",
+            "g:\\ue_5.3\\engine\\source\\runtime\\engine\\classes\\gameframework\\charactermovementreplication.h",
+            "g:\\ue_5.3\\engine\\source\\runtime\\experimental\\iris\\core\\public\\iris\\serialization\\irisobjectreferencepackagemap.h",
+            "g:\\ue_5.3\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\iriscore\\uht\\irisobjectreferencepackagemap.generated.h",
+            "g:\\ue_5.3\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\charactermovementreplication.generated.h",
+            "g:\\ue_5.3\\engine\\source\\runtime\\engine\\classes\\gameframework\\rootmotionsource.h",
+            "g:\\ue_5.3\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\rootmotionsource.generated.h",
+            "g:\\ue_5.3\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\character.generated.h",
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\unrealeditor\\inc\\source\\uht\\sourcecharacter.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

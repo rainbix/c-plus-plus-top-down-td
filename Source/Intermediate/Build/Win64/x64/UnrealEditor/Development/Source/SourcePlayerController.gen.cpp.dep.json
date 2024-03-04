@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\unrealeditor\\inc\\source\\uht\\sourceplayercontroller.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\x64\\sourceeditor\\development\\unrealed\\sharedpch.unrealed.cpp20.h.pch",
+        "Includes": [
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\source\\definitions.source.h",
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\source\\source\\sourceplayercontroller.h",
+            "d:\\projects\\c-plus-plus-top-down-td\\source\\intermediate\\build\\win64\\unrealeditor\\inc\\source\\uht\\sourceplayercontroller.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
