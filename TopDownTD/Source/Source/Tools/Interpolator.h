@@ -11,6 +11,8 @@ public:
 	bool IsActive();
 	bool IsElapsed() const;
 	void ProcessTick(float deltaTime);
+	void ResetWithNewTime(float newTotalTime);
+	float Progress() const;
 	void Stop();
 	void Start();
 	void Reset();

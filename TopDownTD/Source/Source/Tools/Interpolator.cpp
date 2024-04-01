@@ -27,6 +27,17 @@ void Interpolator::ProcessTick(float deltaTime)
 	curTime += deltaTime;
 }
 
+void Interpolator::ResetWithNewTime(float newTotalTime)
+{
+	this->totalTime = newTotalTime;
+	Reset();
+}
+
+float Interpolator::Progress() const
+{
+	return curTime / totalTime;
+}
+
 void Interpolator::Stop()
 {
 	isActive = false;

@@ -4,6 +4,7 @@
 #include "Components/Button.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,6 +20,7 @@ void UMainMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	ProcessDisplayParticipants(InDeltaTime);
+	AnimateBackgroundColor(InDeltaTime);
 }
 
 #pragma endregion
@@ -49,7 +51,9 @@ void UMainMenuWidget::NativeConstruct()
 	#pragma endregion 
 	
 	world = GetWorld();
-	interpolator = MakeUnique<Interpolator>(timeToNextParticipant);
+	participantsInterpolator = MakeUnique<Interpolator>(timeToNextParticipant);
+	backgroundInterpolator = MakeUnique<Interpolator>(backgroundIdleTime);
+	backgroundInterpolator->Start();
 	
 	PopulateParticipants();
 	ToViewMode(EViewModes::MainView);
@@ -58,6 +62,35 @@ void UMainMenuWidget::NativeConstruct()
 #pragma endregion 
 
 #pragma region Private
+
+void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
+{
+	if (!backgroundInterpolator)
+		return;
+	
+	backgroundInterpolator->ProcessTick(deltaTime);
+
+	//Lerp color only if in transition mode
+	if (isBackgroundTransitioning)
+	{
+		const auto color = FLinearColor::LerpUsingHSV(fromBackgroundColor, toBackgrounColor, backgroundInterpolator->Progress());
+		backgroundImage->SetColorAndOpacity(color);
+	}
+
+	if (backgroundInterpolator->IsElapsed())
+	{
+		//Toggle mode and set new state duration
+		isBackgroundTransitioning = !isBackgroundTransitioning;
+		backgroundInterpolator->ResetWithNewTime(isBackgroundTransitioning ? backgroundTransitionTime : backgroundIdleTime);
+
+		//Calculate next target for transition
+		if (isBackgroundTransitioning)
+		{
+			fromBackgroundColor = backgroundImage->GetColorAndOpacity();
+			toBackgrounColor = GetRandomLinearColor(fromBackgroundColor.A);
+		}
+	}
+}
 
 #pragma region ButtonHandlers
 
@@ -139,7 +172,7 @@ void UMainMenuWidget::CreateParticipant(const FString& name, int32 row, int32 co
 
 void UMainMenuWidget::CleanupDisplayedParticipants()
 {
-	interpolator->Stop();
+	participantsInterpolator->Stop();
 	participantsToShow.Reset();
 	
 	for (int i = 0; i < participantsWidgets.Num(); i++)
@@ -153,14 +186,14 @@ void UMainMenuWidget::CleanupDisplayedParticipants()
 
 void UMainMenuWidget::ProcessDisplayParticipants(float InDeltaTime)
 {
-	if (!interpolator->IsActive())
+	if (!participantsInterpolator->IsActive())
 		return;
 
-	interpolator->ProcessTick(InDeltaTime);
+	participantsInterpolator->ProcessTick(InDeltaTime);
 	
-	if (interpolator->IsElapsed())
+	if (participantsInterpolator->IsElapsed())
 	{
-		interpolator->Reset();
+		participantsInterpolator->Reset();
 
 		//Get random participant index
 		const int rndIndex = FMath::RandRange(0, participantsToShow.Num() - 1);
@@ -182,7 +215,7 @@ void UMainMenuWidget::ProcessDisplayParticipants(float InDeltaTime)
 		
 		//Stop flow if all participants were shown
 		if (participantsToShow.Num() == 0)
-			interpolator->Stop();
+			participantsInterpolator->Stop();
 	}
 }
 
@@ -206,7 +239,7 @@ void UMainMenuWidget::ToViewMode(EViewModes viewMode)
 			mainVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
 			creditsVerticalBox->SetVisibility(ESlateVisibility::Visible);
 
-			interpolator->Start();
+			participantsInterpolator->Start();
 		
 			break;
 	}

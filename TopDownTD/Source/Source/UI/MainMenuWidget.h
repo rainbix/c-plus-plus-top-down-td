@@ -11,6 +11,7 @@ class UGridPanel;
 class UButton;
 class UTextBlock;
 class UWorld;
+class UImage;
 
 UENUM(BlueprintType)
 enum class EViewModes : uint8
@@ -61,12 +62,15 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UGridPanel* creditsGridPanel;
 
-	//References
+	//Assignables
 	UPROPERTY(EditAnywhere, Category="Assignables")
 	UWorld* gameLevel;
 
 	UPROPERTY(EditAnywhere, Category="Assignables")
 	UWorld* gymLevel;
+
+	UPROPERTY(EditAnywhere, Category="Assignables")
+	UImage* backgroundImage = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="Assignables")
 	TSubclassOf<UParticipantWidget> participantWidgetTemplate = nullptr;
@@ -76,7 +80,13 @@ public:
 	TArray<FString> participantNames;
 
 	UPROPERTY(EditAnywhere, Category="Assignables | Data")
-	float timeToNextParticipant = 0.2f;
+	float timeToNextParticipant = .2f;
+
+	UPROPERTY(EditAnywhere, Category="Assignables | Data")
+	float backgroundTransitionTime = 1.f;
+
+	UPROPERTY(EditAnywhere, Category="Assignables | Data")
+	float backgroundIdleTime = 2.f;
 	
 	#pragma endregion 
 
@@ -89,8 +99,14 @@ private:
 
 	UPROPERTY()
 	UWorld* world;
+
+	bool isBackgroundTransitioning = false;
+	FLinearColor fromBackgroundColor;
+	FLinearColor toBackgrounColor;
+	TUniquePtr<Interpolator> participantsInterpolator = nullptr;
+	TUniquePtr<Interpolator> backgroundInterpolator = nullptr;
 	
-	TUniquePtr<Interpolator> interpolator = nullptr;
+	void AnimateBackgroundColor(float deltaTime);
 	
 	#pragma region ButtonHandlers
 	
