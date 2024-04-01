@@ -2,8 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Source/Tools/Interpolator.h"
 #include "MainMenuWidget.generated.h"
 
+class UParticipantWidget;
 class UVerticalBox;
 class UGridPanel;
 class UButton;
@@ -17,6 +19,13 @@ enum class EViewModes : uint8
 	CreditsView
 };
 
+struct RGB
+{
+	float r;
+	float g;
+	float b;
+};
+
 UCLASS()
 class SOURCE_API UMainMenuWidget : public UUserWidget
 {
@@ -25,7 +34,8 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	#pragma region Elements
-	
+
+	//Buttons
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UButton* playButton;
 
@@ -41,6 +51,7 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UButton* backFromCreditsButton;
 
+	//Containers
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UVerticalBox* mainVerticalBox;
 
@@ -50,14 +61,22 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UGridPanel* creditsGridPanel;
 
-	UPROPERTY(EditAnywhere, Category="Assignables")
-	TArray<FString> participantNames;
-
+	//References
 	UPROPERTY(EditAnywhere, Category="Assignables")
 	UWorld* gameLevel;
 
 	UPROPERTY(EditAnywhere, Category="Assignables")
 	UWorld* gymLevel;
+
+	UPROPERTY(EditAnywhere, Category="Assignables")
+	TSubclassOf<UParticipantWidget> participantWidgetTemplate = nullptr;
+
+	//Data
+	UPROPERTY(EditAnywhere, Category="Assignables | Data")
+	TArray<FString> participantNames;
+
+	UPROPERTY(EditAnywhere, Category="Assignables | Data")
+	float timeToNextParticipant = 0.2f;
 	
 	#pragma endregion 
 
@@ -69,10 +88,9 @@ private:
 	EViewModes currentViewMode = EViewModes::MainView;
 
 	UPROPERTY()
-	TArray<UTextBlock*> participants;
-
-	UPROPERTY()
-	TArray<int> participantsToShow;
+	UWorld* world;
+	
+	TUniquePtr<Interpolator> interpolator = nullptr;
 	
 	#pragma region ButtonHandlers
 	
@@ -94,10 +112,12 @@ private:
 	#pragma endregion 
 
 	#pragma region Participants
-	
-	bool isParticipantDisplayFlowActive = false;
-	float participantFlowCurTime;
-	const float timeToNextParticipant = 0.2f;
+
+	UPROPERTY()
+	TArray<UParticipantWidget*> participantsWidgets;
+
+	UPROPERTY()
+	TArray<int> participantsToShow;
 	
 	void PopulateParticipants();
 	void CreateParticipant(const FString& name, int32 row, int32 column);
@@ -109,10 +129,12 @@ private:
 	#pragma region Tools
 	
 	void ToViewMode(EViewModes viewMode);
-	void PrintScreenMessage(const FString& message, FColor color = FColor::Yellow, float duration = 2.0);
+
+	RGB GenerateRandomRGB();
+	FLinearColor GetRandomLinearColor(float alpha = 1.0f);
+	FSlateColor GetRandomSlateColor(float alpha = 1.0f);
 
 	#pragma endregion
 	
 	GENERATED_BODY()
-	
 };
