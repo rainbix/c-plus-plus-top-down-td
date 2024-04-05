@@ -5,11 +5,11 @@
 #include "Source/Tools/Interpolator.h"
 #include "MainMenuWidget.generated.h"
 
+class SimpleInterpolator;
 class UParticipantWidget;
 class UVerticalBox;
 class UGridPanel;
 class UButton;
-class UTextBlock;
 class UWorld;
 class UImage;
 
@@ -101,10 +101,8 @@ private:
 	UWorld* world;
 
 	bool isBackgroundTransitioning = false;
-	FLinearColor fromBackgroundColor;
-	FLinearColor toBackgrounColor;
-	TUniquePtr<Interpolator> participantsInterpolator = nullptr;
-	TUniquePtr<Interpolator> backgroundInterpolator = nullptr;
+	TUniquePtr<SimpleInterpolator> participantsInterpolator = nullptr;
+	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
 	
 	void AnimateBackgroundColor(float deltaTime);
 	

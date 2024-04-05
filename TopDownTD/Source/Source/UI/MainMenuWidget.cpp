@@ -1,17 +1,14 @@
 #include "MainMenuWidget.h"
 
+#include "Source/Tools/SimpleInterpolator.h"
 #include "ParticipantWidget.h"
-#include "Components/Button.h"
-#include "Components/GridPanel.h"
-#include "Components/GridSlot.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Components/GridPanel.h"
+#include "Components/Button.h"
+#include "Components/Image.h"
+#include "Components/GridSlot.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
-
-class UTextBlock;
-class UGridSlot;
 
 #pragma region Public
 
@@ -51,8 +48,8 @@ void UMainMenuWidget::NativeConstruct()
 	#pragma endregion 
 	
 	world = GetWorld();
-	participantsInterpolator = MakeUnique<Interpolator>(timeToNextParticipant);
-	backgroundInterpolator = MakeUnique<Interpolator>(backgroundIdleTime);
+	participantsInterpolator = MakeUnique<SimpleInterpolator>(timeToNextParticipant);
+	backgroundInterpolator = MakeUnique<Interpolator<FLinearColor>>(backgroundIdleTime, GetRandomLinearColor(), GetRandomLinearColor());
 	backgroundInterpolator->Start();
 	
 	PopulateParticipants();
@@ -73,7 +70,7 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 	//Lerp color only if in transition mode
 	if (isBackgroundTransitioning)
 	{
-		const auto color = FLinearColor::LerpUsingHSV(fromBackgroundColor, toBackgrounColor, backgroundInterpolator->Progress());
+		const auto color = FLinearColor::LerpUsingHSV(backgroundInterpolator->From, backgroundInterpolator->To, backgroundInterpolator->Progress());
 		backgroundImage->SetColorAndOpacity(color);
 	}
 
@@ -86,8 +83,8 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 		//Calculate next target for transition
 		if (isBackgroundTransitioning)
 		{
-			fromBackgroundColor = backgroundImage->GetColorAndOpacity();
-			toBackgrounColor = GetRandomLinearColor(fromBackgroundColor.A);
+			backgroundInterpolator->From = backgroundImage->GetColorAndOpacity();
+			backgroundInterpolator->To = GetRandomLinearColor(backgroundInterpolator->From.A);
 		}
 	}
 }
