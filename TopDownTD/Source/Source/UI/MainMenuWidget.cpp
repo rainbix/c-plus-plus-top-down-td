@@ -9,6 +9,7 @@
 #include "Components/GridSlot.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
+#include "Source/Tools/Interpolator.cpp"
 
 #pragma region Public
 
