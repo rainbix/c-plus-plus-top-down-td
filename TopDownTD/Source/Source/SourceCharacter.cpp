@@ -40,6 +40,9 @@ ASourceCharacter::ASourceCharacter()
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//Health
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+	
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -48,4 +51,42 @@ ASourceCharacter::ASourceCharacter()
 void ASourceCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+
+	// TimeSinceLastDamage += DeltaSeconds;
+	// if (TimeSinceLastDamage > 2)
+	// {
+	// 	TimeSinceLastDamage = 0;
+	// 	const FDamageInformation damageInfo(1);
+	// 	Execute_ReceiveDamage(this, damageInfo);
+	// }
+}
+
+void ASourceCharacter::ReceiveDamage_Implementation(FDamageInformation DamageInfo)
+{	
+	HealthComponent->ReceiveDamage(DamageInfo);
+}
+
+bool ASourceCharacter::IsDead_Implementation()
+{
+	return HealthComponent->IsDead();
+}
+
+int ASourceCharacter::GetCurrentHealth_Implementation()
+{
+	return HealthComponent->GetCurrentHealth();
+}
+
+int ASourceCharacter::GetMaxHealth_Implementation()
+{
+	return HealthComponent->GetMaxHealth();
+}
+
+void ASourceCharacter::DoShit()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Blue, "not const");
+}
+
+void ASourceCharacter::Something_Implementation()
+{
+	DoShit();
 }
