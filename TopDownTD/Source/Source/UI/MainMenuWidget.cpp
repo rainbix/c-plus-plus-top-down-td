@@ -54,7 +54,7 @@ void UMainMenuWidget::NativeConstruct()
 	backgroundInterpolator->Start();
 	
 	PopulateParticipants();
-	ToViewMode(EViewModes::MainView);
+	ToViewMode(EViewModes::MainView, true);
 }
 
 #pragma endregion 
@@ -221,22 +221,28 @@ void UMainMenuWidget::ProcessDisplayParticipants(float InDeltaTime)
 
 #pragma region Tools
 
-void UMainMenuWidget::ToViewMode(EViewModes viewMode)
+void UMainMenuWidget::ToViewMode(EViewModes viewMode, bool firstStart)
 {
 	switch (viewMode)
 	{
 		case EViewModes::MainView:
-			mainVerticalBox->SetVisibility(ESlateVisibility::Visible);
-			creditsVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
+			//mainVerticalBox->SetVisibility(ESlateVisibility::Visible);
+			//creditsVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
+			PlayAnimation(showMainMenuAnimation);
+
+			if (!firstStart)
+				PlayAnimation(showCreditsAnimation, 0, 1, EUMGSequencePlayMode::Reverse, 2);
 		
 			CleanupDisplayedParticipants();
 		
 			break;
 
 		case EViewModes::CreditsView:
-			mainVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
-			creditsVerticalBox->SetVisibility(ESlateVisibility::Visible);
-
+			//mainVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
+			//creditsVerticalBox->SetVisibility(ESlateVisibility::Visible);
+			PlayAnimation(showMainMenuAnimation, 0, 1, EUMGSequencePlayMode::Reverse, 2);
+			PlayAnimation(showCreditsAnimation);
+		
 			participantsInterpolator->Start();
 		
 			break;

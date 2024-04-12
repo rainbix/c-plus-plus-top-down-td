@@ -90,6 +90,16 @@ public:
 	
 	#pragma endregion 
 
+	#pragma region Animations
+	
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* showMainMenuAnimation;
+
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* showCreditsAnimation;
+	
+	#pragma endregion 
+	
 protected:
 	virtual void NativeConstruct() override;
 	
@@ -142,7 +152,7 @@ private:
 
 	#pragma region Tools
 	
-	void ToViewMode(EViewModes viewMode);
+	void ToViewMode(EViewModes viewMode, bool firstStart = false);
 
 	RGB GenerateRandomRGB();
 	FLinearColor GetRandomLinearColor(float alpha = 1.0f);
