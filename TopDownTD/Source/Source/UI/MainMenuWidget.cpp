@@ -2,6 +2,7 @@
 
 #include "Source/Tools/SimpleInterpolator.h"
 #include "ParticipantWidget.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/VerticalBox.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
@@ -29,6 +30,8 @@ void UMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	world = GetWorld();
+	
 	#pragma region Button Handlers
 	
 	if (playButton)
@@ -47,11 +50,20 @@ void UMainMenuWidget::NativeConstruct()
 		backFromCreditsButton->OnClicked.AddDynamic(this, &UMainMenuWidget::BackFromCreditsButtonHandler);
 
 	#pragma endregion 
-	
-	world = GetWorld();
+
+	#pragma region Animations
+
+	//Interpolators
 	participantsInterpolator = MakeUnique<SimpleInterpolator>(timeToNextParticipant);
 	backgroundInterpolator = MakeUnique<Interpolator<FLinearColor>>(backgroundIdleTime, GetRandomLinearColor(), GetRandomLinearColor());
 	backgroundInterpolator->Start();
+
+	//Animation delegates
+	ShowMainMenuAnimationFinishedDelegatePlay.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerPlay);
+	ShowMainMenuAnimationFinishedDelegateGym.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerGym);
+	ShowMainMenuAnimationFinishedDelegateCredits.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerCredits);
+
+	#pragma endregion 
 	
 	PopulateParticipants();
 	ToViewMode(EViewModes::MainView, true);
@@ -60,6 +72,8 @@ void UMainMenuWidget::NativeConstruct()
 #pragma endregion 
 
 #pragma region Private
+
+#pragma region Animations
 
 void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 {
@@ -71,6 +85,8 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 	//Lerp color only if in transition mode
 	if (isBackgroundTransitioning)
 	{
+		auto c = backgroundInterpolator->Lerp(&FLinearColor::LerpUsingHSV);
+		
 		const auto color = FLinearColor::LerpUsingHSV(backgroundInterpolator->From, backgroundInterpolator->To, backgroundInterpolator->Progress());
 		backgroundImage->SetColorAndOpacity(color);
 	}
@@ -90,36 +106,94 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 	}
 }
 
+void UMainMenuWidget::MainMenuAnimationFinishedHandlerPlay()
+{
+	UGameplayStatics::OpenLevelBySoftObjectPtr(world, gameLevel);
+}
+
+void UMainMenuWidget::MainMenuAnimationFinishedHandlerGym()
+{
+	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), gymLevel);
+}
+
+void UMainMenuWidget::MainMenuAnimationFinishedHandlerCredits()
+{
+	ToggleInput(true);
+	
+	UnbindFromAnimationFinished(showMainMenuAnimation, ShowMainMenuAnimationFinishedDelegateCredits);
+	PlayAnimation(showCreditsAnimation);
+	
+	participantsInterpolator->Start();
+}
+
+void UMainMenuWidget::ReverseAnimationQuick(UWidgetAnimation* anim)
+{
+	PlayAnimation(anim, 0, 1, EUMGSequencePlayMode::Reverse, 2);
+}
+
+#pragma endregion 
+
 #pragma region ButtonHandlers
 
 void UMainMenuWidget::PlayButtonPressHandler()
 {
+	if(!isAnyInputAllowed)
+		return;
+	
 	if (gameLevel)
-		UGameplayStatics::OpenLevelBySoftObjectPtr(world, gameLevel);
+	{
+		ToggleInput(false);
+		
+		//Wait for the animation fade out before opening the leve
+		BindToAnimationFinished(showMainMenuAnimation, ShowMainMenuAnimationFinishedDelegatePlay);
+
+		//Play hide animation
+		ReverseAnimationQuick(showMainMenuAnimation);
+	}
 	else 
 		GeneralPurposeUtils::DisplayScreenMessage(TEXT("Gym level is not assigned"), FColor::Yellow);
 }
 
 void UMainMenuWidget::GymButtonPressHandler()
 {
+	if(!isAnyInputAllowed)
+		return;
+	
 	if (gymLevel)
-		UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), gymLevel);
+	{
+		ToggleInput(false);
+		
+		//Wait for the animation fade out before opening the level
+		BindToAnimationFinished(showMainMenuAnimation, ShowMainMenuAnimationFinishedDelegateGym);
+
+		//Play hide animation
+		ReverseAnimationQuick(showMainMenuAnimation);
+	}
 	else
 		GeneralPurposeUtils::DisplayScreenMessage(TEXT("Gym level is not assigned"), FColor::Yellow);
 }
 
 void UMainMenuWidget::CreditsButtonPressHandler()
 {
+	if(!isAnyInputAllowed)
+		return;
+	
 	ToViewMode(EViewModes::CreditsView);
 }
 
 void UMainMenuWidget::ExitButtonPressHandler()
 {
+	if(!isAnyInputAllowed)
+		return;
+	
 	GetOwningPlayer()->ConsoleCommand("exit");
 }
 
 void UMainMenuWidget::BackFromCreditsButtonHandler()
 {
+	if(!isAnyInputAllowed)
+		return;
+	
 	ToViewMode(EViewModes::MainView);
 }
 
@@ -178,7 +252,7 @@ void UMainMenuWidget::CleanupDisplayedParticipants()
 		participantsToShow.Add(i);
 		
 		if (participantsWidgets[i])
-			participantsWidgets[i]->SetVisibility(ESlateVisibility::Hidden);
+			participantsWidgets[i]->Hide();
 	}
 }
 
@@ -210,6 +284,7 @@ void UMainMenuWidget::ProcessDisplayParticipants(float InDeltaTime)
 		//Apply rnd color to participant
 		participantsWidgets[i]->SetNameStyle(rndColor);
 		participantsWidgets[i]->SetBackgroundStyle(rndLinearColor);
+		participantsWidgets[i]->Display();
 		
 		//Stop flow if all participants were shown
 		if (participantsToShow.Num() == 0)
@@ -221,30 +296,34 @@ void UMainMenuWidget::ProcessDisplayParticipants(float InDeltaTime)
 
 #pragma region Tools
 
+void UMainMenuWidget::ToggleInput(bool isInputActive)
+{
+	isAnyInputAllowed = isInputActive;
+}
+
 void UMainMenuWidget::ToViewMode(EViewModes viewMode, bool firstStart)
 {
 	switch (viewMode)
 	{
 		case EViewModes::MainView:
-			//mainVerticalBox->SetVisibility(ESlateVisibility::Visible);
-			//creditsVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
 			PlayAnimation(showMainMenuAnimation);
 
+			//Prevent fade-out animation for credits for the first time
 			if (!firstStart)
-				PlayAnimation(showCreditsAnimation, 0, 1, EUMGSequencePlayMode::Reverse, 2);
+				ReverseAnimationQuick(showCreditsAnimation);
 		
 			CleanupDisplayedParticipants();
 		
 			break;
 
 		case EViewModes::CreditsView:
-			//mainVerticalBox->SetVisibility(ESlateVisibility::Collapsed);
-			//creditsVerticalBox->SetVisibility(ESlateVisibility::Visible);
-			PlayAnimation(showMainMenuAnimation, 0, 1, EUMGSequencePlayMode::Reverse, 2);
-			PlayAnimation(showCreditsAnimation);
-		
-			participantsInterpolator->Start();
-		
+
+			ToggleInput(false);
+			
+			//Wait for the animation fade out before displaying participants list
+			BindToAnimationFinished(showMainMenuAnimation, ShowMainMenuAnimationFinishedDelegateCredits);
+			ReverseAnimationQuick(showMainMenuAnimation);
+
 			break;
 	}
 }

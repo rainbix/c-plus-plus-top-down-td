@@ -29,9 +29,22 @@ void UParticipantWidget::SetBackgroundStyle(FLinearColor color)
 		background->SetBrushColor(color);
 }
 
+void UParticipantWidget::Display()
+{
+	//if (displayAnimation)
+	//	PlayAnimation(displayAnimation);
+}
+
+void UParticipantWidget::Hide()
+{
+	SetVisibility(ESlateVisibility::Hidden);
+}
+
 void UParticipantWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UParticipantWidget::NativeDestruct()

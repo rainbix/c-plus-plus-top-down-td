@@ -17,12 +17,17 @@ public:
 	void SetWidgetVisibility(ESlateVisibility visibility);
 	void SetNameStyle(FSlateColor color);
 	void SetBackgroundStyle(FLinearColor color);
+	void Display();
+	void Hide();
 	
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* participantName;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UBorder* background;
+	
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* displayAnimation;
 	
 protected:
 	virtual void NativeConstruct() override;

@@ -109,12 +109,6 @@ private:
 
 	UPROPERTY()
 	UWorld* world;
-
-	bool isBackgroundTransitioning = false;
-	TUniquePtr<SimpleInterpolator> participantsInterpolator = nullptr;
-	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
-	
-	void AnimateBackgroundColor(float deltaTime);
 	
 	#pragma region ButtonHandlers
 	
@@ -135,6 +129,39 @@ private:
 
 	#pragma endregion 
 
+	#pragma region Animations
+
+	//Interpolators
+	bool isBackgroundTransitioning = false;
+	TUniquePtr<SimpleInterpolator> participantsInterpolator = nullptr;
+	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
+
+	void AnimateBackgroundColor(float deltaTime);
+	
+	//Animation events
+	
+	//Open main scene delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegatePlay;
+	
+	UFUNCTION() //UFunction is required by BindDynamic
+	void MainMenuAnimationFinishedHandlerPlay();
+	
+	//Open gym delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateGym;
+	
+	UFUNCTION() //UFunction is required by BindDynamic
+	void MainMenuAnimationFinishedHandlerGym();
+
+	//Open credits delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateCredits;
+	
+	UFUNCTION() //UFunction is required by BindDynamic
+	void MainMenuAnimationFinishedHandlerCredits();
+
+	void ReverseAnimationQuick(UWidgetAnimation* anim);
+
+	#pragma endregion 
+	
 	#pragma region Participants
 
 	UPROPERTY()
@@ -151,7 +178,10 @@ private:
 	#pragma endregion 
 
 	#pragma region Tools
-	
+
+	bool isAnyInputAllowed = true;
+
+	void ToggleInput(bool isInptActive);
 	void ToViewMode(EViewModes viewMode, bool firstStart = false);
 
 	RGB GenerateRandomRGB();
