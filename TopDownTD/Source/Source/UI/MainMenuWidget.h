@@ -7,7 +7,6 @@
 
 class SimpleInterpolator;
 class UParticipantWidget;
-class UVerticalBox;
 class UGridPanel;
 class UButton;
 class UWorld;
@@ -53,12 +52,6 @@ public:
 	UButton* backFromCreditsButton;
 
 	//Containers
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UVerticalBox* mainVerticalBox;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UVerticalBox* creditsVerticalBox;
-
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UGridPanel* creditsGridPanel;
 
@@ -137,38 +130,33 @@ private:
 	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
 
 	void AnimateBackgroundColor(float deltaTime);
+	void ReverseAnimationQuick(UWidgetAnimation* anim);
 	
-	//Animation events
+	#pragma region AnimationEvents
 	
 	//Open main scene delegate
 	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegatePlay;
-	
-	UFUNCTION() //UFunction is required by BindDynamic
-	void MainMenuAnimationFinishedHandlerPlay();
+	UFUNCTION()	void MainMenuAnimationFinishedHandlerPlay(); //UFunction is required by BindDynamic
 	
 	//Open gym delegate
 	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateGym;
-	
-	UFUNCTION() //UFunction is required by BindDynamic
-	void MainMenuAnimationFinishedHandlerGym();
+	UFUNCTION() void MainMenuAnimationFinishedHandlerGym(); //UFunction is required by BindDynamic
 
 	//Open credits delegate
 	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateCredits;
+	UFUNCTION() void MainMenuAnimationFinishedHandlerCredits(); //UFunction is required by BindDynamic
 	
-	UFUNCTION() //UFunction is required by BindDynamic
-	void MainMenuAnimationFinishedHandlerCredits();
+	//Open credits delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateExit;
+	UFUNCTION() void MainMenuAnimationFinishedHandlerExit(); //UFunction is required by BindDynamic
 
-	void ReverseAnimationQuick(UWidgetAnimation* anim);
-
+	#pragma endregion 
 	#pragma endregion 
 	
 	#pragma region Participants
 
-	UPROPERTY()
-	TArray<UParticipantWidget*> participantsWidgets;
-
-	UPROPERTY()
-	TArray<int> participantsToShow;
+	UPROPERTY()	TArray<UParticipantWidget*> participantsWidgets;
+	UPROPERTY()	TArray<int> participantsToShow;
 	
 	void PopulateParticipants();
 	void CreateParticipant(const FString& name, int32 row, int32 column);

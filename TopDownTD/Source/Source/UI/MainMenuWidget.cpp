@@ -3,7 +3,6 @@
 #include "Source/Tools/SimpleInterpolator.h"
 #include "ParticipantWidget.h"
 #include "Animation/WidgetAnimation.h"
-#include "Components/VerticalBox.h"
 #include "Components/GridPanel.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
@@ -62,6 +61,7 @@ void UMainMenuWidget::NativeConstruct()
 	ShowMainMenuAnimationFinishedDelegatePlay.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerPlay);
 	ShowMainMenuAnimationFinishedDelegateGym.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerGym);
 	ShowMainMenuAnimationFinishedDelegateCredits.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerCredits);
+	ShowMainMenuAnimationFinishedDelegateExit.BindDynamic(this, &UMainMenuWidget::MainMenuAnimationFinishedHandlerExit);
 
 	#pragma endregion 
 	
@@ -85,9 +85,9 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 	//Lerp color only if in transition mode
 	if (isBackgroundTransitioning)
 	{
-		auto c = backgroundInterpolator->Lerp(&FLinearColor::LerpUsingHSV);
+		const auto color = backgroundInterpolator->Lerp(FLinearColor::LerpUsingHSV);
 		
-		const auto color = FLinearColor::LerpUsingHSV(backgroundInterpolator->From, backgroundInterpolator->To, backgroundInterpolator->Progress());
+		//const auto color = FLinearColor::LerpUsingHSV(backgroundInterpolator->From, backgroundInterpolator->To, backgroundInterpolator->Progress());
 		backgroundImage->SetColorAndOpacity(color);
 	}
 
@@ -106,16 +106,26 @@ void UMainMenuWidget::AnimateBackgroundColor(float deltaTime)
 	}
 }
 
+void UMainMenuWidget::ReverseAnimationQuick(UWidgetAnimation* anim)
+{
+	PlayAnimation(anim, 0, 1, EUMGSequencePlayMode::Reverse, 2);
+}
+
+#pragma region AnimationEvents
+
+// Is called when UI animation finished to play after pressing Play btn
 void UMainMenuWidget::MainMenuAnimationFinishedHandlerPlay()
 {
 	UGameplayStatics::OpenLevelBySoftObjectPtr(world, gameLevel);
 }
 
+// Is called when UI animation finished to play after pressing Gym btn
 void UMainMenuWidget::MainMenuAnimationFinishedHandlerGym()
 {
 	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), gymLevel);
 }
 
+// Is called when UI animation finished to play after pressing Credits btn
 void UMainMenuWidget::MainMenuAnimationFinishedHandlerCredits()
 {
 	ToggleInput(true);
@@ -126,10 +136,13 @@ void UMainMenuWidget::MainMenuAnimationFinishedHandlerCredits()
 	participantsInterpolator->Start();
 }
 
-void UMainMenuWidget::ReverseAnimationQuick(UWidgetAnimation* anim)
+// Is called when UI animation finished to play after pressing Exit btn
+void UMainMenuWidget::MainMenuAnimationFinishedHandlerExit()
 {
-	PlayAnimation(anim, 0, 1, EUMGSequencePlayMode::Reverse, 2);
+	GetOwningPlayer()->ConsoleCommand("exit");
 }
+
+#pragma endregion
 
 #pragma endregion 
 
@@ -185,8 +198,14 @@ void UMainMenuWidget::ExitButtonPressHandler()
 {
 	if(!isAnyInputAllowed)
 		return;
+
+	ToggleInput(false);
 	
-	GetOwningPlayer()->ConsoleCommand("exit");
+	//Wait for the animation fade out before opening the level
+	BindToAnimationFinished(showMainMenuAnimation, ShowMainMenuAnimationFinishedDelegateExit);
+
+	//Play hide animation
+	ReverseAnimationQuick(showMainMenuAnimation);
 }
 
 void UMainMenuWidget::BackFromCreditsButtonHandler()
