@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DamageInformation.h"
 #include "HealthComponent.generated.h"
 
 
@@ -18,7 +17,6 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
-	virtual void ReceiveDamage(FDamageInformation& DamageInfo);
 	virtual bool IsDead();
 	virtual int GetCurrentHealth();
 	virtual int GetMaxHealth();
@@ -32,4 +30,7 @@ protected:
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void OnDeath();
+	UFUNCTION()
+	virtual void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 };
