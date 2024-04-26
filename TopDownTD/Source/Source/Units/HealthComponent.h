@@ -24,9 +24,9 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, Category="Health")
-	int MaxHealth;
+	float MaxHealth;
 
-	int CurrentHealth;
+	float CurrentHealth;
 	
 	// Called when the game starts
 	virtual void BeginPlay() override;
