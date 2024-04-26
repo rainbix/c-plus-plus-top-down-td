@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,7 +12,6 @@ class SOURCE_API UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 	
 public:
-	// Sets default values for this component's properties
 	UHealthComponent();
 
 	virtual bool IsDead();
@@ -27,8 +24,7 @@ protected:
 	float MaxHealth;
 
 	float CurrentHealth;
-	
-	// Called when the game starts
+
 	virtual void BeginPlay() override;
 	virtual void OnDeath();
 	UFUNCTION()

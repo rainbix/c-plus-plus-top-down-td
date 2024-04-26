@@ -11,7 +11,6 @@ class ASourceGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	
 public:
 	ASourceGameMode();
 };

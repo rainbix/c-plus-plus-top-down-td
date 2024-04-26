@@ -22,7 +22,6 @@ ASourcePlayerController::ASourcePlayerController()
 	FollowTime = 0.f;
 }
 
-
 void ASourcePlayerController::BeginPlay()
 {
 	// Call the base class  
