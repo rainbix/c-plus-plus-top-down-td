@@ -29,7 +29,7 @@ void UHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const
 
 	CurrentHealth -= Damage;
 
-	UE_LOG(LogTemp, Log, TEXT("Health %i"), CurrentHealth);
+	// UE_LOG(LogTemp, Log, TEXT("Health %i"), CurrentHealth);
 
 	if (IsDead())
 	{
