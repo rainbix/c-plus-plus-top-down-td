@@ -7,7 +7,6 @@
 
 class SimpleInterpolator;
 class UParticipantWidget;
-class UVerticalBox;
 class UGridPanel;
 class UButton;
 class UWorld;
@@ -54,12 +53,6 @@ public:
 
 	//Containers
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UVerticalBox* mainVerticalBox;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	UVerticalBox* creditsVerticalBox;
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UGridPanel* creditsGridPanel;
 
 	//Assignables
@@ -90,6 +83,16 @@ public:
 	
 	#pragma endregion 
 
+	#pragma region Animations
+	
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* showMainMenuAnimation;
+
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* showCreditsAnimation;
+	
+	#pragma endregion 
+	
 protected:
 	virtual void NativeConstruct() override;
 	
@@ -99,12 +102,6 @@ private:
 
 	UPROPERTY()
 	UWorld* world;
-
-	bool isBackgroundTransitioning = false;
-	TUniquePtr<SimpleInterpolator> participantsInterpolator = nullptr;
-	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
-	
-	void AnimateBackgroundColor(float deltaTime);
 	
 	#pragma region ButtonHandlers
 	
@@ -125,13 +122,41 @@ private:
 
 	#pragma endregion 
 
+	#pragma region Animations
+
+	//Interpolators
+	bool isBackgroundTransitioning = false;
+	TUniquePtr<SimpleInterpolator> participantsInterpolator = nullptr;
+	TUniquePtr<Interpolator<FLinearColor>> backgroundInterpolator = nullptr;
+
+	void AnimateBackgroundColor(float deltaTime);
+	void ReverseAnimationQuick(UWidgetAnimation* anim);
+	
+	#pragma region AnimationEvents
+	
+	//Open main scene delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegatePlay;
+	UFUNCTION()	void MainMenuAnimationFinishedHandlerPlay(); //UFunction is required by BindDynamic
+	
+	//Open gym delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateGym;
+	UFUNCTION() void MainMenuAnimationFinishedHandlerGym(); //UFunction is required by BindDynamic
+
+	//Open credits delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateCredits;
+	UFUNCTION() void MainMenuAnimationFinishedHandlerCredits(); //UFunction is required by BindDynamic
+	
+	//Open credits delegate
+	FWidgetAnimationDynamicEvent ShowMainMenuAnimationFinishedDelegateExit;
+	UFUNCTION() void MainMenuAnimationFinishedHandlerExit(); //UFunction is required by BindDynamic
+
+	#pragma endregion 
+	#pragma endregion 
+	
 	#pragma region Participants
 
-	UPROPERTY()
-	TArray<UParticipantWidget*> participantsWidgets;
-
-	UPROPERTY()
-	TArray<int> participantsToShow;
+	UPROPERTY()	TArray<UParticipantWidget*> participantsWidgets;
+	UPROPERTY()	TArray<int> participantsToShow;
 	
 	void PopulateParticipants();
 	void CreateParticipant(const FString& name, int32 row, int32 column);
@@ -141,8 +166,11 @@ private:
 	#pragma endregion 
 
 	#pragma region Tools
-	
-	void ToViewMode(EViewModes viewMode);
+
+	bool isAnyInputAllowed = true;
+
+	void ToggleInput(bool isInptActive);
+	void ToViewMode(EViewModes viewMode, bool firstStart = false);
 
 	RGB GenerateRandomRGB();
 	FLinearColor GetRandomLinearColor(float alpha = 1.0f);

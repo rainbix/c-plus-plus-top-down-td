@@ -11,4 +11,6 @@ public:
 	
 	T From;
 	T To;
+
+	T Lerp(T (*lerp_func)(const T& f, const T& t, const float d));
 };
