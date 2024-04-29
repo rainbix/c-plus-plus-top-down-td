@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Units/HealthComponent.h"
+#include "Health/HealthComponent.h"
 #include "SourceCharacter.generated.h"
 
 UCLASS(Blueprintable)
