@@ -6,15 +6,22 @@
 #include "GameFramework/HUD.h"
 #include "GameplayHUD.generated.h"
 
-/**
- * 
- */
+class UMinimapWidget;
+class UActiveWeaponWidget;
+class ULevelStateWidget;
+
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
 {
 public:
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<UMinLayoutBase> MinimalLayoutClass = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UMinimapWidget> MinimapWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UActiveWeaponWidget> ActiveWeaponWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<ULevelStateWidget> LevelStateWidgetClass = nullptr;
 
 protected:
 	virtual void BeginPlay() override;
@@ -22,11 +29,20 @@ protected:
 	
 private:
 
-	//UPROPERTY()
-	//TObjectPtr<UMinLayoutBase> MinimalWidget = nullptr;
+	UPROPERTY()
+	UWorld* world;
 	
-	//UPROPERTY()
-	//TObjectPtr<AMyCppCharacter> PlayerCharacter = nullptr;
+	UPROPERTY()
+	TObjectPtr<UMinimapWidget> minimapWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UActiveWeaponWidget> activeWeaponWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<ULevelStateWidget> levelStateWidget = nullptr;
+
+	template <typename  T>
+	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
 	
 	GENERATED_BODY()
 	
