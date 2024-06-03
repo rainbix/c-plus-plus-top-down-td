@@ -4,6 +4,7 @@
 #include "MinimapWidget.h"
 #include "LevelStateWidget.h"
 #include "ActiveWeaponWidget.h"
+#include "PlayerHealthWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -16,11 +17,9 @@ void AGameplayHUD::BeginPlay()
 	minimapWidget = SpawnWidget(MinimapWidgetClass);
 	activeWeaponWidget = SpawnWidget(ActiveWeaponWidgetClass);
 	levelStateWidget = SpawnWidget(LevelStateWidgetClass);
+	playerHealthWidget = SpawnWidget(PlayerHealthWidgetClass);
 
-	if (minimapWidget)
-		UKismetSystemLibrary::PrintString(world, "Created " + minimapWidget.GetName());
-	else
-		UKismetSystemLibrary::PrintString(world, "NOT CREATED");
+	InitializeWidgets();
 }
 
 void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -28,6 +27,12 @@ void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//ClearAllHandlers();
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+void AGameplayHUD::InitializeWidgets()
+{
+	if (playerHealthWidget)
+		playerHealthWidget->Initialize(100, 75);
 }
 
 template <typename T>

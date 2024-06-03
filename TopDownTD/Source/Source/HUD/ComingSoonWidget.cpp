@@ -7,11 +7,9 @@
 void UComingSoonWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	// Get the name of the changed property
+	
 	FName PropertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-
-	// Check which property changed and update the text blocks
+	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UComingSoonWidget, titleText) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(UComingSoonWidget, bodyText))
 	{

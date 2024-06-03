@@ -9,6 +9,7 @@
 class UMinimapWidget;
 class UActiveWeaponWidget;
 class ULevelStateWidget;
+class UPlayerHealthWidget;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -20,6 +21,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UActiveWeaponWidget> ActiveWeaponWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UPlayerHealthWidget> PlayerHealthWidgetClass = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<ULevelStateWidget> LevelStateWidgetClass = nullptr;
 
@@ -39,10 +43,15 @@ private:
 	TObjectPtr<UActiveWeaponWidget> activeWeaponWidget = nullptr;
 
 	UPROPERTY()
+	TObjectPtr<UPlayerHealthWidget> playerHealthWidget = nullptr;
+
+	UPROPERTY()
 	TObjectPtr<ULevelStateWidget> levelStateWidget = nullptr;
 
 	template <typename  T>
 	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
+
+	void InitializeWidgets();
 	
 	GENERATED_BODY()
 	
