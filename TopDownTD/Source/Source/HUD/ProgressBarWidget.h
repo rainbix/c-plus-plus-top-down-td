@@ -9,6 +9,7 @@
 class UImage;
 struct FColor;
 class UProgressBar;
+class UTexture2D;
 
 UCLASS()
 class SOURCE_API UProgressBarWidget : public UUserWidget
@@ -18,9 +19,13 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	TObjectPtr<UProgressBar> bar;
 
+	// References
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	TObjectPtr<UImage> barImage;
+	
 	// Methods
-	void Initialize(float maxVal, float initVal = -1);
-	void SetValue(float newVal);
+	void InitializeWidget(int maxVal, int initVal = -1);
+	void SetValue(int newVal);
 
 #if WITH_EDITOR
 	
@@ -35,12 +40,21 @@ protected:
 private:
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	TArray<float> backgroundTransitionBounds;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	TArray<FLinearColor> backgroundTransitionColors;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
+	TArray<TObjectPtr<UTexture2D>> backgroundTransitionIcons;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
+	FLinearColor emptyBarColor;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
+	TObjectPtr<UTexture2D> emptyBarIcon;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	float maximumVal;
@@ -50,7 +64,8 @@ private:
 	
 	void Update(float deltaTime);
 	void SetValueImmediate(float newVal);
-	FLinearColor GetTransitionColor(float curProgress);
+	void UpdateBar(float progress);
+	TTuple<FLinearColor, TObjectPtr<UTexture2D>> GetTransitionData(float curProgress);
 	
 	GENERATED_BODY()
 };

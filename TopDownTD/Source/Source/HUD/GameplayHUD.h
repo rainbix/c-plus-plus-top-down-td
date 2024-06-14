@@ -6,10 +6,11 @@
 #include "GameFramework/HUD.h"
 #include "GameplayHUD.generated.h"
 
+class UProgressBarWidget;
 class UMinimapWidget;
 class UActiveWeaponWidget;
 class ULevelStateWidget;
-class UPlayerHealthWidget;
+class UHudTestWidget;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -22,12 +23,17 @@ public:
 	TSubclassOf<UActiveWeaponWidget> ActiveWeaponWidgetClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<UPlayerHealthWidget> PlayerHealthWidgetClass = nullptr;
+	TSubclassOf<UProgressBarWidget> PlayerHealthWidgetClass = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<ULevelStateWidget> LevelStateWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UHudTestWidget> HudTestWidgetClass = nullptr;
+
 protected:
+	UFUNCTION()
+	void TestShoot();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
@@ -43,10 +49,13 @@ private:
 	TObjectPtr<UActiveWeaponWidget> activeWeaponWidget = nullptr;
 
 	UPROPERTY()
-	TObjectPtr<UPlayerHealthWidget> playerHealthWidget = nullptr;
+	TObjectPtr<UProgressBarWidget> playerHealthWidget = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<ULevelStateWidget> levelStateWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UHudTestWidget> hudTestWidget = nullptr;
 
 	template <typename  T>
 	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);

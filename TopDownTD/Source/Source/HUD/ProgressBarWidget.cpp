@@ -34,13 +34,13 @@ void UProgressBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	
 	if (propertyName == GET_MEMBER_NAME_CHECKED(UProgressBarWidget, maximumVal))
 	{
-		Initialize(maximumVal, currentVal);
+		InitializeWidget(maximumVal, currentVal);
 	}
 	
 	if (propertyName == GET_MEMBER_NAME_CHECKED(UProgressBarWidget, currentVal))
 	{
 		if (maximumVal <= 0)
-			Initialize(maximumVal, currentVal);
+			InitializeWidget(maximumVal, currentVal);
 		
 		SetValueImmediate(currentVal);
 	}
@@ -51,29 +51,34 @@ void UProgressBarWidget::SetValueImmediate(float newVal)
 	currentVal = newVal;
 	
 	const float progress = FMath::Clamp(newVal / maximumVal, 0, 1);
-	bar->SetPercent(progress);
-	bar->SetFillColorAndOpacity(GetTransitionColor(progress));
+	
+	UpdateBar(progress);
 }
 
-FLinearColor UProgressBarWidget::GetTransitionColor(float curProgress)
+TTuple<FLinearColor, TObjectPtr<UTexture2D>> UProgressBarWidget::GetTransitionData(float curProgress)
 {
 	if (backgroundTransitionBounds.Num() == 0 || backgroundTransitionColors.Num() == 0 || backgroundTransitionBounds.Num() != backgroundTransitionColors.Num())
-		return bar->GetFillColorAndOpacity();
+		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon); 
 
+	if (curProgress <= 0)
+	{
+		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(emptyBarColor, emptyBarIcon);
+	}
+	
 	for (int i = 0; i < backgroundTransitionBounds.Num(); i++)
 	{
 		if (curProgress > backgroundTransitionBounds[i])
 		{
-			return backgroundTransitionColors[i];
+			return TTuple<FLinearColor, TObjectPtr<UTexture2D>>( backgroundTransitionColors[i], backgroundTransitionIcons[i]);
 		}
 	}
 
-	return bar->GetFillColorAndOpacity();
+	return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon);
 }
 
 #endif
 
-void UProgressBarWidget::Initialize(float maxVal, float initVal)
+void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
 {
 	this->maximumVal = maxVal;
 	this->currentVal = initVal > 0 ? initVal : maxVal;
@@ -81,19 +86,29 @@ void UProgressBarWidget::Initialize(float maxVal, float initVal)
 	SetValueImmediate(currentVal);
 }
 
-void UProgressBarWidget::SetValue(float newVal)
+void UProgressBarWidget::SetValue(int newVal)
 {
-	UE_LOG(LogTemp, Log, TEXT("SetValue: %f"), newVal);
+	UE_LOG(LogTemp, Log, TEXT("SetValue: %d"), newVal);
 	
 	if (bar)
 	{
-	
 		currentVal = newVal;
 
 		//TODO: Move to lerp
-		float progress = FMath::Clamp(newVal / maximumVal, 0, 1);
-		bar->SetPercent(progress);
+		const float rawProgress = static_cast<float>(newVal) / maximumVal;
+		const float progress = FMath::Clamp(rawProgress, 0, 1);
+		
+		UpdateBar(progress);
 	}
+}
+
+void UProgressBarWidget::UpdateBar(float progress)
+{
+	bar->SetPercent(progress);
+
+	auto translationData = GetTransitionData(progress);
+	bar->SetFillColorAndOpacity(translationData.Key);
+	barImage->SetBrushFromTexture(translationData.Value);
 }
 
 void UProgressBarWidget::Update(float deltaTime)
