@@ -33,7 +33,6 @@ public:
 
 protected:
 	UFUNCTION()
-	void TestShoot();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
@@ -61,6 +60,7 @@ private:
 	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
 
 	void InitializeWidgets();
+	void DisposeWidgets();
 	
 	GENERATED_BODY()
 	

@@ -11,6 +11,23 @@ void UActiveWeaponWidget::InitializeWidget(const FWeaponData* weaponData)
 	SetWeaponType(weaponData->weaponType);
 }
 
+void UActiveWeaponWidget::HandleShoot(const FWeaponData* weaponData)
+{
+	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
+}
+
+void UActiveWeaponWidget::HandleReload(const FWeaponData* weaponData)
+{
+	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
+}
+
+void UActiveWeaponWidget::HandleWeaponChange(const FWeaponData* weaponData)
+{
+	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
+	SetWeaponType(weaponData->weaponType);
+}
+
+
 void UActiveWeaponWidget::UpdateAmmo(int curAmmo, int maxAmmo)
 {
 	if (ammoCountText)

@@ -27,7 +27,7 @@ void AGameplayHUD::BeginPlay()
 
 void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	//ClearAllHandlers();
+	DisposeWidgets();
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -36,7 +36,7 @@ void AGameplayHUD::InitializeWidgets()
 {
 	if (playerHealthWidget)
 	{
-		//TODO: Replace initialization to character component health when ready
+		//TODO: Replace initialization with character component health when ready
 		int maxHealth = 100;
 		int curHealth = 80;
 
@@ -50,21 +50,42 @@ void AGameplayHUD::InitializeWidgets()
 	}
 
 	if (activeWeaponWidget)
-		activeWeaponWidget->InitializeWidget(new FWeaponData(100, 75, EWeaponTypes::Weapon1));
+	{
+		//TODO: Replace initialization with character component weapon when ready
+		int maxAmmo = 100;
+		int curAmmo = 10;
+		EWeaponTypes weaponType = EWeaponTypes::Weapon1;
+		FWeaponData* weaponData = new FWeaponData(maxAmmo, curAmmo, weaponType);
+		
+		if (hudTestWidget)
+		{
+			weaponData = hudTestWidget->GetActiveWeaponData();
+		}
+		
+		activeWeaponWidget->InitializeWidget(weaponData);
+	}
 
 	if (hudTestWidget)
 	{
 		hudTestWidget->OnHealthIncreasedDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
 		hudTestWidget->OnHealthDecreasedDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
-		hudTestWidget->OnShootDelegate.AddUObject(this, &AGameplayHUD::TestShoot);
+		hudTestWidget->OnShootDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleShoot);
+		hudTestWidget->OnReloadDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleReload);
+		hudTestWidget->OnWeaponChangeDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
 	}
 }
 
-void AGameplayHUD::TestShoot()
+void AGameplayHUD::DisposeWidgets()
 {
-	GeneralPurposeUtils::DisplayScreenMessage("Shoot from here");
+	if (hudTestWidget)
+	{
+		hudTestWidget->OnHealthIncreasedDelegate.RemoveAll(playerHealthWidget);
+		hudTestWidget->OnHealthDecreasedDelegate.RemoveAll(playerHealthWidget);
+		hudTestWidget->OnShootDelegate.RemoveAll(activeWeaponWidget);
+		hudTestWidget->OnReloadDelegate.RemoveAll(activeWeaponWidget);
+		hudTestWidget->OnWeaponChangeDelegate.RemoveAll(activeWeaponWidget);
+	}
 }
-
 
 template <typename T>
 T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)

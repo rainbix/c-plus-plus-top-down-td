@@ -17,7 +17,10 @@ class SOURCE_API UActiveWeaponWidget : public UUserWidget
 {
 public:
 	void InitializeWidget(const FWeaponData* weaponData);
-
+	void HandleShoot(const FWeaponData* weaponData);
+	void HandleReload(const FWeaponData* weaponData);
+	void HandleWeaponChange(const FWeaponData* weaponData);
+	
 private:
 	
 	void UpdateAmmo(int curAmmo, int maxAmmo);
