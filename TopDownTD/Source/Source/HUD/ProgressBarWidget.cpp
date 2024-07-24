@@ -24,6 +24,72 @@ void UProgressBarWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 
 #pragma endregion 
 
+void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
+{
+	this->maximumVal = maxVal;
+	this->currentVal = initVal > 0 ? initVal : maxVal;
+
+	SetValueImmediate(currentVal);
+}
+
+void UProgressBarWidget::SetValueImmediate(float newVal)
+{
+	currentVal = newVal;
+	
+	const float progress = FMath::Clamp(newVal / maximumVal, 0, 1);
+	
+	UpdateBar(progress);
+}
+
+void UProgressBarWidget::SetValue(int newVal)
+{
+	if (bar)
+	{
+		currentVal = newVal;
+
+		//TODO: Move to lerp
+		const float rawProgress = static_cast<float>(newVal) / maximumVal;
+		const float progress = FMath::Clamp(rawProgress, 0, 1);
+		
+		UpdateBar(progress);
+	}
+}
+
+void UProgressBarWidget::UpdateBar(float progress)
+{
+	bar->SetPercent(progress);
+	
+	const auto translationData = GetTransitionData(progress);
+	bar->SetFillColorAndOpacity(translationData.Key);
+	barImage->SetBrushFromTexture(translationData.Value);
+}
+
+void UProgressBarWidget::Update(float deltaTime)
+{
+	//TODO: Lerp
+}
+
+TTuple<FLinearColor, TObjectPtr<UTexture2D>> UProgressBarWidget::GetTransitionData(float curProgress)
+{
+	if (backgroundTransitionBounds.Num() == 0 || backgroundTransitionColors.Num() == 0 || backgroundTransitionBounds.Num() != backgroundTransitionColors.Num())
+		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon); 
+
+	if (curProgress <= 0)
+	{
+		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(emptyBarColor, emptyBarIcon);
+	}
+	
+	for (int i = 0; i < backgroundTransitionBounds.Num(); i++)
+	{
+		if (curProgress > backgroundTransitionBounds[i])
+		{
+			return TTuple<FLinearColor, TObjectPtr<UTexture2D>>( backgroundTransitionColors[i], backgroundTransitionIcons[i]);
+		}
+	}
+
+	return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), backgroundTransitionIcons[backgroundTransitionIcons.Num() - 1]);
+}
+
 #if WITH_EDITOR
 
 void UProgressBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -46,74 +112,6 @@ void UProgressBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	}
 }
 
-void UProgressBarWidget::SetValueImmediate(float newVal)
-{
-	currentVal = newVal;
-	
-	const float progress = FMath::Clamp(newVal / maximumVal, 0, 1);
-	
-	UpdateBar(progress);
-}
-
-TTuple<FLinearColor, TObjectPtr<UTexture2D>> UProgressBarWidget::GetTransitionData(float curProgress)
-{
-	if (backgroundTransitionBounds.Num() == 0 || backgroundTransitionColors.Num() == 0 || backgroundTransitionBounds.Num() != backgroundTransitionColors.Num())
-		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon); 
-
-	if (curProgress <= 0)
-	{
-		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(emptyBarColor, emptyBarIcon);
-	}
-	
-	for (int i = 0; i < backgroundTransitionBounds.Num(); i++)
-	{
-		if (curProgress > backgroundTransitionBounds[i])
-		{
-			return TTuple<FLinearColor, TObjectPtr<UTexture2D>>( backgroundTransitionColors[i], backgroundTransitionIcons[i]);
-		}
-	}
-
-	return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon);
-}
-
 #endif
-
-void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
-{
-	this->maximumVal = maxVal;
-	this->currentVal = initVal > 0 ? initVal : maxVal;
-
-	SetValueImmediate(currentVal);
-}
-
-void UProgressBarWidget::SetValue(int newVal)
-{
-	UE_LOG(LogTemp, Log, TEXT("SetValue: %d"), newVal);
-	
-	if (bar)
-	{
-		currentVal = newVal;
-
-		//TODO: Move to lerp
-		const float rawProgress = static_cast<float>(newVal) / maximumVal;
-		const float progress = FMath::Clamp(rawProgress, 0, 1);
-		
-		UpdateBar(progress);
-	}
-}
-
-void UProgressBarWidget::UpdateBar(float progress)
-{
-	bar->SetPercent(progress);
-
-	auto translationData = GetTransitionData(progress);
-	bar->SetFillColorAndOpacity(translationData.Key);
-	barImage->SetBrushFromTexture(translationData.Value);
-}
-
-void UProgressBarWidget::Update(float deltaTime)
-{
-	//TODO: Lerp
-}
 
 
