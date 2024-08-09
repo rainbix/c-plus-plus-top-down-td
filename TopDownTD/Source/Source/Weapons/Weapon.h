@@ -19,4 +19,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Components")
 	USkeletalMeshComponent* WeaponMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FName ShootPointSocket = "ShootSocket";
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	float TraceMaxDistance = 5000.0f;
+	
 };

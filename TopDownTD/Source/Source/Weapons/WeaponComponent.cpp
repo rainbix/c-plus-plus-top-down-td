@@ -25,6 +25,7 @@ void UWeaponComponent::SpawnWeapon()
 {
 	if(!GetWorld()) return;
 
+	//todo: ACharacter cast makes it impossible to use weapon by other pawns
 	ACharacter* character = Cast<ACharacter>(GetOwner());
 	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 	
@@ -32,6 +33,7 @@ void UWeaponComponent::SpawnWeapon()
 	
 	FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, false);
 	CurrentWeapon->AttachToComponent(character->GetMesh(), attachmentRules, WeaponSocketName);
+	CurrentWeapon->SetOwner(character);
 }
 
 
