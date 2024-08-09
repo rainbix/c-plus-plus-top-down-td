@@ -25,9 +25,6 @@ protected:
 	TSubclassOf<class AWeapon> DefaultWeaponClass;
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
 	FName WeaponSocketName = "WeaponSocket";
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* FireAction;
 	
 private:
 	UPROPERTY()

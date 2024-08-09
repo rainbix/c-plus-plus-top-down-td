@@ -51,6 +51,7 @@ ASourceCharacter::ASourceCharacter()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+
 void ASourceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -60,4 +61,9 @@ void ASourceCharacter::Tick(float DeltaSeconds)
 void ASourceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ASourceCharacter::Fire()
+{
+	WeaponComponent->Fire();
 }

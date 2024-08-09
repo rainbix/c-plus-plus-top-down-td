@@ -53,6 +53,9 @@ void ASourcePlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ASourcePlayerController::OnTouchTriggered);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ASourcePlayerController::OnTouchReleased);
 		EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ASourcePlayerController::OnTouchReleased);
+
+		//Fire
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ASourcePlayerController::Fire);
 	}
 	else
 	{
@@ -122,4 +125,10 @@ void ASourcePlayerController::OnTouchReleased()
 {
 	bIsTouch = false;
 	OnSetDestinationReleased();
+}
+
+void ASourcePlayerController::Fire()
+{
+	ASourceCharacter* character = Cast<ASourceCharacter>(GetPawn());
+	character->Fire();
 }

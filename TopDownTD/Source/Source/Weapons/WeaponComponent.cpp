@@ -1,6 +1,4 @@
 ﻿#include "WeaponComponent.h"
-
-#include "EnhancedInputComponent.h"
 #include "Weapon.h"
 #include "GameFramework/Character.h"
 
@@ -21,11 +19,6 @@ void UWeaponComponent::BeginPlay()
 	Super::BeginPlay();
 
 	SpawnWeapon();
-	
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(GetOwner()->InputComponent))
-	{
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UWeaponComponent::Fire);
-	}
 }
 
 void UWeaponComponent::SpawnWeapon()
