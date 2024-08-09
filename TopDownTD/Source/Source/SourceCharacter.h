@@ -24,11 +24,6 @@ public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 
-protected:
-	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
-	TSubclassOf<class AWeapon> DefaultWeaponClass;
-	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
-	FName WeaponSocketName;
 private:
 	/** Top down camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -41,12 +36,9 @@ private:
 	UPROPERTY(EditAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* HealthComponent;
 	
+	UPROPERTY(EditAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
+	class UWeaponComponent* WeaponComponent;
+	
 	float TimeSinceLastDamage;
-
-	void SpawnWeapon();
-	// UPROPERTY(EditAnywhere, Category="Weapon", meta=(AllowPrivateAccess = "true"))
-	// TSubclassOf<AWeapon> StartingWeapon;
-	//
-	// AWeapon* CurrentWeapon;
 };
 

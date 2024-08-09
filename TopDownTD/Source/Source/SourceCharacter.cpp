@@ -10,7 +10,7 @@
 #include "Materials/Material.h"
 #include "Engine/World.h"
 #include "Health/HealthComponent.h"
-#include "Weapons/Weapon.h"
+#include "Weapons/WeaponComponent.h"
 
 ASourceCharacter::ASourceCharacter()
 {
@@ -43,6 +43,8 @@ ASourceCharacter::ASourceCharacter()
 
 	//Health
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 	
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
@@ -52,24 +54,10 @@ ASourceCharacter::ASourceCharacter()
 void ASourceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	
 }
 
 void ASourceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	SpawnWeapon();
-}
-
-void ASourceCharacter::SpawnWeapon()
-{
-	if(!GetWorld()) return;
-
-	if(AWeapon* weapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass))
-	{
-		FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, false);
-		weapon->AttachToComponent(GetMesh(), attachmentRules, WeaponSocketName);
-	}
 }
