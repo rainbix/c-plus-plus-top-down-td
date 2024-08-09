@@ -13,13 +13,10 @@ class SOURCE_API AWeapon : public AActor
 	
 public:	
 	AWeapon();
-
+	void Fire();
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Components")
 	USkeletalMeshComponent* WeaponMesh;
-
-public:
-	void Fire();
 };

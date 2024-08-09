@@ -15,7 +15,8 @@ class SOURCE_API UWeaponComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
-
+	void Fire();
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -23,7 +24,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
 	TSubclassOf<class AWeapon> DefaultWeaponClass;
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
-	FName WeaponSocketName;
+	FName WeaponSocketName = "WeaponSocket";
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
 	
 private:
 	UPROPERTY()
