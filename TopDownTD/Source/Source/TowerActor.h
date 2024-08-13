@@ -9,7 +9,6 @@ UCLASS()
 class ATowerActor : public AActor
 {
 	GENERATED_BODY()
-    
 public:    
 	ATowerActor();
 
@@ -22,6 +21,7 @@ public:
 	void Fire();
 
 	FTimerHandle FireRateTimerHandle;
+	ACharacter* MainCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tower Settings")
 	float FireRate;
