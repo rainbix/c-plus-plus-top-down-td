@@ -4,8 +4,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Engine/World.h"
 
-ACharacter* MainCharacter;
-
 ATowerActor::ATowerActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
