@@ -33,6 +33,9 @@ public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChange, const FWeaponData*)
 	FOnWeaponChange OnWeaponChangeDelegate;
 
+	DECLARE_MULTICAST_DELEGATE(FOnPause)
+	FOnPause OnPauseDelegate;
+
 	#pragma endregion
 
 	#pragma region Functions
@@ -54,6 +57,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void PreviousWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void Pause();
 
 	FWeaponData* GetActiveWeaponData();
 	

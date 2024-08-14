@@ -49,6 +49,11 @@ void UHudTestWidget::PreviousWeapon()
 	OnWeaponChangeDelegate.Broadcast(GetActiveWeaponData());
 }
 
+void UHudTestWidget::Pause()
+{
+	OnPauseDelegate.Broadcast();
+}
+
 void UHudTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

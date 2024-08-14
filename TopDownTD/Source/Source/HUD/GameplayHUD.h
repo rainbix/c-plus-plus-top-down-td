@@ -11,6 +11,7 @@ class UMinimapWidget;
 class UActiveWeaponWidget;
 class ULevelStateWidget;
 class UHudTestWidget;
+class UPauseWidget;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -31,6 +32,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UHudTestWidget> HudTestWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UPauseWidget> PauseWidgetClass = nullptr;
+
+	void TogglePause();
+	
 protected:
 	UFUNCTION()
 	virtual void BeginPlay() override;
@@ -40,6 +46,9 @@ private:
 
 	UPROPERTY()
 	UWorld* world;
+	
+	UPROPERTY()
+	APlayerController* playerController;
 	
 	UPROPERTY()
 	TObjectPtr<UMinimapWidget> minimapWidget = nullptr;
@@ -56,12 +65,14 @@ private:
 	UPROPERTY()
 	TObjectPtr<UHudTestWidget> hudTestWidget = nullptr;
 
-	template <typename  T>
-	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
+	UPROPERTY()
+	TObjectPtr<UPauseWidget> pauseWidget = nullptr;
 
+	template <typename T>
+	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
+	
 	void InitializeWidgets();
 	void DisposeWidgets();
 	
 	GENERATED_BODY()
-	
 };

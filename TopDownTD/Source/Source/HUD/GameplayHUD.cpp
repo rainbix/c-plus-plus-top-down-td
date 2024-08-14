@@ -6,8 +6,11 @@
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
 #include "FWeaponData.h"
+#include "PauseWidget.h"
 #include "ProgressBarWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
 void AGameplayHUD::BeginPlay()
@@ -15,13 +18,14 @@ void AGameplayHUD::BeginPlay()
 	Super::BeginPlay();
 
 	world = GetWorld();
+	playerController = UGameplayStatics::GetPlayerController(world, 0);
 	
 	minimapWidget = SpawnWidget(MinimapWidgetClass);
 	activeWeaponWidget = SpawnWidget(ActiveWeaponWidgetClass);
 	levelStateWidget = SpawnWidget(LevelStateWidgetClass);
 	playerHealthWidget = SpawnWidget(PlayerHealthWidgetClass);
 	hudTestWidget = SpawnWidget(HudTestWidgetClass);
-
+	
 	InitializeWidgets();
 }
 
@@ -72,6 +76,7 @@ void AGameplayHUD::InitializeWidgets()
 		hudTestWidget->OnShootDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleShoot);
 		hudTestWidget->OnReloadDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleReload);
 		hudTestWidget->OnWeaponChangeDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
+		hudTestWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
 	}
 }
 
@@ -84,7 +89,30 @@ void AGameplayHUD::DisposeWidgets()
 		hudTestWidget->OnShootDelegate.RemoveAll(activeWeaponWidget);
 		hudTestWidget->OnReloadDelegate.RemoveAll(activeWeaponWidget);
 		hudTestWidget->OnWeaponChangeDelegate.RemoveAll(activeWeaponWidget);
+		hudTestWidget->OnPauseDelegate.RemoveAll(this);
 	}
+}
+
+void AGameplayHUD::TogglePause()
+{
+	//Enter pause
+	if (!playerController->IsPaused()) 
+	{
+		//Show widget
+		if (!pauseWidget)
+			pauseWidget = SpawnWidget(PauseWidgetClass);
+		else
+			pauseWidget->AddToViewport();
+	}
+	//Exit pause
+	else 
+	{
+		//Hide widget
+		if (pauseWidget)
+			pauseWidget->RemoveFromParent();
+	}
+
+	playerController->SetPause(!playerController->IsPaused());
 }
 
 template <typename T>
