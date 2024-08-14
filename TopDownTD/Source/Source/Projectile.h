@@ -18,7 +18,7 @@ protected:
 public:    
 	virtual void Tick(float DeltaTime) override;
 
-	void FireInDirection(const FVector& ShootDirection);
+	void FireInDirection(const FVector& ShootDirection) const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	class UProjectileMovementComponent* ProjectileMovementComponent;
@@ -28,4 +28,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float Damage;
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };
