@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerCharacterSource.h"
+#include "Source/Public/PlayerCharacterSource.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -68,7 +68,7 @@ void APlayerCharacterSource::LookAt(FVector direction, float speed, float deltaT
 
 	currentRotation = FMath::RInterpTo(currentRotation, desiredRotation, deltaTime, speed);
 
-	SetActorRotation(desiredRotation);
+	SetActorRotation(currentRotation);
 }
 
 void APlayerCharacterSource::HandleMouseInput(float deltaTime)
