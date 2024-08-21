@@ -19,14 +19,21 @@ AProjectile::AProjectile()
 	ProjectileMeshComponent->SetNotifyRigidBodyCollision(true);
 	ProjectileMeshComponent->SetSimulatePhysics(false);
 
-	ProjectileMeshComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
-
 	Damage = 10.0f;
 }
 
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ProjectileMeshComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+}
+
+void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	ProjectileMeshComponent->OnComponentHit.RemoveDynamic(this, &AProjectile::OnHit);
 }
 
 void AProjectile::Tick(float DeltaTime)
