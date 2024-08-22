@@ -1,7 +1,7 @@
 ﻿#include "Weapon.h"
 
-#include "RaycastWeaponShootModule.h"
-#include "WeaponShootModule.h"
+#include "ShootModule/RaycastWeaponShootModule.h"
+#include "ShootModule/WeaponShootModule.h"
 #include "Components/SkeletalMeshComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFWeapon, All, All);
