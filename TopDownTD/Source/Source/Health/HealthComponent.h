@@ -18,12 +18,28 @@ public:
 	virtual int GetCurrentHealth();
 	virtual int GetMaxHealth();
 
+	bool GetIsInitialized();
+
+#pragma region Delegates
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnComponentInitialze, int, int)
+	FOnComponentInitialze OnComponentInitializeDelegate;
+	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChange, int)
+	FOnHealthChange OnHealthChangeDelegate;
+
+	DECLARE_MULTICAST_DELEGATE(FOnDie)
+	FOnDie OnDieDelegate;
+
+#pragma endregion 
+
 protected:
 
 	UPROPERTY(EditAnywhere, Category="Health")
 	float MaxHealth;
 
 	float CurrentHealth;
+	bool IsInitialized;
 
 	virtual void BeginPlay() override;
 	virtual void OnDeath();
