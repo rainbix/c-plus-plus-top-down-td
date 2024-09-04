@@ -12,12 +12,17 @@ class SOURCE_API AWeapon : public AActor
 public:	
 	AWeapon();
 	void Fire();
+	void Reload() const;
+	bool CanShoot() const;
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	class UWeaponShootModule* ShootModule;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	class UAmmoModule* AmmoModule;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Components")
 	USkeletalMeshComponent* WeaponMesh;

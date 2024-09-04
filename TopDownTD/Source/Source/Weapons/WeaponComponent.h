@@ -16,6 +16,7 @@ public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
 	void Fire();
+	void Reload();
 	
 protected:
 	// Called when the game starts

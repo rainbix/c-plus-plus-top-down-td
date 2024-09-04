@@ -14,6 +14,13 @@ void UWeaponComponent::Fire()
 	CurrentWeapon->Fire();
 }
 
+void UWeaponComponent::Reload()
+{
+	if (!CurrentWeapon) return;
+
+	CurrentWeapon->Reload();
+}
+
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();

@@ -67,3 +67,8 @@ void ASourceCharacter::Fire()
 {
 	WeaponComponent->Fire();
 }
+
+void ASourceCharacter::Reload()
+{
+	WeaponComponent->Reload();
+}

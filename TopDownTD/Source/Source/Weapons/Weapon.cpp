@@ -1,5 +1,6 @@
 ﻿#include "Weapon.h"
 
+#include "AmmoModule/ClipAmmoModule.h"
 #include "ShootModule/RaycastWeaponShootModule.h"
 #include "ShootModule/WeaponShootModule.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -14,6 +15,7 @@ AWeapon::AWeapon()
 	SetRootComponent(WeaponMesh);
 
 	ShootModule = CreateDefaultSubobject<URaycastWeaponShootModule>("WeaponShootModule");
+	AmmoModule = CreateDefaultSubobject<UClipAmmoModule>("AmmoModule");
 }
 
 void AWeapon::BeginPlay()
@@ -25,9 +27,10 @@ void AWeapon::Fire()
 {
 	if(!ShootModule) return;
 	if(!GetWorld()) return;
+	if(!CanShoot()) return;
 
 	double currentTime = GetWorld()->GetTime().GetWorldTimeSeconds();
-	if(currentTime - LastBulletShotTime < FireRate)
+	if (currentTime - LastBulletShotTime < FireRate)
 	{
 		return;
 	}
@@ -41,5 +44,24 @@ void AWeapon::Fire()
 	const FVector shootDirection = ownerTransform.Rotator().Vector();
 
 	ShootModule->Shoot(startPosition, shootDirection);
+
+	if (AmmoModule)
+	{
+		AmmoModule->OnShot();
+	}
+}
+
+void AWeapon::Reload() const
+{
+	if(!AmmoModule) return;
+
+	AmmoModule->Reload();
+}
+
+bool AWeapon::CanShoot() const
+{
+	if (!AmmoModule) return true;
+	
+	return AmmoModule->CanShoot();
 }
 

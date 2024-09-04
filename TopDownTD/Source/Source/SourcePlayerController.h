@@ -44,6 +44,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* FireAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UInputAction* ReloadAction;
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */
@@ -61,6 +64,7 @@ protected:
 	void OnTouchTriggered();
 	void OnTouchReleased();
 	void Fire();
+	void Reload();
 
 private:
 	FVector CachedDestination;

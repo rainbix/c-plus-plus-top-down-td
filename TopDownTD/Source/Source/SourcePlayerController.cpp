@@ -56,6 +56,7 @@ void ASourcePlayerController::SetupInputComponent()
 
 		//Fire
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ASourcePlayerController::Fire);
+		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ASourcePlayerController::Reload);
 	}
 	else
 	{
@@ -131,4 +132,10 @@ void ASourcePlayerController::Fire()
 {
 	ASourceCharacter* character = Cast<ASourceCharacter>(GetPawn());
 	character->Fire();
+}
+
+void ASourcePlayerController::Reload()
+{
+	ASourceCharacter* character = Cast<ASourceCharacter>(GetPawn());
+	character->Reload();
 }
