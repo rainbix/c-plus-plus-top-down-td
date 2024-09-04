@@ -14,6 +14,9 @@ void UHealthComponent::BeginPlay()
 	
 	AActor* owner = GetOwner();
 	owner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnTakeAnyDamage);
+
+	IsInitialized = true;
+	OnComponentInitializeDelegate.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void UHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
@@ -23,17 +26,21 @@ void UHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const
 	Damage = FMath::Min(Damage, CurrentHealth);
 
 	CurrentHealth -= Damage;
-
-	// UE_LOG(LogTemp, Log, TEXT("Health %i"), CurrentHealth);
-
+	
 	if (IsDead())
 	{
 		OnDeath();
+	}
+	else
+	{
+		OnHealthChangeDelegate.Broadcast(CurrentHealth);
 	}
 }
 
 void UHealthComponent::OnDeath()
 {
+	OnDieDelegate.Broadcast();
+	
 	GetOwner()->Destroy();
 }
 
@@ -50,4 +57,9 @@ int UHealthComponent::GetCurrentHealth()
 int UHealthComponent::GetMaxHealth()
 {
 	return MaxHealth;
+}
+
+bool UHealthComponent::GetIsInitialized()
+{
+	return IsInitialized;
 }
