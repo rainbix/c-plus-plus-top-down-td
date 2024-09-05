@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Math/Color.h"
 #include "Components/ProgressBar.h"
+#include "Curves/CurveLinearColor.h"
 #include "Source/Tools/Interpolator.cpp"
 
 #pragma region Native
@@ -63,10 +64,13 @@ void UProgressBarWidget::UpdateBarImmediate(float newProgress)
 void UProgressBarWidget::UpdateBar(float newProgress)
 {
 	bar->SetPercent(newProgress);
-	
-	const auto translationData = GetTransitionData(newProgress);
-	bar->SetFillColorAndOpacity(translationData.Key);
-	barImage->SetBrushFromTexture(translationData.Value);
+
+	if (colorCurve)
+		bar->SetFillColorAndOpacity(colorCurve->GetLinearColorValue(newProgress));
+	else
+		bar->SetFillColorAndOpacity(unassignedColor);
+		
+	barImage->SetBrushFromTexture( GetIcon(newProgress));
 }
 
 void UProgressBarWidget::ProcessAnimation(float deltaTime)
@@ -92,49 +96,18 @@ float UProgressBarWidget::Lerp(const float& A, const float& B, const float Alpha
 	return A + Alpha * (B-A);
 }
 
-TTuple<FLinearColor, TObjectPtr<UTexture2D>> UProgressBarWidget::GetTransitionData(float curProgress)
+TObjectPtr<UTexture2D> UProgressBarWidget::GetIcon(float curProgress)
 {
-	if (backgroundTransitionBounds.Num() == 0 || backgroundTransitionColors.Num() == 0 || backgroundTransitionBounds.Num() != backgroundTransitionColors.Num())
-		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), emptyBarIcon); 
-
-	if (curProgress <= 0)
-	{
-		return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(emptyBarColor, emptyBarIcon);
-	}
+	if (backgroundTransitionBounds.Num() == 0 || curProgress <= 0)
+		return emptyBarIcon; 
 	
 	for (int i = 0; i < backgroundTransitionBounds.Num(); i++)
 	{
 		if (curProgress > backgroundTransitionBounds[i])
 		{
-			return TTuple<FLinearColor, TObjectPtr<UTexture2D>>( backgroundTransitionColors[i], backgroundTransitionIcons[i]);
+			return backgroundTransitionIcons[i];
 		}
 	}
 
-	return TTuple<FLinearColor, TObjectPtr<UTexture2D>>(bar->GetFillColorAndOpacity(), backgroundTransitionIcons[backgroundTransitionIcons.Num() - 1]);
+	return backgroundTransitionIcons[backgroundTransitionIcons.Num() - 1];
 }
-
-#if WITH_EDITOR
-
-void UProgressBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	
-	const FName propertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	
-	if (propertyName == GET_MEMBER_NAME_CHECKED(UProgressBarWidget, maximumVal))
-	{
-		InitializeWidget(maximumVal, currentVal);
-	}
-	
-	if (propertyName == GET_MEMBER_NAME_CHECKED(UProgressBarWidget, currentVal))
-	{
-		if (maximumVal <= 0)
-			InitializeWidget(maximumVal, currentVal);
-		
-		UpdateBarImmediate(currentVal);
-	}
-}
-
-#endif
-
-
