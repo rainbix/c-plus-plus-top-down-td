@@ -40,35 +40,18 @@ ASourceCharacter::ASourceCharacter()
 	TopDownCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TopDownCamera"));
 	TopDownCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCameraComponent->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	//Health
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
-
-	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 	
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
-
 void ASourceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
 }
 
 void ASourceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void ASourceCharacter::Fire()
-{
-	WeaponComponent->Fire();
-}
-
-void ASourceCharacter::Reload()
-{
-	WeaponComponent->Reload();
 }

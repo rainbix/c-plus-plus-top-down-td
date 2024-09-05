@@ -18,8 +18,6 @@ public:
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
-	virtual void Fire();
-	virtual void Reload();
 	
 	/** Returns TopDownCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
@@ -34,13 +32,5 @@ private:
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
-
-	UPROPERTY(EditAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
-	class UHealthComponent* HealthComponent;
-	
-	UPROPERTY(EditAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
-	class UWeaponComponent* WeaponComponent;
-	
-	float TimeSinceLastDamage;
 };
 

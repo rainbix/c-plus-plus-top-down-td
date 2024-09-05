@@ -3,12 +3,19 @@
 #include "Source/Public/PlayerCharacterSource.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Source/Health/HealthComponent.h"
+#include "Source/Weapons/WeaponComponent.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mouseRotationSpeed = 2;
+	
+	//Health
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 }
 
 void APlayerCharacterSource::BeginPlay()
@@ -43,6 +50,10 @@ void APlayerCharacterSource::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	}
 	
 	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &APlayerCharacterSource::MoveForward);
+	
+	//Weapon
+	inputComponent->BindAction(fireInput, ETriggerEvent::Triggered, this, &APlayerCharacterSource::Fire);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &APlayerCharacterSource::Reload);
 }
 
 void APlayerCharacterSource::MoveForward(const FInputActionValue& value)
@@ -84,4 +95,14 @@ void APlayerCharacterSource::HandleMouseInput(float deltaTime)
 	directionToMouse.Normalize();
 
 	LookAt(directionToMouse, mouseRotationSpeed, deltaTime);
+}
+
+void APlayerCharacterSource::Fire()
+{
+	WeaponComponent->Fire();
+}
+
+void APlayerCharacterSource::Reload()
+{
+	WeaponComponent->Reload();
 }

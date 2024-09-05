@@ -20,6 +20,10 @@ public:
 	UInputMappingContext* mappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
 	UInputAction* moveInput;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
+	UInputAction* fireInput;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
+	UInputAction* reloadInput;
 	
 	APlayerCharacterSource();
 	void MoveToDirection(FVector2D direction);
@@ -31,6 +35,14 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	UPROPERTY(EditAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
+	class UHealthComponent* HealthComponent;
+	
+	UPROPERTY(EditAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
+	class UWeaponComponent* WeaponComponent;
+	
 	void MoveForward(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);
+	void Fire();
+	void Reload();
 };
