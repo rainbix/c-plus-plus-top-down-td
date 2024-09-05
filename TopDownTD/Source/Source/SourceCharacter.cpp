@@ -9,8 +9,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/Material.h"
 #include "Engine/World.h"
-#include "Health/HealthComponent.h"
-#include "Weapons/WeaponComponent.h"
 
 ASourceCharacter::ASourceCharacter()
 {
@@ -49,9 +47,4 @@ ASourceCharacter::ASourceCharacter()
 void ASourceCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-}
-
-void ASourceCharacter::BeginPlay()
-{
-	Super::BeginPlay();
 }
