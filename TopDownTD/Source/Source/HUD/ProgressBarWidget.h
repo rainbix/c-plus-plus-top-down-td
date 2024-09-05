@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Source/Tools/Interpolator.h"
 #include "ProgressBarWidget.generated.h"
 
 class UImage;
@@ -38,7 +39,7 @@ protected:
 	virtual void NativeConstruct() override;
 	
 private:
-	
+		
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
@@ -61,10 +62,23 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	float currentVal;
+
+	#pragma region Animation
+
+	//Temporal reimplementation for default Lerp func
+	static float Lerp(const float& A, const float& B, const float Alpha);
+
+	void ProcessAnimation(float deltaTime);
+
+	TUniquePtr<Interpolator<float>> barInterpolator = nullptr;
 	
-	void Update(float deltaTime);
-	void SetValueImmediate(float newVal);
-	void UpdateBar(float progress);
+	UPROPERTY(EditAnywhere, Category="Progress Bar|Animation")
+	float animationTime = 0.2f;
+
+	#pragma endregion 
+	
+	void UpdateBarImmediate(float newProgress);
+	void UpdateBar(float newProgress);
 	TTuple<FLinearColor, TObjectPtr<UTexture2D>> GetTransitionData(float curProgress);
 	
 	GENERATED_BODY()

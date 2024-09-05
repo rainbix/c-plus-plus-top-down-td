@@ -5,21 +5,22 @@
 #include "Components/Image.h"
 #include "Math/Color.h"
 #include "Components/ProgressBar.h"
+#include "Source/Tools/Interpolator.cpp"
 
 #pragma region Native
 
 void UProgressBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	//TODO: Create interpolator
+	
+	barInterpolator = MakeUnique<Interpolator<float>>(animationTime, 0, 1);
 }
 
 void UProgressBarWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	Update(InDeltaTime);
+	ProcessAnimation(InDeltaTime);
 }
 
 #pragma endregion 
@@ -29,44 +30,66 @@ void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
 	this->maximumVal = maxVal;
 	this->currentVal = initVal > 0 ? initVal : maxVal;
 
-	SetValueImmediate(currentVal);
+	UpdateBarImmediate(currentVal);
 }
 
-void UProgressBarWidget::SetValueImmediate(float newVal)
-{
-	currentVal = newVal;
-	
-	const float progress = FMath::Clamp(newVal / maximumVal, 0, 1);
-	
-	UpdateBar(progress);
-}
-
+//Set value with animation (called from outside when Widget is updated)
 void UProgressBarWidget::SetValue(int newVal)
 {
 	if (bar)
 	{
 		currentVal = newVal;
 
-		//TODO: Move to lerp
-		const float rawProgress = static_cast<float>(newVal) / maximumVal;
-		const float progress = FMath::Clamp(rawProgress, 0, 1);
+		const float newRawProgress = static_cast<float>(newVal) / maximumVal;
+		const float newProgress = FMath::Clamp(newRawProgress, 0, 1);
+
+		const float curProgress = bar->GetPercent();
 		
-		UpdateBar(progress);
+		barInterpolator->SetFromTo(curProgress, newProgress);
+		barInterpolator->Start();
 	}
 }
 
-void UProgressBarWidget::UpdateBar(float progress)
+// Set value without animation
+void UProgressBarWidget::UpdateBarImmediate(float newProgress)
 {
-	bar->SetPercent(progress);
+	currentVal = newProgress;
 	
-	const auto translationData = GetTransitionData(progress);
+	const float progress = FMath::Clamp(newProgress / maximumVal, 0, 1);
+	
+	UpdateBar(progress);
+}
+
+void UProgressBarWidget::UpdateBar(float newProgress)
+{
+	bar->SetPercent(newProgress);
+	
+	const auto translationData = GetTransitionData(newProgress);
 	bar->SetFillColorAndOpacity(translationData.Key);
 	barImage->SetBrushFromTexture(translationData.Value);
 }
 
-void UProgressBarWidget::Update(float deltaTime)
+void UProgressBarWidget::ProcessAnimation(float deltaTime)
 {
-	//TODO: Lerp
+	if (barInterpolator && barInterpolator->IsActive())
+	{
+		barInterpolator->ProcessTick(deltaTime);
+		
+		const float progress = barInterpolator->Lerp(Lerp);
+		UpdateBar(progress);
+		
+		if (barInterpolator->IsElapsed())
+		{
+			barInterpolator->Stop();
+			UpdateBar(barInterpolator->To);
+		}
+	}
+}
+
+
+float UProgressBarWidget::Lerp(const float& A, const float& B, const float Alpha)
+{
+	return A + Alpha * (B-A);
 }
 
 TTuple<FLinearColor, TObjectPtr<UTexture2D>> UProgressBarWidget::GetTransitionData(float curProgress)
@@ -108,7 +131,7 @@ void UProgressBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 		if (maximumVal <= 0)
 			InitializeWidget(maximumVal, currentVal);
 		
-		SetValueImmediate(currentVal);
+		UpdateBarImmediate(currentVal);
 	}
 }
 
