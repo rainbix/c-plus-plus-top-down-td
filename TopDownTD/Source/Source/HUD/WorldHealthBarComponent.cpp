@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ProgressBarWidget.h"
 #include "WorldHealthBarComponent.h"
+#include "ProgressBarWidget.h"
 #include "Components/WidgetComponent.h"
 #include "Source/Health/HealthComponent.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
