@@ -1,6 +1,5 @@
 ﻿#include "ClipAmmoModule.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogFWeapon, All, All);
+#include "Source/Source.h"
 
 UClipAmmoModule::UClipAmmoModule()
 {
