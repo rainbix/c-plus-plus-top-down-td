@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Health/HealthComponent.h"
 #include "SourceCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -31,5 +32,10 @@ private:
 	/** Camera boom positioning the camera above the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(EditAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
+	class UHealthComponent* HealthComponent;
+	
+	float TimeSinceLastDamage;
 };
 
