@@ -4,7 +4,6 @@
 #include "ProgressBarWidget.h"
 #include "Components/WidgetComponent.h"
 #include "Source/Health/HealthComponent.h"
-#include "Source/Tools/GeneralPurposeUtils.h"
 
 // Sets default values for this component's properties
 UWorldHealthBarComponent::UWorldHealthBarComponent()
@@ -15,7 +14,7 @@ UWorldHealthBarComponent::UWorldHealthBarComponent()
 void UWorldHealthBarComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	//Try to get HealthBar Widget and Health Component
 	if (TryGetHealthBarWidget() && TryGetHealthComponent())
 	{
