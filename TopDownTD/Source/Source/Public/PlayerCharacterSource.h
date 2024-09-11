@@ -35,10 +35,10 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* HealthComponent;
 	
-	UPROPERTY(EditAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
 	class UWeaponComponent* WeaponComponent;
 	
 	void MoveForward(const FInputActionValue& value);
