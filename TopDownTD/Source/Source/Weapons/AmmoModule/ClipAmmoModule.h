@@ -39,4 +39,6 @@ public:
 	virtual bool CanShoot() override;
 	virtual void OnShot() override;
 	virtual void AddAmmo(int Value);
+	virtual int GetCurrentAmmo() const override;
+	virtual int GetSpareAmmo() const override;
 };

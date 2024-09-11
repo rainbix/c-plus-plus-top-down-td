@@ -71,3 +71,13 @@ void UClipAmmoModule::AddAmmo(int Value)
 
 	UE_LOG(LogFWeapon, Display, TEXT("Add ammo: SpareAmmoLeft [%i])"), SpareAmmoLeft)
 }
+
+int UClipAmmoModule::GetCurrentAmmo() const
+{
+	return CurrentClipAmmo;
+}
+
+int UClipAmmoModule::GetSpareAmmo() const
+{
+	return SpareAmmoLeft;
+}
