@@ -30,7 +30,7 @@ void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
 {
 	this->maximumVal = maxVal;
 	this->currentVal = initVal > 0 ? initVal : maxVal;
-
+	
 	UpdateBarImmediate(currentVal);
 }
 
