@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "GameplayHUD.generated.h"
 
+class UPauseButtonWidget;
 class UProgressBarWidget;
 class UMinimapWidget;
 class UActiveWeaponWidget;
@@ -28,14 +29,21 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<ULevelStateWidget> LevelStateWidgetClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<UHudTestWidget> HudTestWidgetClass = nullptr;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UPauseWidget> PauseWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UPauseButtonWidget> PauseButtonClass = nullptr;
+
+	//Test widget
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UHudTestWidget> HudTestWidgetClass = nullptr;
+	
 	void TogglePause();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPauseToggleHandler(bool isPause);
 	
 protected:
 	UFUNCTION()
@@ -67,6 +75,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UPauseWidget> pauseWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UPauseButtonWidget> pauseButtonWidget = nullptr;
 
 	template <typename T>
 	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
