@@ -3,6 +3,7 @@
 #include "GameplayHUD.h"
 #include "MinimapWidget.h"
 #include "LevelStateWidget.h"
+#include "PauseButtonWidget.h"
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
 #include "FWeaponData.h"
@@ -10,8 +11,6 @@
 #include "ProgressBarWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetStringLibrary.h"
-#include "Source/Tools/GeneralPurposeUtils.h"
 
 void AGameplayHUD::BeginPlay()
 {
@@ -24,6 +23,9 @@ void AGameplayHUD::BeginPlay()
 	activeWeaponWidget = SpawnWidget(ActiveWeaponWidgetClass);
 	levelStateWidget = SpawnWidget(LevelStateWidgetClass);
 	playerHealthWidget = SpawnWidget(PlayerHealthWidgetClass);
+	pauseButtonWidget = SpawnWidget(PauseButtonClass);
+
+	//TODO: Test widget. Remove after all widget bindings are done
 	hudTestWidget = SpawnWidget(HudTestWidgetClass);
 	
 	InitializeWidgets();
@@ -69,6 +71,11 @@ void AGameplayHUD::InitializeWidgets()
 		activeWeaponWidget->InitializeWidget(weaponData);
 	}
 
+	if (pauseButtonWidget)
+	{
+		pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
+	}
+	
 	if (hudTestWidget)
 	{
 		hudTestWidget->OnHealthIncreasedDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
@@ -82,6 +89,11 @@ void AGameplayHUD::InitializeWidgets()
 
 void AGameplayHUD::DisposeWidgets()
 {
+	if (pauseButtonWidget)
+	{
+		pauseButtonWidget->OnPauseDelegate.RemoveAll(this);
+	}
+	
 	if (hudTestWidget)
 	{
 		hudTestWidget->OnHealthIncreasedDelegate.RemoveAll(playerHealthWidget);
@@ -113,6 +125,9 @@ void AGameplayHUD::TogglePause()
 	}
 
 	playerController->SetPause(!playerController->IsPaused());
+
+	//Expose pause function to blueprints
+	OnPauseToggleHandler(playerController->IsPaused());
 }
 
 template <typename T>
