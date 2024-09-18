@@ -28,7 +28,9 @@ public:
 	APlayerCharacterSource();
 	void MoveToDirection(FVector2D direction);
 	void LookAt(FVector direction, float speed, float deltaTime);
-
+	class UHealthComponent* GetHealthComponent() const;
+	class UWeaponComponent* GetWeaponComponent() const;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
