@@ -66,15 +66,15 @@ bool AWeapon::CanShoot() const
 
 int AWeapon::GetCurrentAmmo() const
 {
-	if (!AmmoModule) return true;
+	if (!AmmoModule) return INFINITY;
 
 	return AmmoModule->GetCurrentAmmo();
-
 }
 
 int AWeapon::GetSpareAmmo() const
 {
-	return AmmoModule->GetSpareAmmo();
+	if (!AmmoModule) return INFINITY;
 
+	return AmmoModule->GetSpareAmmo();
 }
 
