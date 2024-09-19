@@ -18,6 +18,16 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (AmmoModule)
+	{
+		AmmoModule->OnAmmoChanged.BindUObject(this, &AWeapon::HandleAmmoChanged);
+	}
+}
+
+void AWeapon::HandleAmmoChanged()
+{
+	OnAmmoChanged.Broadcast(this);
 }
 
 void AWeapon::Fire()
@@ -47,7 +57,7 @@ void AWeapon::Fire()
 		AmmoModule->OnShot();
 	}
 	
-	OnShotDelegate.Broadcast(GetCurrentAmmo(), GetSpareAmmo());
+	OnAmmoChanged.Broadcast(this);
 }
 
 void AWeapon::Reload() const
@@ -76,5 +86,10 @@ int AWeapon::GetSpareAmmo() const
 	if (!AmmoModule) return INFINITY;
 
 	return AmmoModule->GetSpareAmmo();
+}
+
+EWeaponTypes AWeapon::GetWeaponType() const
+{
+	return WeaponType;
 }
 

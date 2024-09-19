@@ -36,6 +36,7 @@ void UClipAmmoModule::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		CurrentClipAmmo += ammoToAdd;
 		SpareAmmoLeft -= ammoToAdd;
 		UE_LOG(LogFWeapon, Display, TEXT("Reload finished: SpareAmmoLeft [%i])"), SpareAmmoLeft)
+		OnAmmoChanged.Execute();
 	}
 }
 
@@ -62,14 +63,15 @@ void UClipAmmoModule::OnShot()
 	{
 		CurrentClipAmmo--;
 		UE_LOG(LogFWeapon, Display, TEXT("Ammo left %i"), CurrentClipAmmo);
+		OnAmmoChanged.Execute();
 	}
 }
 
 void UClipAmmoModule::AddAmmo(int Value)
 {
 	SpareAmmoLeft = FMath::Clamp(SpareAmmoLeft + Value, 0, MaxSpareAmmo);
-
 	UE_LOG(LogFWeapon, Display, TEXT("Add ammo: SpareAmmoLeft [%i])"), SpareAmmoLeft)
+	OnAmmoChanged.Execute();
 }
 
 int UClipAmmoModule::GetCurrentAmmo() const

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "WeaponComponent.generated.h"
 
+class AWeapon;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SOURCE_API UWeaponComponent : public UActorComponent
@@ -17,13 +18,20 @@ public:
 	UWeaponComponent();
 	void Fire();
 	void Reload();
+	AWeapon* GetCurrentWeapon() const;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, class AWeapon* newWeapon)
+	FOnWeaponChanged OnWeaponChanged;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, class AWeapon* newWeapon)
+	FOnWeaponChanged OnWeaponAmmoChange;
 	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
-	TSubclassOf<class AWeapon> DefaultWeaponClass;
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
 	FName WeaponSocketName = "WeaponSocket";
 	
@@ -31,4 +39,8 @@ private:
 	UPROPERTY()
 	AWeapon* CurrentWeapon = nullptr;
 	void SpawnWeapon();
+
+	void SubscribeOnWeapon();
+	void UnsubscribeOnWeapon();
+	void HandleWeaponAmmoChanged(AWeapon* weapon) const;
 };

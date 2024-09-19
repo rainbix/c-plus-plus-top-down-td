@@ -4,29 +4,24 @@
 #include "FWeaponData.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Source/Weapons/Weapon.h"
 
-void UActiveWeaponWidget::InitializeWidget(const FWeaponData* weaponData)
+void UActiveWeaponWidget::InitializeWidget(AWeapon* weapon)
 {
-	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
-	SetWeaponType(weaponData->weaponType);
+	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
+	SetWeaponType(weapon->GetWeaponType());
 }
 
-void UActiveWeaponWidget::HandleShoot(const FWeaponData* weaponData)
+void UActiveWeaponWidget::HandleWeaponAmmoChanged(AWeapon* weaponData)
 {
-	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
+	UpdateAmmo(weaponData->GetCurrentAmmo(), weaponData->GetSpareAmmo());
 }
 
-void UActiveWeaponWidget::HandleReload(const FWeaponData* weaponData)
+void UActiveWeaponWidget::HandleWeaponChange(AWeapon* weapon)
 {
-	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
+	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
+	SetWeaponType(weapon->GetWeaponType());
 }
-
-void UActiveWeaponWidget::HandleWeaponChange(const FWeaponData* weaponData)
-{
-	UpdateAmmo(weaponData->curAmmo, weaponData->maxAmmo);
-	SetWeaponType(weaponData->weaponType);
-}
-
 
 void UActiveWeaponWidget::UpdateAmmo(int curAmmo, int maxAmmo)
 {

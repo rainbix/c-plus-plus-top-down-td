@@ -13,6 +13,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
+#include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
 {
@@ -42,11 +43,12 @@ void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGameplayHUD::InitializeWidgets()
 {
+	APawn* PlayerPawn = playerController->AcknowledgedPawn;
+	APlayerCharacterSource* sourcePlayerCharacter = Cast<APlayerCharacterSource>(PlayerPawn);
+	check(sourcePlayerCharacter);
+
 	if (playerHealthWidget)
 	{
-		APlayerCharacterSource* sourcePlayerCharacter = Cast<APlayerCharacterSource>(playerController->AcknowledgedPawn);
-		check(sourcePlayerCharacter);
-
 		UHealthComponent* HealthComponent = sourcePlayerCharacter->GetHealthComponent();
 		
 		int maxHealth = HealthComponent->GetMaxHealth();
@@ -59,18 +61,16 @@ void AGameplayHUD::InitializeWidgets()
 
 	if (activeWeaponWidget)
 	{
-		//TODO: Replace initialization with character component weapon when ready
-		int maxAmmo = 100;
-		int curAmmo = 10;
-		EWeaponTypes weaponType = EWeaponTypes::Weapon1;
-		FWeaponData* weaponData = new FWeaponData(maxAmmo, curAmmo, weaponType);
-		
-		if (hudTestWidget)
+		UWeaponComponent* WeaponComponent = sourcePlayerCharacter->GetWeaponComponent();
+
+		WeaponComponent->OnWeaponChanged.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
+		WeaponComponent->OnWeaponAmmoChange.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponAmmoChanged);
+		auto Weapon = WeaponComponent->GetCurrentWeapon();
+
+		if (Weapon)
 		{
-			weaponData = hudTestWidget->GetActiveWeaponData();
+			activeWeaponWidget->InitializeWidget(Weapon);
 		}
-		
-		activeWeaponWidget->InitializeWidget(weaponData);
 	}
 
 	if (pauseButtonWidget)
@@ -80,9 +80,6 @@ void AGameplayHUD::InitializeWidgets()
 	
 	if (hudTestWidget)
 	{
-		hudTestWidget->OnShootDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleShoot);
-		hudTestWidget->OnReloadDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleReload);
-		hudTestWidget->OnWeaponChangeDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
 		hudTestWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
 	}
 }
@@ -102,12 +99,17 @@ void AGameplayHUD::DisposeWidgets()
 		auto HealthComponent = sourcePlayerCharacter->GetHealthComponent();
 		HealthComponent->OnHealthChangeDelegate.RemoveAll(playerHealthWidget);
 	}
+
+	if (activeWeaponWidget)
+	{
+		auto WeaponComponent = sourcePlayerCharacter->GetWeaponComponent();
+
+		WeaponComponent->OnWeaponChanged.RemoveAll(activeWeaponWidget);
+		WeaponComponent->OnWeaponAmmoChange.RemoveAll(activeWeaponWidget);
+	}
 	
 	if (hudTestWidget)
 	{
-		hudTestWidget->OnShootDelegate.RemoveAll(activeWeaponWidget);
-		hudTestWidget->OnReloadDelegate.RemoveAll(activeWeaponWidget);
-		hudTestWidget->OnWeaponChangeDelegate.RemoveAll(activeWeaponWidget);
 		hudTestWidget->OnPauseDelegate.RemoveAll(this);
 	}
 }
