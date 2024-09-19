@@ -11,7 +11,7 @@ class SOURCE_API URaycastWeaponShootModule : public UWeaponShootModule
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Parameters")
 	float TraceMaxDistance = 5000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parameters")

@@ -17,11 +17,15 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Parameters")
-	int MaxClipAmmo;
+	int MaxClipAmmo = 10;
 	int CurrentClipAmmo;
 
 	UPROPERTY(EditAnywhere, Category="Parameters")
-	float ReloadDuration;
+	int MaxSpareAmmo = 50;
+	int SpareAmmoLeft;
+
+	UPROPERTY(EditAnywhere, Category="Parameters")
+	float ReloadDuration = 2;
 	float ReloadStartTime;
 	bool IsReloading;
 	
@@ -34,4 +38,7 @@ public:
 	virtual void Reload() override;
 	virtual bool CanShoot() override;
 	virtual void OnShot() override;
+	virtual void AddAmmo(int Value);
+	virtual int GetCurrentAmmo() const override;
+	virtual int GetSpareAmmo() const override;
 };

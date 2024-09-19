@@ -4,9 +4,8 @@
 UClipAmmoModule::UClipAmmoModule()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	MaxClipAmmo = 10;
 	CurrentClipAmmo = MaxClipAmmo;
-	ReloadDuration = 0;
+	SpareAmmoLeft = MaxSpareAmmo;
 	ReloadStartTime = 0;
 	IsReloading = false;
 }
@@ -17,6 +16,7 @@ void UClipAmmoModule::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentClipAmmo = MaxClipAmmo;
+	SpareAmmoLeft = MaxSpareAmmo;
 }
 
 // Called every frame
@@ -32,16 +32,19 @@ void UClipAmmoModule::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	if (currentTime - ReloadStartTime > ReloadDuration)
 	{
 		IsReloading = false;
-		CurrentClipAmmo = MaxClipAmmo;
-		UE_LOG(LogFWeapon, Display, TEXT("Reload finished)"))
+		int ammoToAdd = FMath::Min(MaxClipAmmo - CurrentClipAmmo, SpareAmmoLeft);
+		CurrentClipAmmo += ammoToAdd;
+		SpareAmmoLeft -= ammoToAdd;
+		UE_LOG(LogFWeapon, Display, TEXT("Reload finished: SpareAmmoLeft [%i])"), SpareAmmoLeft)
 	}
 }
 
 void UClipAmmoModule::Reload()
 {
 	if (IsReloading) return;
-	if(CurrentClipAmmo >= MaxClipAmmo) return;
+	if (CurrentClipAmmo >= MaxClipAmmo) return;
 	if (!GetWorld()) return;
+	if (SpareAmmoLeft <= 0) return;
 
 	IsReloading = true;
 	ReloadStartTime = GetWorld()->GetTimeSeconds();
@@ -62,3 +65,19 @@ void UClipAmmoModule::OnShot()
 	}
 }
 
+void UClipAmmoModule::AddAmmo(int Value)
+{
+	SpareAmmoLeft = FMath::Clamp(SpareAmmoLeft + Value, 0, MaxSpareAmmo);
+
+	UE_LOG(LogFWeapon, Display, TEXT("Add ammo: SpareAmmoLeft [%i])"), SpareAmmoLeft)
+}
+
+int UClipAmmoModule::GetCurrentAmmo() const
+{
+	return CurrentClipAmmo;
+}
+
+int UClipAmmoModule::GetSpareAmmo() const
+{
+	return SpareAmmoLeft;
+}
