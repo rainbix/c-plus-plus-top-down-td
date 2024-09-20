@@ -8,20 +8,28 @@ UCLASS()
 class SOURCE_API AWeapon : public AActor
 {
 	GENERATED_BODY()
+
+#pragma region Delegates
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnShot, int, int)
+	FOnShot OnShotDelegate;
+#pragma endregion
 	
 public:	
 	AWeapon();
 	void Fire();
 	void Reload() const;
 	bool CanShoot() const;
+	int GetCurrentAmmo() const;
+	int GetSpareAmmo() const;
 
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
-	class UWeaponShootModule* ShootModule;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
+	class URaycastWeaponShootModule* ShootModule;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	class UAmmoModule* AmmoModule;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Components")

@@ -15,4 +15,6 @@ public:
 	virtual void Reload()	{	}
 	virtual bool CanShoot() {return true;}
 	virtual void OnShot() {}
+	virtual int GetCurrentAmmo() const {return INFINITY;}
+	virtual int GetSpareAmmo() const {return INFINITY;}
 };

@@ -1,7 +1,6 @@
 ﻿#include "Weapon.h"
 #include "AmmoModule/ClipAmmoModule.h"
 #include "ShootModule/RaycastWeaponShootModule.h"
-#include "ShootModule/WeaponShootModule.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Source/Source.h"
 
@@ -47,6 +46,8 @@ void AWeapon::Fire()
 	{
 		AmmoModule->OnShot();
 	}
+	
+	OnShotDelegate.Broadcast(GetCurrentAmmo(), GetSpareAmmo());
 }
 
 void AWeapon::Reload() const
@@ -61,5 +62,19 @@ bool AWeapon::CanShoot() const
 	if (!AmmoModule) return true;
 	
 	return AmmoModule->CanShoot();
+}
+
+int AWeapon::GetCurrentAmmo() const
+{
+	if (!AmmoModule) return INFINITY;
+
+	return AmmoModule->GetCurrentAmmo();
+}
+
+int AWeapon::GetSpareAmmo() const
+{
+	if (!AmmoModule) return INFINITY;
+
+	return AmmoModule->GetSpareAmmo();
 }
 
