@@ -17,9 +17,9 @@ UCLASS()
 class SOURCE_API UActiveWeaponWidget : public UUserWidget
 {
 public:
-	void InitializeWidget(AWeapon* weaponData);
-	void HandleWeaponAmmoChanged(AWeapon* weaponData);
-	void HandleWeaponChange(AWeapon* weapon);
+	void InitializeWidget(const AWeapon* weapon);
+	void HandleWeaponAmmoChanged(const AWeapon* weapon);
+	void HandleWeaponChange(const AWeapon* weapon);
 	
 private:
 	

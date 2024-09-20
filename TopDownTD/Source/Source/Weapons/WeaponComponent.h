@@ -20,10 +20,10 @@ public:
 	void Reload();
 	AWeapon* GetCurrentWeapon() const;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, class AWeapon* newWeapon)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const AWeapon* newWeapon)
 	FOnWeaponChanged OnWeaponChanged;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, class AWeapon* newWeapon)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const AWeapon* weapon)
 	FOnWeaponChanged OnWeaponAmmoChange;
 	
 protected:

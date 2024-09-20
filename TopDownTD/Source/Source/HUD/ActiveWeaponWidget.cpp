@@ -6,18 +6,18 @@
 #include "Components/TextBlock.h"
 #include "Source/Weapons/Weapon.h"
 
-void UActiveWeaponWidget::InitializeWidget(AWeapon* weapon)
+void UActiveWeaponWidget::InitializeWidget(const AWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 	SetWeaponType(weapon->GetWeaponType());
 }
 
-void UActiveWeaponWidget::HandleWeaponAmmoChanged(AWeapon* weaponData)
+void UActiveWeaponWidget::HandleWeaponAmmoChanged(const AWeapon* weapon)
 {
-	UpdateAmmo(weaponData->GetCurrentAmmo(), weaponData->GetSpareAmmo());
+	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 }
 
-void UActiveWeaponWidget::HandleWeaponChange(AWeapon* weapon)
+void UActiveWeaponWidget::HandleWeaponChange(const AWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 	SetWeaponType(weapon->GetWeaponType());

@@ -65,9 +65,8 @@ void AGameplayHUD::InitializeWidgets()
 
 		WeaponComponent->OnWeaponChanged.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
 		WeaponComponent->OnWeaponAmmoChange.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponAmmoChanged);
-		auto Weapon = WeaponComponent->GetCurrentWeapon();
 
-		if (Weapon)
+		if (auto Weapon = WeaponComponent->GetCurrentWeapon())
 		{
 			activeWeaponWidget->InitializeWidget(Weapon);
 		}
