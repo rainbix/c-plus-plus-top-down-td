@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "Source/TowerActor.h"
 #include "TowerSpawnPlaceholder.h"
+#include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
@@ -15,22 +16,29 @@ ATowerSpawnPlaceholder::ATowerSpawnPlaceholder()
 void ATowerSpawnPlaceholder::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	InitializeWidgets();
-	InitializeInteractions();
+
+	try
+	{
+		InitializeWidgets();
+		InitializeInteractions();
+	}
+	catch (...)
+	{
+		GeneralPurposeUtils::DisplayScreenMessage("BeginPlay failed", FColor::Red);
+	}
 }
 
 void ATowerSpawnPlaceholder::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
+	
 	UpdateInteractionState(true);
 }
 
 void ATowerSpawnPlaceholder::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-
+	
 	UpdateInteractionState(false);
 }
 
@@ -71,18 +79,26 @@ void ATowerSpawnPlaceholder::SpawnTower(const TSubclassOf<ATowerActor> towerToSp
 {
 	if (towerToSpawn)
 	{
+		//Prepare spawn
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
 
-		FVector spawnPos = GetActorLocation();
-		FRotator spawnRot(0, 0, 0);
+		const FVector spawnPos = GetActorLocation();
+		const FRotator spawnRot(0, 0, 0);
 
-		spawnedTower = GetWorld()->SpawnActor<ATowerActor>(towerToSpawn, spawnPos, spawnRot);
+		//Spawn scaffolding first. When building timer will be finished corresponding tower is placed
+		spawnedScaffolding = GetWorld()->SpawnActor<ATowerBuildingScaffolding>(scaffoldingActorClass, spawnPos, spawnRot);
 		
-		if (spawnedTower)
+		if (spawnedScaffolding)
 		{
-			//Disable Placeholder mesh 
-			placeholderMeshComponent->SetVisibility(false);
+			//Initialize scaffolding
+			spawnedScaffolding->InitializeActor(towerToSpawn, BuildTime);
+
+			//TODO: Subscribe on scaffoldings build finish event
+			
+			//Disable Placeholder mesh
+			if (placeholderMeshComponent)
+				placeholderMeshComponent->SetVisibility(false);
 			
 			//Force disable interaction widget
 			ToggleWidget(InteractEmptyWidgetHolder, false);
@@ -99,7 +115,12 @@ void ATowerSpawnPlaceholder::SpawnTower(const TSubclassOf<ATowerActor> towerToSp
 
 bool ATowerSpawnPlaceholder::CanSpawnTower() const
 {
-	return isInInteractionRange && !spawnedTower;
+	return isInInteractionRange && IsEmpty();
+}
+
+bool ATowerSpawnPlaceholder::IsEmpty() const
+{
+	return !spawnedScaffolding && !spawnedTower;
 }
 
 #pragma endregion 
@@ -108,14 +129,14 @@ bool ATowerSpawnPlaceholder::CanSpawnTower() const
 
 void ATowerSpawnPlaceholder::InitializeInteractions()
 {
-	UpdateInteractionState(false);
-    	
     try
     {
-    	TArray<UStaticMeshComponent*> Components;
-    	GetComponents<UStaticMeshComponent>(Components);
+		UpdateInteractionState(false);
+    	
+    	//TArray<UStaticMeshComponent*> Components;
+    	//GetComponents<UStaticMeshComponent>(Components);
 
-    	placeholderMeshComponent = Components[0];
+    	//placeholderMeshComponent = Components[0];
     }
     catch (...)
     {
@@ -126,9 +147,9 @@ void ATowerSpawnPlaceholder::InitializeInteractions()
 void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 {
 	isInInteractionRange = isInteractionAllowed;
-
+	
 	//Enable Build widget only if no tower built yet
-	if (!spawnedTower)
+	if (IsEmpty())
 		ToggleWidget(InteractEmptyWidgetHolder, isInteractionAllowed);
 }
 

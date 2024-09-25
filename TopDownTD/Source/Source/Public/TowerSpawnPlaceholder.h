@@ -4,16 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Source/TowerActor.h"
 #include "TowerSpawnPlaceholder.generated.h"
 
 class ATowerActor;
 class UWidgetComponent;
+class ATowerBuildingScaffolding;
 
 UCLASS()
 class SOURCE_API ATowerSpawnPlaceholder : public AActor
 {
 	GENERATED_BODY()
+
+	//TODO: FIx placeholder mex disabling
 	
 public:	
 	ATowerSpawnPlaceholder();
@@ -34,9 +36,20 @@ private:
 
 	void SpawnTower(const TSubclassOf<ATowerActor> towerToSpawn);
 	bool CanSpawnTower() const;
+	bool IsEmpty() const;
 
 	#pragma endregion
 
+	#pragma region Scaffolding
+
+	UPROPERTY(EditDefaultsOnly, Category="References")
+	TSubclassOf<ATowerBuildingScaffolding> scaffoldingActorClass;
+	
+	UPROPERTY()
+	ATowerBuildingScaffolding* spawnedScaffolding;
+
+	#pragma endregion
+	
 	#pragma region Interation
 
 	bool isInInteractionRange;
@@ -66,6 +79,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
 	TSubclassOf<ATowerActor> TempTowerToPlace;
+
+	UPROPERTY(EditDefaultsOnly, Category="Temp")
+	int BuildTime;
 	
 	#pragma endregion 
 };
