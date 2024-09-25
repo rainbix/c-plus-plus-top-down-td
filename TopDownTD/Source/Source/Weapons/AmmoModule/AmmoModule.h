@@ -10,6 +10,9 @@ class SOURCE_API UAmmoModule : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	DECLARE_DELEGATE(FOnAmmoChanged)
+	FOnAmmoChanged OnAmmoChanged;
+	
 	UAmmoModule();
 
 	virtual void Reload()	{	}

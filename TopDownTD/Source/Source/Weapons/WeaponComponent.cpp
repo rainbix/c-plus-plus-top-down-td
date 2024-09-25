@@ -21,6 +21,11 @@ void UWeaponComponent::Reload()
 	CurrentWeapon->Reload();
 }
 
+AWeapon* UWeaponComponent::GetCurrentWeapon() const
+{
+	return CurrentWeapon;
+}
+
 void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -42,6 +47,25 @@ void UWeaponComponent::SpawnWeapon()
 	CurrentWeapon->AttachToComponent(character->GetMesh(), attachmentRules, WeaponSocketName);
 	CurrentWeapon->SetOwner(character);
 	CurrentWeapon->SetInstigator(character);
+	SubscribeOnWeapon();
+	OnWeaponChanged.Broadcast(CurrentWeapon);
+}
+
+void UWeaponComponent::SubscribeOnWeapon()
+{
+	CurrentWeapon->OnAmmoChanged.AddUObject(this, &UWeaponComponent::HandleWeaponAmmoChanged);
+}
+
+void UWeaponComponent::UnsubscribeOnWeapon()
+{
+	if (!CurrentWeapon) return;
+	
+	CurrentWeapon->OnAmmoChanged.RemoveAll(this);
+}
+
+void UWeaponComponent::HandleWeaponAmmoChanged(AWeapon* weapon) const
+{
+	OnWeaponAmmoChange.Broadcast(weapon);
 }
 
 

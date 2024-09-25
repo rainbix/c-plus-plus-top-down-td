@@ -106,3 +106,13 @@ void APlayerCharacterSource::Reload()
 {
 	WeaponComponent->Reload();
 }
+
+UHealthComponent* APlayerCharacterSource::GetHealthComponent() const
+{
+	return HealthComponent;
+}
+
+UWeaponComponent* APlayerCharacterSource::GetWeaponComponent() const
+{
+	return WeaponComponent;
+}
