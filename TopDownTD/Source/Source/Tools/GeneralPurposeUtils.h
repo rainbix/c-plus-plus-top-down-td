@@ -2,9 +2,9 @@
 
 #pragma once
 
-#define LOG(text, ...) UE_LOG(LogCore, Log, TEXT(text), __VA_ARGS__);
-#define LOG_WARNING(text, ...) UE_LOG(LogCore, Warning, TEXT(text), __VA_ARGS__);
-#define LOG_ERROR(text, ...) UE_LOG(LogCore, Error, TEXT(text), __VA_ARGS__);
+#define LOG(format, ...) UE_LOG(LogCore, Log, TEXT(format), ##__VA_ARGS__);
+#define LOG_WARNING(format, ...) UE_LOG(LogCore, Warning, TEXT(format), ##__VA_ARGS__);
+#define LOG_ERROR(format, ...) UE_LOG(LogCore, Error, TEXT(format), ##__VA_ARGS__);
 
 class GeneralPurposeUtils
 {
