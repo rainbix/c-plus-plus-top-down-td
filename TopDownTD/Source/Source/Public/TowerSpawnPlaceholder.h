@@ -9,20 +9,22 @@
 class ATowerActor;
 class UWidgetComponent;
 class ATowerBuildingScaffolding;
+class UParticleSystemComponent;
 
 UCLASS()
 class SOURCE_API ATowerSpawnPlaceholder : public AActor
 {
+	//Purpose of the class is to be a Spawn Point for the Tower
+
+	//TODO: Add particle system cascade component and disable it on interaction
+	
 	GENERATED_BODY()
 
-	//TODO: FIx placeholder mex disabling
-	
 public:	
 	ATowerSpawnPlaceholder();
 	
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,21 +34,29 @@ private:
 	#pragma region Towers
 	
 	UPROPERTY()
-	ATowerActor* spawnedTower;
+	ATowerActor* SpawnedTower;
 
-	void SpawnTower(const TSubclassOf<ATowerActor> towerToSpawn);
+	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn);
+	void TowerBuildingFinishedHandler(ATowerActor* tower);
+
+	#pragma region Tower State Properties
+	
 	bool CanSpawnTower() const;
 	bool IsEmpty() const;
+	bool IsTowerBuilding() const;
+	bool IsTowerReady() const;
 
+	#pragma endregion
+	
 	#pragma endregion
 
 	#pragma region Scaffolding
 
 	UPROPERTY(EditDefaultsOnly, Category="References")
-	TSubclassOf<ATowerBuildingScaffolding> scaffoldingActorClass;
+	TSubclassOf<ATowerBuildingScaffolding> ScaffoldingActorClass;
 	
 	UPROPERTY()
-	ATowerBuildingScaffolding* spawnedScaffolding;
+	ATowerBuildingScaffolding* SpawnedScaffolding;
 
 	#pragma endregion
 	
@@ -55,7 +65,10 @@ private:
 	bool isInInteractionRange;
 
 	UPROPERTY()
-	UStaticMeshComponent* placeholderMeshComponent;
+	UStaticMeshComponent* PlaceholderMeshComponent;
+	
+	UPROPERTY()
+	UParticleSystemComponent* InteractionEffectComponent;
 
 	void InitializeInteractions();
 	void UpdateInteractionState(bool isInteractionAllowed);
@@ -73,13 +86,16 @@ private:
 	#pragma endregion
 
 	#pragma region TEMP
-	
+
+	//TODO: TO be replaced by PlayerController input when Anton finishes his refactor
 	UFUNCTION(BlueprintCallable)
 	void TempInputProcess();
 
+	//TODO: TO be replaced by config file params
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
 	TSubclassOf<ATowerActor> TempTowerToPlace;
 
+	//TODO: TO be replaced by config file params
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
 	int BuildTime;
 	

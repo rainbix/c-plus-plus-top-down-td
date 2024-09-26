@@ -34,8 +34,10 @@ void ATowerBuildingScaffolding::Tick(float DeltaTime)
 
 void ATowerBuildingScaffolding::InitializeActor(const TSubclassOf<ATowerActor> targetTowerClass, int buildTime)
 {
+	//Cache tower class
 	TowerToSpawnClass = targetTowerClass;
 
+	//Start build timer
 	BuildTimeInterpolator->ResetWithNewTime(buildTime);
 	BuildTimeInterpolator->Start();
 }
@@ -57,7 +59,10 @@ void ATowerBuildingScaffolding::ProcessBuilding(float deltaTime)
 	{
 		BuildTimeInterpolator->Stop();
 
+		//Spawn tower
 		SpawnTower(TowerToSpawnClass);
+
+		//Destroy scaffolding
 		Destroy();
 	}
 }
@@ -66,20 +71,19 @@ void ATowerBuildingScaffolding::SpawnTower(const TSubclassOf<ATowerActor> target
 {
 	if (!targetTowerClass)
 	{
-		GeneralPurposeUtils::DisplayScreenMessage("Nothing to spawn", FColor::Red);
+		GeneralPurposeUtils::DisplayScreenMessage("[ATowerBuildingScaffolding] Nothing to spawn", FColor::Red);
 		return;
 	}
 	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 
-	FVector spawnPos = GetActorLocation();
-	FRotator spawnRot(0, 0, 0);
+	const FVector spawnPos = GetActorLocation();
+	const FRotator spawnRot(0, 0, 0);
 
 	if (const auto spawnedTower = GetWorld()->SpawnActor<ATowerActor>(targetTowerClass, spawnPos, spawnRot))
 	{
-		//TODO: Broadcast event
-		GeneralPurposeUtils::DisplayScreenMessage("Tower spawned " + spawnedTower->GetName());
+		OnBuildingFinishedDelegate.Broadcast(spawnedTower);
 	}
 }
 
@@ -88,20 +92,21 @@ bool ATowerBuildingScaffolding::TryGetTimerBarWidget()
 {
 	try
 	{
+		//Get Widget component
 		if (const auto widgetComponent = FindComponentByClass<UWidgetComponent>())
 		{
+			//Get owning widget from widget component (Expected to be Building Progress Bar widget)
 			if (const auto owningWidget = widgetComponent->GetWidget())
 			{
 				TimerBarWidget = Cast<UProgressBarWidget>(owningWidget);
-				return true;
+				return TimerBarWidget != nullptr;
 			}
 		}
 	}
 	catch (...)
 	{
-		GeneralPurposeUtils::DisplayScreenMessage("FAIL");
+		GeneralPurposeUtils::DisplayScreenMessage("[ATowerBuildingScaffolding] Filed to get building progress bar widget");
 	}
-
-
+	
 	return false;
 }

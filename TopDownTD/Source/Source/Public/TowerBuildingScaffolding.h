@@ -13,11 +13,15 @@ class SimpleInterpolator;
 UCLASS()
 class SOURCE_API ATowerBuildingScaffolding : public AActor
 {
+	//Purpose of the class is to be a graphics placeholder while Tower build time is ticking.
+	//After build time elapsed placeholder is going to be replaced by a tower instance
+	
 	GENERATED_BODY()	
+
+public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnBuildingFinished, ATowerActor*)
+	FOnBuildingFinished OnBuildingFinishedDelegate;
 	
-	//TODO: Add delegate when Tower has finished building and return pointer to the tower
-	
-public:	
 	ATowerBuildingScaffolding();
 
 	virtual void Tick(float DeltaTime) override;
