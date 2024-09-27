@@ -15,8 +15,6 @@ UCLASS()
 class SOURCE_API ATowerSpawnPlaceholder : public AActor
 {
 	//Purpose of the class is to be a Spawn Point for the Tower
-
-	//TODO: Add particle system cascade component and disable it on interaction
 	
 	GENERATED_BODY()
 
@@ -67,13 +65,22 @@ private:
 	UPROPERTY()
 	UStaticMeshComponent* PlaceholderMeshComponent;
 	
-	UPROPERTY()
-	UParticleSystemComponent* InteractionEffectComponent;
-
 	void InitializeInteractions();
 	void UpdateInteractionState(bool isInteractionAllowed);
 
+	template <typename T>
+	T* InitializeFromComponent(int indexToTake);
+
 	#pragma endregion
+
+	#pragma region Effects
+
+	UPROPERTY()
+	UParticleSystemComponent* BuildReadyEffectComponent;
+
+	static void ToggleEffect(UParticleSystemComponent* effectComponent, bool isActive);
+	
+	#pragma endregion 
 	
 	#pragma region Widgets
 	

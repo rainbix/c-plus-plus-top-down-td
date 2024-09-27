@@ -4,6 +4,7 @@
 #include "TowerSpawnPlaceholder.h"
 #include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
 #pragma region Overrides
@@ -50,7 +51,7 @@ void ATowerSpawnPlaceholder::InitializeWidgets()
 {
 	try
 	{
-		InteractEmptyWidgetHolder = FindComponentByClass<UWidgetComponent>();
+		InteractEmptyWidgetHolder = InitializeFromComponent<UWidgetComponent>(0);
 	}
 	catch (...)
 	{
@@ -96,8 +97,9 @@ void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBu
 		if (PlaceholderMeshComponent)
 			PlaceholderMeshComponent->SetVisibility(false);
 		
-		//Force disable interaction widget
+		//Force disable interaction widget and build ready effect
 		ToggleWidget(InteractEmptyWidgetHolder, false);
+		ToggleEffect(BuildReadyEffectComponent, false);
 
 		//Force disable further iteration until next BeginOverlap event
 		UpdateInteractionState(false);
@@ -105,7 +107,7 @@ void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBu
 }
 
 void ATowerSpawnPlaceholder::TowerBuildingFinishedHandler(ATowerActor* tower)
-{
+{	
 	SpawnedScaffolding = nullptr;
 	SpawnedTower = tower;
 }
@@ -142,26 +144,33 @@ void ATowerSpawnPlaceholder::InitializeInteractions()
 {
     try
     {
-		UpdateInteractionState(false);
+    	//Grab first static mesh and treat as a graphics mesh
+    	PlaceholderMeshComponent = InitializeFromComponent<UStaticMeshComponent>(0);
+    	
+    	//Grab first particle system and treat as a interaction effect
+    	BuildReadyEffectComponent = InitializeFromComponent<UParticleSystemComponent>(0);
 
-    	//Get all static mesh components
-    	TArray<UStaticMeshComponent*> meshComponents;
-    	GetComponents<UStaticMeshComponent>(meshComponents);
-
-    	//Grab first one and treat as a graphics mesh
-    	if (meshComponents.Num() > 0)
-    		PlaceholderMeshComponent = meshComponents[0];
-
-    	//Get all static mesh components
-    	//TArray<UParticleSystemComponent*> particleComponents;
-    	//GetComponents<UParticleSystemComponent>(particleComponents);
-
-    	//GeneralPurposeUtils::DisplayScreenMessage(FString::FromInt(particleComponents.Num()));
+    	//Set initial state as not interacting with anything
+    	UpdateInteractionState(false);
     }
     catch (...)
     {
     	GeneralPurposeUtils::DisplayScreenMessage("Could not get placeholder mesh", FColor::Red);
     }
+}
+
+template <typename T>
+T* ATowerSpawnPlaceholder::InitializeFromComponent(int indexToTake)
+{
+	//Get all components
+	TArray<T*> components;
+	GetComponents<T>(components);
+
+	//Fill object with specified index from received components list
+	if (components.Num() > indexToTake)
+		return components[indexToTake];
+
+	return nullptr;
 }
 
 void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
@@ -171,7 +180,8 @@ void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 	//Enable/Disable Build Widget only if no tower built yet
 	if (IsEmpty())
 	{
-		ToggleWidget(InteractEmptyWidgetHolder, isInteractionAllowed);
+		ToggleWidget(InteractEmptyWidgetHolder, isInInteractionRange);
+		ToggleEffect(BuildReadyEffectComponent, isInInteractionRange);
 	}
 	else if (isInInteractionRange && IsTowerBuilding())
 	{
@@ -181,6 +191,16 @@ void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 	{
 		//Do some stuff if tower is build and ready (upgrade, destroy, etc)
 	}
+}
+
+#pragma endregion
+
+#pragma region Effects
+
+void ATowerSpawnPlaceholder::ToggleEffect(UParticleSystemComponent* effectComponent, bool isActive)
+{
+	if (effectComponent)
+		effectComponent->SetActive(isActive);
 }
 
 #pragma endregion
