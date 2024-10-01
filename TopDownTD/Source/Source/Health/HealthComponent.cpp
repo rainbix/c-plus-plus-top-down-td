@@ -1,40 +1,57 @@
 #include "HealthComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "Source/AbilitySystem/Attibutes/HealthSet.h"
+
+DECLARE_LOG_CATEGORY_EXTERN(Health, Log, All);
+DEFINE_LOG_CATEGORY(Health);
+
 UHealthComponent::UHealthComponent()
 {
-	MaxHealth = 100;
-	CurrentHealth = 100;
+	HealthSet = nullptr;
+	IsInitialized = false;
 }
 
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CurrentHealth = MaxHealth;
 	
-	AActor* owner = GetOwner();
-	owner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnTakeAnyDamage);
+	UAbilitySystemComponent* ASC = Cast<IAbilitySystemInterface>(GetOwner())->GetAbilitySystemComponent();
 
-	IsInitialized = true;
-	OnComponentInitializeDelegate.Broadcast(CurrentHealth, MaxHealth);
+	if (!IsValid(ASC))
+	{
+		UE_LOG(Health, Error, TEXT("HealthComponent: Health component for owner [%s] doesn't have ability system."), *GetNameSafe(GetOwner()));
+		return;
+	}
+
+	HealthSet = ASC->GetSet<UHealthSet>();
+	if (!HealthSet)
+	{
+		UE_LOG(Health, Error, TEXT("HealthComponent: Cannot initialize health component for owner [%s] with NULL health set on the ability system."), *GetNameSafe(GetOwner()));
+		return;
+	}
+
+	HealthSet->OnCurrentHealthChanged.AddUObject(this, &UHealthComponent::HandleCurrentHealthChanged);
+	HealthSet->OnMaxHealthChanged.AddUObject(this, &UHealthComponent::HandleMaxHealthChanged);
+
+	HandleMaxHealthChanged(GetMaxHealth());
+	HandleCurrentHealthChanged(GetMaxHealth());
 }
 
-void UHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
-                                       class AController* InstigatedBy,
-                                       AActor* DamageCauser)
+void UHealthComponent::HandleCurrentHealthChanged(float NewValue)
 {
-	Damage = FMath::Min(Damage, CurrentHealth);
+	OnCurrentHealthChangeDelegate.Broadcast(NewValue);
 
-	CurrentHealth -= Damage;
-	
-	if (IsDead())
+	if (HealthSet->GetCurrentHealth() < 0.0f)
 	{
 		OnDeath();
 	}
-	else
-	{
-		OnHealthChangeDelegate.Broadcast(CurrentHealth);
-	}
+}
+
+void UHealthComponent::HandleMaxHealthChanged(float NewValue)
+{
+	OnMaxHealthChangeDelegate.Broadcast(NewValue);
 }
 
 void UHealthComponent::OnDeath()
@@ -46,17 +63,17 @@ void UHealthComponent::OnDeath()
 
 bool UHealthComponent::IsDead()
 {
-	return CurrentHealth <= 0;
+	return HealthSet->GetCurrentHealth() <= 0;
 }
 
 int UHealthComponent::GetCurrentHealth()
 {
-	return CurrentHealth;
+	return HealthSet ? HealthSet->GetCurrentHealth() : 0;
 }
 
 int UHealthComponent::GetMaxHealth()
 {
-	return MaxHealth;
+	return HealthSet ? HealthSet->GetMaxHealth() : 0;
 }
 
 bool UHealthComponent::GetIsInitialized()

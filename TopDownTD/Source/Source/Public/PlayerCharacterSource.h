@@ -6,10 +6,11 @@
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "Source/SourcePlayerController.h"
+#include "AbilitySystemInterface.h"
 #include "PlayerCharacterSource.generated.h"
 
 UCLASS()
-class SOURCE_API APlayerCharacterSource : public ACharacter
+class SOURCE_API APlayerCharacterSource : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -30,6 +31,7 @@ public:
 	void LookAt(FVector direction, float speed, float deltaTime);
 	class UHealthComponent* GetHealthComponent() const;
 	class UWeaponComponent* GetWeaponComponent() const;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -38,10 +40,13 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
-	class UHealthComponent* HealthComponent;
+	UHealthComponent* HealthComponent;
 	
 	UPROPERTY(VisibleAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
-	class UWeaponComponent* WeaponComponent;
+	UWeaponComponent* WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UAbilitySystemComponent* AbilitySystem;
 	
 	void MoveForward(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);

@@ -26,7 +26,8 @@ public:
 	FOnComponentInitialze OnComponentInitializeDelegate;
 	
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChange, int)
-	FOnHealthChange OnHealthChangeDelegate;
+	FOnHealthChange OnCurrentHealthChangeDelegate;
+	FOnHealthChange OnMaxHealthChangeDelegate;
 
 	DECLARE_MULTICAST_DELEGATE(FOnDie)
 	FOnDie OnDieDelegate;
@@ -34,15 +35,13 @@ public:
 #pragma endregion 
 
 protected:
+	UPROPERTY()
+	const class UHealthSet* HealthSet;
 
-	UPROPERTY(EditAnywhere, Category="Health")
-	float MaxHealth;
-
-	float CurrentHealth;
 	bool IsInitialized;
 
+	void HandleCurrentHealthChanged(float NewValue);
+	void HandleMaxHealthChanged(float NewValue);
 	virtual void BeginPlay() override;
 	virtual void OnDeath();
-	UFUNCTION()
-	virtual void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 };

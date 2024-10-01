@@ -71,7 +71,7 @@ void UWorldHealthBarComponent::BindHealthBarWidgetToHealthComponent()
 			HealthComponent->OnComponentInitializeDelegate.AddUObject(this, &UWorldHealthBarComponent::HealthInitializeHandler);
 		}
 
-		HealthComponent->OnHealthChangeDelegate.AddUObject(this, &UWorldHealthBarComponent::HealthChangedHandler);
+		HealthComponent->OnCurrentHealthChangeDelegate.AddUObject(this, &UWorldHealthBarComponent::HealthChangedHandler);
 		HealthComponent->OnDieDelegate.AddUObject(this, &UWorldHealthBarComponent::DieHandler);
 	}
 }

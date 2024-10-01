@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Source/Health/HealthComponent.h"
 #include "Source/Weapons/WeaponComponent.h"
+#include "AbilitySystemComponent.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
@@ -16,6 +17,8 @@ APlayerCharacterSource::APlayerCharacterSource()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
+
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability"));
 }
 
 void APlayerCharacterSource::BeginPlay()
@@ -115,4 +118,9 @@ UHealthComponent* APlayerCharacterSource::GetHealthComponent() const
 UWeaponComponent* APlayerCharacterSource::GetWeaponComponent() const
 {
 	return WeaponComponent;
+}
+
+UAbilitySystemComponent* APlayerCharacterSource::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
 }
