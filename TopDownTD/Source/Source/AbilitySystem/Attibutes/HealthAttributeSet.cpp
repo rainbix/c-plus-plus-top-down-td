@@ -1,15 +1,15 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "HealthSet.h"
+#include "HealthAttributeSet.h"
 #include "GameplayEffectExtension.h"
 
-UHealthSet::UHealthSet() :
+UHealthAttributeSet::UHealthAttributeSet() :
 	CurrentHealth(100),
 	MaxHealth(100)
 {
 }
 
-void UHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void UHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 

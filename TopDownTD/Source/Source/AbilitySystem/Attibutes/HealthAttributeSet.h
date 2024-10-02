@@ -6,13 +6,13 @@
 #include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
 #include "SAttributeSet.h"
-#include "HealthSet.generated.h"
+#include "HealthAttributeSet.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOURCE_API UHealthSet : public USAttributeSet
+class SOURCE_API UHealthAttributeSet : public USAttributeSet
 {
 	GENERATED_BODY()
 
@@ -25,14 +25,14 @@ protected:
 public:
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
-	UHealthSet();
+	UHealthAttributeSet();
 
 	mutable FAttributeChanged OnCurrentHealthChanged;
 	mutable FAttributeChanged OnMaxHealthChanged;
 	
 	//~ Helper functions for "Health" attributes
-	ATTRIBUTE_ACCESSORS(UHealthSet, CurrentHealth);
+	ATTRIBUTE_ACCESSORS(UHealthAttributeSet, CurrentHealth);
 	
 	//~ Helper functions for "MaxHealth" attributes
-	ATTRIBUTE_ACCESSORS(UHealthSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(UHealthAttributeSet, MaxHealth);
 };

@@ -36,7 +36,7 @@ public:
 
 protected:
 	UPROPERTY()
-	const class UHealthSet* HealthSet;
+	const class UHealthAttributeSet* HealthSet;
 
 	bool IsInitialized;
 

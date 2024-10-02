@@ -2,7 +2,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
-#include "Source/AbilitySystem/Attibutes/HealthSet.h"
+#include "Source/AbilitySystem/Attibutes/HealthAttributeSet.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(Health, Log, All);
 DEFINE_LOG_CATEGORY(Health);
@@ -25,7 +25,7 @@ void UHealthComponent::BeginPlay()
 		return;
 	}
 
-	HealthSet = ASC->GetSet<UHealthSet>();
+	HealthSet = ASC->GetSet<UHealthAttributeSet>();
 	if (!HealthSet)
 	{
 		UE_LOG(Health, Error, TEXT("HealthComponent: Cannot initialize health component for owner [%s] with NULL health set on the ability system."), *GetNameSafe(GetOwner()));
@@ -34,6 +34,10 @@ void UHealthComponent::BeginPlay()
 
 	HealthSet->OnCurrentHealthChanged.AddUObject(this, &UHealthComponent::HandleCurrentHealthChanged);
 	HealthSet->OnMaxHealthChanged.AddUObject(this, &UHealthComponent::HandleMaxHealthChanged);
+
+	ASC->SetNumericAttributeBase(HealthSet->GetCurrentHealthAttribute(), HealthSet->GetMaxHealth());
+	
+	UE_LOG(Health, Display, TEXT("HealthComponent: MaxHealth [%f] CurrentHealth: [%f} for owner: [%s]."), HealthSet->GetMaxHealth(), HealthSet->GetCurrentHealth(), *GetNameSafe(GetOwner()));
 
 	HandleMaxHealthChanged(GetMaxHealth());
 	HandleCurrentHealthChanged(GetMaxHealth());
