@@ -26,9 +26,6 @@ public:
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 	UHealthAttributeSet();
-
-	mutable FAttributeChanged OnCurrentHealthChanged;
-	mutable FAttributeChanged OnMaxHealthChanged;
 	
 	//~ Helper functions for "Health" attributes
 	ATTRIBUTE_ACCESSORS(UHealthAttributeSet, CurrentHealth);

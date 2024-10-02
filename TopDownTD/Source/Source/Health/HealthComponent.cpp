@@ -2,6 +2,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayEffectExtension.h"
 #include "Source/AbilitySystem/Attibutes/HealthAttributeSet.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(Health, Log, All);
@@ -31,21 +32,22 @@ void UHealthComponent::BeginPlay()
 		UE_LOG(Health, Error, TEXT("HealthComponent: Cannot initialize health component for owner [%s] with NULL health set on the ability system."), *GetNameSafe(GetOwner()));
 		return;
 	}
+	
+	ASC->GetGameplayAttributeValueChangeDelegate(HealthSet->GetCurrentHealthAttribute()).AddUObject(this, &ThisClass::HandleCurrentHealthChanged);
+	ASC->GetGameplayAttributeValueChangeDelegate(HealthSet->GetMaxHealthAttribute()).AddUObject(this, &ThisClass::HandleMaxHealthChanged);
 
-	HealthSet->OnCurrentHealthChanged.AddUObject(this, &UHealthComponent::HandleCurrentHealthChanged);
-	HealthSet->OnMaxHealthChanged.AddUObject(this, &UHealthComponent::HandleMaxHealthChanged);
 
 	ASC->SetNumericAttributeBase(HealthSet->GetCurrentHealthAttribute(), HealthSet->GetMaxHealth());
-	
+
 	UE_LOG(Health, Display, TEXT("HealthComponent: MaxHealth [%f] CurrentHealth: [%f} for owner: [%s]."), HealthSet->GetMaxHealth(), HealthSet->GetCurrentHealth(), *GetNameSafe(GetOwner()));
 
-	HandleMaxHealthChanged(GetMaxHealth());
-	HandleCurrentHealthChanged(GetMaxHealth());
+	IsInitialized = true;
 }
 
-void UHealthComponent::HandleCurrentHealthChanged(float NewValue)
+
+void UHealthComponent::HandleCurrentHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData)
 {
-	OnCurrentHealthChangeDelegate.Broadcast(NewValue);
+	OnCurrentHealthChangeDelegate.Broadcast(OnAttributeChangeData.NewValue);
 
 	if (HealthSet->GetCurrentHealth() < 0.0f)
 	{
@@ -53,9 +55,9 @@ void UHealthComponent::HandleCurrentHealthChanged(float NewValue)
 	}
 }
 
-void UHealthComponent::HandleMaxHealthChanged(float NewValue)
+void UHealthComponent::HandleMaxHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData) const
 {
-	OnMaxHealthChangeDelegate.Broadcast(NewValue);
+	OnMaxHealthChangeDelegate.Broadcast(OnAttributeChangeData.NewValue);
 }
 
 void UHealthComponent::OnDeath()

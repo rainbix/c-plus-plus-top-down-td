@@ -13,13 +13,4 @@ void UHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
-	{
-		OnMaxHealthChanged.Broadcast(GetMaxHealth());
-	}
-
-	if (Data.EvaluatedData.Attribute == GetCurrentHealthAttribute())
-	{
-		OnCurrentHealthChanged.Broadcast(GetCurrentHealth());
-	}
 }

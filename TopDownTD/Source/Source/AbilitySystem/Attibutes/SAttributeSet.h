@@ -16,8 +16,6 @@ struct FGameplayEffectSpec;
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FAttributeChanged, float /*NewValue*/)
-
 UCLASS()
 class SOURCE_API USAttributeSet : public UAttributeSet
 {

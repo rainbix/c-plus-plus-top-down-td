@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayEffectTypes.h"
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
@@ -40,8 +41,8 @@ protected:
 
 	bool IsInitialized;
 
-	void HandleCurrentHealthChanged(float NewValue);
-	void HandleMaxHealthChanged(float NewValue);
+	void HandleCurrentHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData);
+	void HandleMaxHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData) const;
 	virtual void BeginPlay() override;
 	virtual void OnDeath();
 };
