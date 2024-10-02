@@ -33,20 +33,23 @@ void UHealthComponent::BeginPlay()
 		return;
 	}
 	
+	ASC->SetNumericAttributeBase(HealthSet->GetCurrentHealthAttribute(), HealthSet->GetMaxHealth());
+	
 	ASC->GetGameplayAttributeValueChangeDelegate(HealthSet->GetCurrentHealthAttribute()).AddUObject(this, &ThisClass::HandleCurrentHealthChanged);
 	ASC->GetGameplayAttributeValueChangeDelegate(HealthSet->GetMaxHealthAttribute()).AddUObject(this, &ThisClass::HandleMaxHealthChanged);
-
-
-	ASC->SetNumericAttributeBase(HealthSet->GetCurrentHealthAttribute(), HealthSet->GetMaxHealth());
 
 	UE_LOG(Health, Display, TEXT("HealthComponent: MaxHealth [%f] CurrentHealth: [%f} for owner: [%s]."), HealthSet->GetMaxHealth(), HealthSet->GetCurrentHealth(), *GetNameSafe(GetOwner()));
 
 	IsInitialized = true;
-}
 
+	OnComponentInitializeDelegate.Broadcast(HealthSet->GetCurrentHealth(), HealthSet->GetMaxHealth());
+}
 
 void UHealthComponent::HandleCurrentHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData)
 {
+
+	UE_LOG(Health, Display, TEXT("HealthComponent: CurrentHealth changed to: [%f} for owner: [%s]."), HealthSet->GetCurrentHealth(), *GetNameSafe(GetOwner()));
+
 	OnCurrentHealthChangeDelegate.Broadcast(OnAttributeChangeData.NewValue);
 
 	if (HealthSet->GetCurrentHealth() < 0.0f)
@@ -57,6 +60,8 @@ void UHealthComponent::HandleCurrentHealthChanged(const FOnAttributeChangeData& 
 
 void UHealthComponent::HandleMaxHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData) const
 {
+	UE_LOG(Health, Display, TEXT("HealthComponent: MaxHealth changed to: [%f} for owner: [%s]."), HealthSet->GetMaxHealth(), *GetNameSafe(GetOwner()));
+
 	OnMaxHealthChangeDelegate.Broadcast(OnAttributeChangeData.NewValue);
 }
 

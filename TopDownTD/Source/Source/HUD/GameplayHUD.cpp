@@ -53,8 +53,15 @@ void AGameplayHUD::InitializeWidgets()
 		
 		int maxHealth = HealthComponent->GetMaxHealth();
 		int curHealth = HealthComponent->GetCurrentHealth();
-		
-		playerHealthWidget->InitializeWidget(maxHealth, curHealth);
+
+		if (HealthComponent->GetIsInitialized())
+		{
+			playerHealthWidget->InitializeWidget(maxHealth, curHealth);
+		}
+		else
+		{
+			HealthComponent->OnComponentInitializeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::InitializeWidget);
+		}
 		
 		HealthComponent->OnCurrentHealthChangeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
 	}
@@ -96,7 +103,8 @@ void AGameplayHUD::DisposeWidgets()
 	if (playerHealthWidget)
 	{
 		auto HealthComponent = sourcePlayerCharacter->GetHealthComponent();
-		HealthComponent->OnMaxHealthChangeDelegate.RemoveAll(playerHealthWidget);
+		HealthComponent->OnComponentInitializeDelegate.RemoveAll(playerHealthWidget);
+		HealthComponent->OnCurrentHealthChangeDelegate.RemoveAll(playerHealthWidget);
 	}
 
 	if (activeWeaponWidget)
