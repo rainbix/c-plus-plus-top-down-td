@@ -25,7 +25,7 @@ public:
 	UWorld* mainMenuLevel;
 
 protected:
-	virtual void NativeConstruct() override;
+	virtual auto NativeConstruct() -> void override;
 	
 private:
 	UFUNCTION()
