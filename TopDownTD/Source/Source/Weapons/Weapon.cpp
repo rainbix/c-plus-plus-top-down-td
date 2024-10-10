@@ -1,6 +1,7 @@
 ﻿#include "Weapon.h"
+
+#include "AbilitySystemComponent.h"
 #include "AmmoModule/ClipAmmoModule.h"
-#include "ShootModule/RaycastWeaponShootModule.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Source/Source.h"
 
@@ -11,7 +12,6 @@ AWeapon::AWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	SetRootComponent(WeaponMesh);
 
-	ShootModule = CreateDefaultSubobject<URaycastWeaponShootModule>("WeaponShootModule");
 	AmmoModule = CreateDefaultSubobject<UClipAmmoModule>("AmmoModule");
 }
 
@@ -32,31 +32,29 @@ void AWeapon::HandleAmmoChanged()
 
 void AWeapon::Fire()
 {
-	if(!ShootModule) return;
 	if(!GetWorld()) return;
 	if(!CanShoot()) return;
+	if(!OwnerAbilitySystem) return;
 
-	double currentTime = GetWorld()->GetTime().GetWorldTimeSeconds();
-	if (currentTime - LastBulletShotTime < FireRate)
+	// double currentTime = GetWorld()->GetTime().GetWorldTimeSeconds();
+	// if (currentTime - LastBulletShotTime < FireRate)
+	// {
+	// 	return;
+	// }
+	//
+	// LastBulletShotTime = currentTime;
+	if(!OwnerAbilitySystem->TryActivateAbility(FireAbilitySpec))
 	{
 		return;
 	}
 
-	LastBulletShotTime = currentTime;
 	UE_LOG(LogFWeapon, Display, TEXT("Fire)"))
-
-	const FTransform ownerTransform = GetOwner()->GetTransform();
-	const FTransform socketTransform = WeaponMesh->GetSocketTransform(ShootPointSocket);
-	const FVector startPosition = socketTransform.GetLocation();
-	const FVector shootDirection = ownerTransform.Rotator().Vector();
-
-	ShootModule->Shoot(startPosition, shootDirection);
-
+	
 	if (AmmoModule)
 	{
 		AmmoModule->OnShot();
 	}
-	
+
 	OnAmmoChanged.Broadcast(this);
 }
 
@@ -93,3 +91,29 @@ EWeaponTypes AWeapon::GetWeaponType() const
 	return WeaponType;
 }
 
+void AWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	FireAbilitySpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbility, 1, INDEX_NONE, this));
+	OwnerAbilitySystem = AbilitySystemComponent;
+}
+
+void AWeapon::OnUnequip(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (FireAbilitySpec.IsValid())
+	{
+		AbilitySystemComponent->ClearAbility(FireAbilitySpec);
+		OwnerAbilitySystem = nullptr;
+	}
+}
+
+FVector AWeapon::GetShootStartPosition() const
+{
+	const FTransform socketTransform = WeaponMesh->GetSocketTransform(ShootPointSocket);
+	return socketTransform.GetLocation();
+}
+
+FVector AWeapon::GetShootDirection()
+{
+	const FTransform ownerTransform = GetOwner()->GetTransform();
+	return ownerTransform.Rotator().Vector();
+}

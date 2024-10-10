@@ -7,6 +7,7 @@
 #include "WeaponComponent.generated.h"
 
 class AWeapon;
+class UAbilitySystemComponent;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class SOURCE_API UWeaponComponent : public UActorComponent
@@ -38,6 +39,9 @@ protected:
 private:
 	UPROPERTY()
 	AWeapon* CurrentWeapon = nullptr;
+
+	UPROPERTY()
+	UAbilitySystemComponent* OwnerAbilitySystem;
 	void SpawnWeapon();
 
 	void SubscribeOnWeapon();

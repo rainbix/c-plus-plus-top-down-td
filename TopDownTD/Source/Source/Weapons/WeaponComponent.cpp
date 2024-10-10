@@ -1,4 +1,6 @@
 ﻿#include "WeaponComponent.h"
+
+#include "AbilitySystemInterface.h"
 #include "Weapon.h"
 #include "GameFramework/Character.h"
 
@@ -30,6 +32,8 @@ void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OwnerAbilitySystem = Cast<IAbilitySystemInterface>(GetOwner())->GetAbilitySystemComponent();
+	check(OwnerAbilitySystem);
 	SpawnWeapon();
 }
 
@@ -54,6 +58,7 @@ void UWeaponComponent::SpawnWeapon()
 void UWeaponComponent::SubscribeOnWeapon()
 {
 	CurrentWeapon->OnAmmoChanged.AddUObject(this, &UWeaponComponent::HandleWeaponAmmoChanged);
+	CurrentWeapon->OnEquip(OwnerAbilitySystem);
 }
 
 void UWeaponComponent::UnsubscribeOnWeapon()
@@ -61,6 +66,7 @@ void UWeaponComponent::UnsubscribeOnWeapon()
 	if (!CurrentWeapon) return;
 	
 	CurrentWeapon->OnAmmoChanged.RemoveAll(this);
+	CurrentWeapon->OnUnequip(OwnerAbilitySystem);
 }
 
 void UWeaponComponent::HandleWeaponAmmoChanged(AWeapon* weapon) const

@@ -1,9 +1,13 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "GameFramework/Actor.h"
 #include "Source/HUD/EWeaponTypes.h"
 #include "Weapon.generated.h"
+
+class UGameplayAbility;
+class UAbilitySystemComponent;
 
 UCLASS()
 class SOURCE_API AWeapon : public AActor
@@ -21,11 +25,17 @@ public:
 	int GetCurrentAmmo() const;
 	int GetSpareAmmo() const;
 	EWeaponTypes GetWeaponType() const;
+
+	void OnEquip(UAbilitySystemComponent* AbilitySystemComponent);
+	void OnUnequip(UAbilitySystemComponent* AbilitySystemComponent);
+	FVector GetShootStartPosition() const;
+	FVector GetShootDirection();
+
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
-	class URaycastWeaponShootModule* ShootModule;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Abilities")
+	TSubclassOf<UGameplayAbility> FireAbility;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	class UAmmoModule* AmmoModule;
@@ -44,6 +54,11 @@ protected:
 
 	float LastBulletShotTime;
 
+	UPROPERTY()
+	FGameplayAbilitySpecHandle FireAbilitySpec;
+
+	UPROPERTY()
+	UAbilitySystemComponent* OwnerAbilitySystem;
 private:
 	void HandleAmmoChanged();
 };
