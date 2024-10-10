@@ -15,6 +15,20 @@ class SOURCE_API UTowerShopWidget : public UUserWidget
 	//Purpose of the class is to show and handle tower shop
 
 public:
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTowerSelected, TSubclassOf<ATowerActor> selectedTower)
+	FOnTowerSelected OnTowerSelected;
+
+	DECLARE_MULTICAST_DELEGATE(FOnClosed)
+	FOnClosed OnClosed;
+
+protected:
+	virtual void NativeConstruct() override;
+	
+private:
+
+	#pragma region Buttons
+	
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UButton* closeButton;
 
@@ -24,12 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UButton* towerBButton;
 
-protected:
-	virtual void NativeConstruct() override;
+	#pragma endregion 
 	
-private:
-
-#pragma region ButtonHandlers
+	#pragma region ButtonHandlers
 	
 	UFUNCTION()
 	void CloseButtonPressHandler();
@@ -46,7 +57,11 @@ private:
 	
 	//TODO: TO be replaced by config file params
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	TSubclassOf<ATowerActor> TempTowerToPlace;
+	TSubclassOf<ATowerActor> TempTowerToPlaceA;
+
+	//TODO: TO be replaced by config file params
+	UPROPERTY(EditDefaultsOnly, Category="Temp")
+	TSubclassOf<ATowerActor> TempTowerToPlaceB;
 
 #pragma endregion 
 	

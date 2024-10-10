@@ -6,10 +6,12 @@
 #include "PauseButtonWidget.h"
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
+#include "Source/TowerActor.h"
 #include "FWeaponData.h"
 #include "PauseWidget.h"
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
+#include "TowerShopWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
@@ -40,6 +42,8 @@ void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	Super::EndPlay(EndPlayReason);
 }
+
+#pragma region Widgets
 
 void AGameplayHUD::InitializeWidgets()
 {
@@ -113,6 +117,60 @@ void AGameplayHUD::DisposeWidgets()
 	}
 }
 
+template <typename T>
+T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
+{
+	if (!widgetClass)
+		return nullptr;
+	
+	T* widget = CreateWidget<T>(world, widgetClass);
+	if (!widget)
+		return nullptr;
+	
+	widget->AddToViewport();
+
+	if (isCollapsed)
+		widget->SetVisibility(ESlateVisibility::Collapsed);
+	
+	return widget;
+}
+
+#pragma endregion
+
+#pragma region Tower Shop
+
+void AGameplayHUD::ShowTowerShopWidget()
+{
+	if (towerShopWidget)
+	{
+		towerShopWidget->AddToViewport();
+	}
+	else
+	{
+		if (TowerShopClass)
+		{
+			towerShopWidget = SpawnWidget(TowerShopClass);
+			towerShopWidget->OnClosed.AddUObject(this, &AGameplayHUD::ShopTowerClosed);
+			towerShopWidget->OnTowerSelected.AddUObject(this, &AGameplayHUD::ShopTowerSelected);
+		}
+	}
+}
+
+void AGameplayHUD::ShopTowerClosed()
+{
+	towerShopWidget->RemoveFromParent();
+}
+
+void AGameplayHUD::ShopTowerSelected(TSubclassOf<ATowerActor> selectedTowerClass)
+{
+	if (selectedTowerClass)
+		OnTowerBuildRequest.Broadcast(selectedTowerClass);
+}
+
+#pragma endregion
+
+#pragma region Pause
+
 void AGameplayHUD::TogglePause()
 {
 	//Enter pause
@@ -131,27 +189,12 @@ void AGameplayHUD::TogglePause()
 		if (pauseWidget)
 			pauseWidget->RemoveFromParent();
 	}
-
+	
 	playerController->SetPause(!playerController->IsPaused());
 
 	//Expose pause function to blueprints
 	OnPauseToggleHandler(playerController->IsPaused());
 }
 
-template <typename T>
-T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
-{
-	if (!widgetClass)
-		return nullptr;
-	
-	T* widget = CreateWidget<T>(world, widgetClass);
-	if (!widget)
-		return nullptr;
-	
-	widget->AddToViewport();
+#pragma endregion 
 
-	if (isCollapsed)
-		widget->SetVisibility(ESlateVisibility::Collapsed);
-	
-	return widget;
-}

@@ -7,6 +7,7 @@
 #include "TowerSpawnPlaceholder.generated.h"
 
 class ATowerActor;
+class AGameplayHUD;
 class UWidgetComponent;
 class ATowerBuildingScaffolding;
 class UParticleSystemComponent;
@@ -28,12 +29,16 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+
+	UPROPERTY()
+	AGameplayHUD* hud;
 	
 	#pragma region Towers
 	
 	UPROPERTY()
 	ATowerActor* SpawnedTower;
 
+	void TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass);
 	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn);
 	void TowerBuildingFinishedHandler(ATowerActor* tower);
 
@@ -97,11 +102,7 @@ private:
 	//TODO: TO be replaced by PlayerController input when Anton finishes his refactor
 	UFUNCTION(BlueprintCallable)
 	void TempInputProcess();
-
-	//TODO: TO be replaced by config file params
-	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	TSubclassOf<ATowerActor> TempTowerToPlace;
-
+	
 	//TODO: TO be replaced by config file params
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
 	int BuildTime;

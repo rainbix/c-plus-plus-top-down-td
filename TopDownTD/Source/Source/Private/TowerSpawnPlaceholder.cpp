@@ -4,7 +4,9 @@
 #include "TowerSpawnPlaceholder.h"
 #include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Source/HUD/GameplayHUD.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
 #pragma region Overrides
@@ -22,6 +24,14 @@ void ATowerSpawnPlaceholder::BeginPlay()
 	{
 		InitializeWidgets();
 		InitializeInteractions();
+
+		//Get reference to HUD class
+		const APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		hud = Cast<AGameplayHUD>(playerController->GetHUD());
+		if (hud)
+		{
+			hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
+		}
 	}
 	catch (...)
 	{
@@ -68,6 +78,13 @@ void ATowerSpawnPlaceholder::ToggleWidget(UWidgetComponent* widget, bool isActiv
 #pragma endregion 
 
 #pragma region Towers
+void ATowerSpawnPlaceholder::TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass)
+{
+	if (selectedTowerClass)
+	{
+		BuildTower(selectedTowerClass);
+	}
+}
 
 void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild)
 {
@@ -213,7 +230,16 @@ void ATowerSpawnPlaceholder::TempInputProcess()
 		return;
 
 	if (CanSpawnTower())
-		BuildTower(TempTowerToPlace);
+	{
+		if (hud)
+		{
+			hud->ShowTowerShopWidget();	
+		}
+		else
+		{
+			GeneralPurposeUtils::DisplayScreenMessage("No reference to HUD", FColor::Red);
+		}
+	}
 }
 
 #pragma endregion

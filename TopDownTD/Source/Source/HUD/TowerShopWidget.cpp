@@ -2,9 +2,8 @@
 
 
 #include "TowerShopWidget.h"
-#include "Components/Button.h"
 #include "Source/TowerActor.h"
-#include "Source/Tools/GeneralPurposeUtils.h"
+#include "Components/Button.h"
 
 void UTowerShopWidget::NativeConstruct()
 {
@@ -27,20 +26,25 @@ void UTowerShopWidget::NativeConstruct()
 		towerBButton->OnClicked.Clear();
 		towerBButton->OnClicked.AddDynamic(this, &UTowerShopWidget::TowerButtonBPressHandler);
 	}
-
 }
 
 void UTowerShopWidget::CloseButtonPressHandler()
 {
-	GeneralPurposeUtils::DisplayScreenMessage("Press button Close");
+	OnClosed.Broadcast();
 }
 
 void UTowerShopWidget::TowerButtonAPressHandler()
 {
-	GeneralPurposeUtils::DisplayScreenMessage("Press button A");
+	OnClosed.Broadcast();
+	
+	if (TempTowerToPlaceA)
+		OnTowerSelected.Broadcast(TempTowerToPlaceA);
 }
 
 void UTowerShopWidget::TowerButtonBPressHandler()
 {
-	GeneralPurposeUtils::DisplayScreenMessage("Press button B");
+	OnClosed.Broadcast();
+	
+	if (TempTowerToPlaceB)
+		OnTowerSelected.Broadcast(TempTowerToPlaceB);
 }

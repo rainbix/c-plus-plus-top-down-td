@@ -13,11 +13,16 @@ class UActiveWeaponWidget;
 class ULevelStateWidget;
 class UHudTestWidget;
 class UPauseWidget;
+class UTowerShopWidget;
+class ATowerActor;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
 {
 public:
+
+	#pragma region Widget Classes
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UMinimapWidget> MinimapWidgetClass = nullptr;
 
@@ -36,14 +41,34 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UPauseButtonWidget> PauseButtonClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UTowerShopWidget> TowerShopClass = nullptr;
+	
 	//Test widget
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UHudTestWidget> HudTestWidgetClass = nullptr;
+
+	#pragma endregion 
+
+	#pragma region Tower Shop
+	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTowerSelected, TSubclassOf<ATowerActor> selectedTower)
+	FOnTowerSelected OnTowerBuildRequest;
+
+	void ShowTowerShopWidget();
+	void ShopTowerClosed();
+	void ShopTowerSelected(TSubclassOf<ATowerActor> selectedTowerClass);
+
+	#pragma endregion 
+
+	#pragma region Pause
 	
 	void TogglePause();
-
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnPauseToggleHandler(bool isPause);
+
+	#pragma endregion 
 	
 protected:
 	UFUNCTION()
@@ -57,6 +82,8 @@ private:
 	
 	UPROPERTY()
 	APlayerController* playerController;
+
+	#pragma region Widgets Instances
 	
 	UPROPERTY()
 	TObjectPtr<UMinimapWidget> minimapWidget = nullptr;
@@ -79,11 +106,20 @@ private:
 	UPROPERTY()
 	TObjectPtr<UPauseButtonWidget> pauseButtonWidget = nullptr;
 
-	template <typename T>
-	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
+	UPROPERTY()
+	TObjectPtr<UTowerShopWidget> towerShopWidget = nullptr;
+
+	#pragma endregion 
+
+	#pragma region Widgets
 	
 	void InitializeWidgets();
 	void DisposeWidgets();
+	
+	template <typename T>
+	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
+
+	#pragma endregion 
 	
 	GENERATED_BODY()
 };
