@@ -12,9 +12,11 @@
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
 #include "TowerShopWidget.h"
+#include "TowerSpawnPlaceholder.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
 #include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
@@ -83,7 +85,7 @@ void AGameplayHUD::InitializeWidgets()
 	
 	if (hudTestWidget)
 	{
-		hudTestWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
+		hudTestWidget->OnBuildDelegate.AddUObject(this, &AGameplayHUD::TryBuild);
 	}
 }
 
@@ -139,8 +141,28 @@ T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
 
 #pragma region Tower Shop
 
+void AGameplayHUD::TryBuild()
+{
+	//TODO: This is temporal solution. Don't panic
+	TArray<AActor*> FoundPlaceholders;
+	UGameplayStatics::GetAllActorsOfClass(world, ATowerSpawnPlaceholder::StaticClass(), FoundPlaceholders);
+	for (auto foundActor : FoundPlaceholders)
+	{
+		if (!foundActor)
+			continue;
+		
+		auto towerPlaceholder = Cast<ATowerSpawnPlaceholder>(foundActor);
+		if (!towerPlaceholder || !towerPlaceholder->IsInInteractionRange())
+			continue;
+
+		towerPlaceholder->ProcessInputRequest();
+	}
+}
+
 void AGameplayHUD::ShowTowerShopWidget()
 {
+	playerController->SetPause(true);
+	
 	if (towerShopWidget)
 	{
 		towerShopWidget->AddToViewport();
@@ -150,18 +172,19 @@ void AGameplayHUD::ShowTowerShopWidget()
 		if (TowerShopClass)
 		{
 			towerShopWidget = SpawnWidget(TowerShopClass);
-			towerShopWidget->OnClosed.AddUObject(this, &AGameplayHUD::ShopTowerClosed);
-			towerShopWidget->OnTowerSelected.AddUObject(this, &AGameplayHUD::ShopTowerSelected);
+			towerShopWidget->OnClosed.AddUObject(this, &AGameplayHUD::ShopTowerClosedHandler);
+			towerShopWidget->OnTowerSelected.AddUObject(this, &AGameplayHUD::ShopTowerSelectedHandler);
 		}
 	}
 }
 
-void AGameplayHUD::ShopTowerClosed()
+void AGameplayHUD::ShopTowerClosedHandler()
 {
+	playerController->SetPause(false);
 	towerShopWidget->RemoveFromParent();
 }
 
-void AGameplayHUD::ShopTowerSelected(TSubclassOf<ATowerActor> selectedTowerClass)
+void AGameplayHUD::ShopTowerSelectedHandler(TSubclassOf<ATowerActor> selectedTowerClass)
 {
 	if (selectedTowerClass)
 		OnTowerBuildRequest.Broadcast(selectedTowerClass);

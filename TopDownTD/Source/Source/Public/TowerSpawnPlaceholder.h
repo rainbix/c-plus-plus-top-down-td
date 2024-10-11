@@ -25,6 +25,9 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
+	bool IsInInteractionRange() const;
+	void ProcessInputRequest();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -34,10 +37,12 @@ private:
 	AGameplayHUD* hud;
 	
 	#pragma region Towers
+
+	FDelegateHandle towerBuildRequestDelegateHandle;
 	
 	UPROPERTY()
-	ATowerActor* SpawnedTower;
-
+	ATowerActor* spawnedTower;
+	
 	void TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass);
 	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn);
 	void TowerBuildingFinishedHandler(ATowerActor* tower);
@@ -100,8 +105,7 @@ private:
 	#pragma region TEMP
 
 	//TODO: TO be replaced by PlayerController input when Anton finishes his refactor
-	UFUNCTION(BlueprintCallable)
-	void TempInputProcess();
+	
 	
 	//TODO: TO be replaced by config file params
 	UPROPERTY(EditDefaultsOnly, Category="Temp")

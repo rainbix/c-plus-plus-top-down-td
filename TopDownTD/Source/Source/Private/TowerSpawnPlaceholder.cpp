@@ -30,7 +30,7 @@ void ATowerSpawnPlaceholder::BeginPlay()
 		hud = Cast<AGameplayHUD>(playerController->GetHUD());
 		if (hud)
 		{
-			hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
+			//hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
 		}
 	}
 	catch (...)
@@ -78,12 +78,13 @@ void ATowerSpawnPlaceholder::ToggleWidget(UWidgetComponent* widget, bool isActiv
 #pragma endregion 
 
 #pragma region Towers
+
 void ATowerSpawnPlaceholder::TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass)
 {
+	hud->OnTowerBuildRequest.Remove(towerBuildRequestDelegateHandle);
+	
 	if (selectedTowerClass)
-	{
 		BuildTower(selectedTowerClass);
-	}
 }
 
 void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild)
@@ -126,7 +127,7 @@ void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBu
 void ATowerSpawnPlaceholder::TowerBuildingFinishedHandler(ATowerActor* tower)
 {	
 	SpawnedScaffolding = nullptr;
-	SpawnedTower = tower;
+	spawnedTower = tower;
 }
 
 #pragma region Tower State Properties
@@ -148,7 +149,7 @@ bool ATowerSpawnPlaceholder::IsTowerBuilding() const
 
 bool ATowerSpawnPlaceholder::IsTowerReady() const
 {
-	return SpawnedTower != nullptr;
+	return spawnedTower != nullptr;
 }
 
 #pragma endregion
@@ -210,6 +211,34 @@ void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 	}
 }
 
+void ATowerSpawnPlaceholder::ProcessInputRequest()
+{
+	if (!isInInteractionRange)
+		return;
+
+	if (CanSpawnTower())
+	{
+		if (hud)
+		{
+			hud->OnTowerBuildRequest.Remove(towerBuildRequestDelegateHandle);
+			towerBuildRequestDelegateHandle = hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
+			
+			hud->ShowTowerShopWidget();	
+		}
+		else
+		{
+			GeneralPurposeUtils::DisplayScreenMessage("No reference to HUD", FColor::Red);
+		}
+	}
+	else
+		GeneralPurposeUtils::DisplayScreenMessage("Can't place tower", FColor::Red);
+}
+
+bool ATowerSpawnPlaceholder::IsInInteractionRange() const
+{
+	return  isInInteractionRange;
+}
+
 #pragma endregion
 
 #pragma region Effects
@@ -222,25 +251,4 @@ void ATowerSpawnPlaceholder::ToggleEffect(UParticleSystemComponent* effectCompon
 
 #pragma endregion
 
-#pragma region TEMP
-
-void ATowerSpawnPlaceholder::TempInputProcess()
-{
-	if (!isInInteractionRange)
-		return;
-
-	if (CanSpawnTower())
-	{
-		if (hud)
-		{
-			hud->ShowTowerShopWidget();	
-		}
-		else
-		{
-			GeneralPurposeUtils::DisplayScreenMessage("No reference to HUD", FColor::Red);
-		}
-	}
-}
-
-#pragma endregion
 

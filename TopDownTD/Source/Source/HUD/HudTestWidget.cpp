@@ -54,6 +54,11 @@ void UHudTestWidget::Pause()
 	OnPauseDelegate.Broadcast();
 }
 
+void UHudTestWidget::Build()
+{
+	OnBuildDelegate.Broadcast();
+}
+
 void UHudTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
