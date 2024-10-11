@@ -39,7 +39,7 @@ void ASpawnManager::Tick(float DeltaTime)
 
 		m_spawnedEnemies.Add(character);
 
-		FVector2D direction = FVector2D(1, 1);
+		FVector2D direction = FVector2D(-1, 0);
 		direction.Normalize();
 		FVector resultDiretion = FVector(direction.X, direction.Y, 0);
 		
