@@ -7,7 +7,7 @@
 #include "Source/AbilitySystem/Abilities/GameplayAbility_BaseAbility.h"
 #include "GameplayAbility_WeaponBase.generated.h"
 
-class AWeapon;
+class ARangedWeapon;
 /**
  * 
  */
@@ -20,5 +20,5 @@ public:
 								const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
 								FGameplayTagContainer* OptionalRelevantTags) const override;
 protected:
-	AWeapon* GetWeaponInstance() const;
+	ARangedWeapon* GetWeaponInstance() const;
 };

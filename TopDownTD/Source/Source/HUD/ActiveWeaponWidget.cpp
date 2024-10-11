@@ -4,20 +4,20 @@
 #include "FWeaponData.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "Source/Weapons/Weapon.h"
+#include "Source/Weapons/RangedWeapon.h"
 
-void UActiveWeaponWidget::InitializeWidget(const AWeapon* weapon)
+void UActiveWeaponWidget::InitializeWidget(const ARangedWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 	SetWeaponType(weapon->GetWeaponType());
 }
 
-void UActiveWeaponWidget::HandleWeaponAmmoChanged(const AWeapon* weapon)
+void UActiveWeaponWidget::HandleWeaponAmmoChanged(const ARangedWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 }
 
-void UActiveWeaponWidget::HandleWeaponChange(const AWeapon* weapon)
+void UActiveWeaponWidget::HandleWeaponChange(const ARangedWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
 	SetWeaponType(weapon->GetWeaponType());

@@ -1,9 +1,9 @@
-﻿#include "Weapon.h"
+﻿#include "RangedWeapon.h"
 
 #include "AmmoModule/ClipAmmoModule.h"
 #include "Components/SkeletalMeshComponent.h"
 
-AWeapon::AWeapon()
+ARangedWeapon::ARangedWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -13,55 +13,55 @@ AWeapon::AWeapon()
 	AmmoModule = CreateDefaultSubobject<UClipAmmoModule>("AmmoModule");
 }
 
-void AWeapon::BeginPlay()
+void ARangedWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
 	if (AmmoModule)
 	{
-		AmmoModule->OnAmmoChanged.BindUObject(this, &AWeapon::HandleAmmoChanged);
+		AmmoModule->OnAmmoChanged.BindUObject(this, &ARangedWeapon::HandleAmmoChanged);
 	}
 }
 
-void AWeapon::HandleAmmoChanged()
+void ARangedWeapon::HandleAmmoChanged()
 {
 	OnAmmoChanged.Broadcast(this);
 }
 
-void AWeapon::Reload() const
+void ARangedWeapon::Reload() const
 {
 	if(!AmmoModule) return;
 
 	AmmoModule->Reload();
 }
 
-bool AWeapon::CanShoot() const
+bool ARangedWeapon::CanShoot() const
 {
 	if (!AmmoModule) return true;
 	
 	return AmmoModule->CanShoot();
 }
 
-int AWeapon::GetCurrentAmmo() const
+int ARangedWeapon::GetCurrentAmmo() const
 {
 	if (!AmmoModule) return INFINITY;
 
 	return AmmoModule->GetCurrentAmmo();
 }
 
-int AWeapon::GetSpareAmmo() const
+int ARangedWeapon::GetSpareAmmo() const
 {
 	if (!AmmoModule) return INFINITY;
 
 	return AmmoModule->GetSpareAmmo();
 }
 
-EWeaponTypes AWeapon::GetWeaponType() const
+EWeaponTypes ARangedWeapon::GetWeaponType() const
 {
 	return WeaponType;
 }
 
-void AWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
+void ARangedWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	if (AbilitySet)
 	{
@@ -69,19 +69,31 @@ void AWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
 	}
 }
 
-void AWeapon::OnUnequip(UAbilitySystemComponent* AbilitySystemComponent)
+void ARangedWeapon::OnUnequip(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	GrantedHandles.TakeFromAbilitySystem(AbilitySystemComponent);
 }
 
-FVector AWeapon::GetShootStartPosition() const
+FVector ARangedWeapon::GetShootStartPosition() const
 {
 	const FTransform socketTransform = WeaponMesh->GetSocketTransform(ShootPointSocket);
 	return socketTransform.GetLocation();
 }
 
-FVector AWeapon::GetShootDirection()
+FVector ARangedWeapon::GetShootDirection() const
 {
 	const FTransform ownerTransform = GetOwner()->GetTransform();
 	return ownerTransform.Rotator().Vector();
+}
+
+void ARangedWeapon::UpdateFiringTime()
+{
+	UWorld* world = GetWorld();
+	check(world);
+	LastFireTime = world->GetTimeSeconds();
+}
+
+float ARangedWeapon::GetTimeSinceLastFire() const
+{
+	return LastFireTime;
 }

@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "WeaponComponent.generated.h"
 
-class AWeapon;
+class ARangedWeapon;
 class UAbilitySystemComponent;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -18,12 +18,12 @@ public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
 	void Reload();
-	AWeapon* GetCurrentWeapon() const;
+	ARangedWeapon* GetCurrentWeapon() const;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const AWeapon* newWeapon)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const ARangedWeapon* newWeapon)
 	FOnWeaponChanged OnWeaponChanged;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const AWeapon* weapon)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const ARangedWeapon* weapon)
 	FOnWeaponChanged OnWeaponAmmoChange;
 	
 protected:
@@ -31,13 +31,13 @@ protected:
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
-	TSubclassOf<AWeapon> DefaultWeaponClass;
+	TSubclassOf<ARangedWeapon> DefaultWeaponClass;
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
 	FName WeaponSocketName = "WeaponSocket";
 	
 private:
 	UPROPERTY()
-	AWeapon* CurrentWeapon = nullptr;
+	ARangedWeapon* CurrentWeapon = nullptr;
 
 	UPROPERTY()
 	UAbilitySystemComponent* OwnerAbilitySystem;
@@ -45,5 +45,5 @@ private:
 
 	void SubscribeOnWeapon();
 	void UnsubscribeOnWeapon();
-	void HandleWeaponAmmoChanged(AWeapon* weapon) const;
+	void HandleWeaponAmmoChanged(ARangedWeapon* weapon) const;
 };

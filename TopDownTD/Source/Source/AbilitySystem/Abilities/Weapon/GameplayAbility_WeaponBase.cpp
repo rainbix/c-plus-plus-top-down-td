@@ -2,7 +2,7 @@
 
 
 #include "GameplayAbility_WeaponBase.h"
-#include "Source/Weapons/Weapon.h"
+#include "Source/Weapons/RangedWeapon.h"
 #include "Source/Source.h"
 
 bool UGameplayAbility_WeaponBase::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -23,11 +23,11 @@ bool UGameplayAbility_WeaponBase::CanActivateAbility(const FGameplayAbilitySpecH
 	return bResult;
 }
 
-AWeapon* UGameplayAbility_WeaponBase::GetWeaponInstance() const
+ARangedWeapon* UGameplayAbility_WeaponBase::GetWeaponInstance() const
 {
 	if (FGameplayAbilitySpec* Spec =  GetCurrentAbilitySpec())
 	{
-		return Cast<AWeapon>(Spec->SourceObject.Get());
+		return Cast<ARangedWeapon>(Spec->SourceObject.Get());
 	}
 
 	return nullptr;

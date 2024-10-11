@@ -5,7 +5,7 @@
 
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
-#include "Source/Weapons/Weapon.h"
+#include "Source/Weapons/RangedWeapon.h"
 #include "NativeGameplayTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponFireType, "Ability.Type.Fire");
@@ -61,7 +61,7 @@ void UGameplayAbility_Weapon_Fire::OnCancelled()
 
 void UGameplayAbility_Weapon_Fire::OnFire()
 {
-	AWeapon* Weapon = GetWeaponInstance();
+	ARangedWeapon* Weapon = GetWeaponInstance();
 
 	FVector StartPosition = Weapon->GetShootStartPosition();
 	FVector Direction = Weapon->GetShootDirection();

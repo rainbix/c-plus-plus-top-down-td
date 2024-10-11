@@ -7,7 +7,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "GameplayAbility_Weapon_Fire.generated.h"
 
-class AWeapon;
+class ARangedWeapon;
 /**
  * 
  */

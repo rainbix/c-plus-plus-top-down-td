@@ -1,7 +1,7 @@
 ﻿#include "WeaponComponent.h"
 
 #include "AbilitySystemInterface.h"
-#include "Weapon.h"
+#include "RangedWeapon.h"
 #include "GameFramework/Character.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -16,7 +16,7 @@ void UWeaponComponent::Reload()
 	CurrentWeapon->Reload();
 }
 
-AWeapon* UWeaponComponent::GetCurrentWeapon() const
+ARangedWeapon* UWeaponComponent::GetCurrentWeapon() const
 {
 	return CurrentWeapon;
 }
@@ -36,7 +36,7 @@ void UWeaponComponent::SpawnWeapon()
 
 	//todo: ACharacter cast makes it impossible to use weapon by other pawns
 	ACharacter* character = Cast<ACharacter>(GetOwner());
-	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+	CurrentWeapon = GetWorld()->SpawnActor<ARangedWeapon>(DefaultWeaponClass);
 	
 	if(!CurrentWeapon) return;
 	
@@ -62,7 +62,7 @@ void UWeaponComponent::UnsubscribeOnWeapon()
 	CurrentWeapon->OnUnequip(OwnerAbilitySystem);
 }
 
-void UWeaponComponent::HandleWeaponAmmoChanged(AWeapon* weapon) const
+void UWeaponComponent::HandleWeaponAmmoChanged(ARangedWeapon* weapon) const
 {
 	OnWeaponAmmoChange.Broadcast(weapon);
 }
