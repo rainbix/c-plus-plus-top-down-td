@@ -22,11 +22,19 @@ public:
 	void LookAt(FVector direction, float speed, float deltaTime);
 	void SetMoveToDirection(FVector2D direction);
 	void SetLookAt(FVector direction);
+	class UHealthComponent* GetHealthComponent() const;
+	class UWeaponComponent* GetWeaponComponent() const;
 
 protected:
 	virtual void Tick(float DeltaTime) override;
 	
 private:
+	UPROPERTY(VisibleAnywhere, Category= "Health", meta = (AllowPrivateAccess = "true"))
+	class UHealthComponent* HealthComponent;
+	
+	UPROPERTY(VisibleAnywhere, Category= "Weapon", meta = (AllowPrivateAccess = "true"))
+	class UWeaponComponent* WeaponComponent;
+
 	FVector2D m_moveDirection;
 	FVector m_lookDirection;
 };

@@ -1,11 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Source/Public/PlayerCharacterSource.h"
+#include "Source/Health/HealthComponent.h"
+#include "Source/Weapons/WeaponComponent.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
 	moveSpeed = 1;
 	mouseRotationSpeed = 2;
+	
+	//Health
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
+
+	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 }
 
 void APlayerCharacterSource::Tick(float DeltaTime)
@@ -16,7 +23,7 @@ void APlayerCharacterSource::Tick(float DeltaTime)
 	{
 		MoveToDirection(m_moveDirection);
 	}
-
+	
 	if (!m_lookDirection.IsZero())
 	{
 		LookAt(m_lookDirection, mouseRotationSpeed, DeltaTime);
@@ -48,4 +55,14 @@ void APlayerCharacterSource::SetMoveToDirection(FVector2D direction)
 void APlayerCharacterSource::SetLookAt(FVector direction)
 {
 	m_lookDirection = direction;
+}
+
+UHealthComponent* APlayerCharacterSource::GetHealthComponent() const
+{
+	return HealthComponent;
+}
+
+UWeaponComponent* APlayerCharacterSource::GetWeaponComponent() const
+{
+	return WeaponComponent;
 }

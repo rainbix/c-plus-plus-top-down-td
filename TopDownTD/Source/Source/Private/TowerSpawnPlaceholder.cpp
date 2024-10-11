@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Source/TowerActor.h"
 #include "TowerSpawnPlaceholder.h"
+#include "Source/TowerActor.h"
 #include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
