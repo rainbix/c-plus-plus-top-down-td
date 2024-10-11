@@ -18,7 +18,7 @@ bool UGA_RangedWeapon_Fire::CanActivateAbility(const FGameplayAbilitySpecHandle 
 {
 	bool bResult = Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 
-	if(bResult)
+	if (bResult)
 	{
 		if(GetWeaponInstance() == nullptr)
 		{
@@ -36,7 +36,7 @@ void UGA_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Han
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if(FireHipMontage)
+	if (FireHipMontage)
 	{
 		UAbilityTask_PlayMontageAndWait* abilityTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, FireHipMontage, 1.0f, NAME_None, false, 1.0f);
 
@@ -75,7 +75,6 @@ AWeapon* UGA_RangedWeapon_Fire::GetWeaponInstance() const
 void UGA_RangedWeapon_Fire::OnCompleted()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
-	
 }
 
 void UGA_RangedWeapon_Fire::OnCancelled()

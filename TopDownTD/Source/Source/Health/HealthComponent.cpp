@@ -52,7 +52,7 @@ void UHealthComponent::HandleCurrentHealthChanged(const FOnAttributeChangeData& 
 
 	OnCurrentHealthChangeDelegate.Broadcast(OnAttributeChangeData.NewValue);
 
-	if (HealthSet->GetCurrentHealth() < 0.0f)
+	if (HealthSet->GetCurrentHealth() <= 0.0f)
 	{
 		OnDeath();
 	}
