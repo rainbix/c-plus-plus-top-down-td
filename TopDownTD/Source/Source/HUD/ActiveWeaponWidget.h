@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ActiveWeaponWidget.generated.h"
 
+class AWeapon;
 class UTextBlock;
 class UImage;
 class UTexture2D;
@@ -16,10 +17,9 @@ UCLASS()
 class SOURCE_API UActiveWeaponWidget : public UUserWidget
 {
 public:
-	void InitializeWidget(const FWeaponData* weaponData);
-	void HandleShoot(const FWeaponData* weaponData);
-	void HandleReload(const FWeaponData* weaponData);
-	void HandleWeaponChange(const FWeaponData* weaponData);
+	void InitializeWidget(const AWeapon* weapon);
+	void HandleWeaponAmmoChanged(const AWeapon* weapon);
+	void HandleWeaponChange(const AWeapon* weapon);
 	
 private:
 	

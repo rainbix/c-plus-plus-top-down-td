@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerController.h"
+#include <Source/Weapons/WeaponComponent.h>
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PlayerCharacterSource.h"
@@ -40,6 +41,10 @@ void AMyPlayerController::SetupInputComponent()
 	
 	UEnhancedInputComponent* inputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMovementInput);
+
+	//Weapon
+	inputComponent->BindAction(fireInput, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleFireInput);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleReloadInput);
 }
 
 void AMyPlayerController::HandleMovementInput(const FInputActionValue& value)
@@ -59,15 +64,15 @@ void AMyPlayerController::HandleMovementInput(const FInputActionValue& value)
 
 void AMyPlayerController::HandleMouseInput(float deltaTime)
 {
-	FHitResult hitResult;
-	GetHitResultUnderCursor(ECC_WorldStatic, true, hitResult);
-
 	APawn* controlledPawn = GetPawn();
 
 	if (!controlledPawn)
 	{
 		return;
 	}
+
+	FHitResult hitResult;
+	GetHitResultUnderCursor(ECC_WorldStatic, true, hitResult);
 	
 	APlayerCharacterSource* player = Cast<APlayerCharacterSource>(controlledPawn);
 	
@@ -76,4 +81,30 @@ void AMyPlayerController::HandleMouseInput(float deltaTime)
 	directionToMouse.Normalize();
 
 	player->LookAt(directionToMouse, player->mouseRotationSpeed, deltaTime);
+}
+
+void AMyPlayerController::HandleFireInput()
+{
+	APawn* controlledPawn = GetPawn();
+
+	if (!controlledPawn)
+	{
+		return;
+	}
+	
+	APlayerCharacterSource* player = Cast<APlayerCharacterSource>(controlledPawn);
+	player->GetWeaponComponent()->Fire();
+}
+
+void AMyPlayerController::HandleReloadInput()
+{
+	APawn* controlledPawn = GetPawn();
+
+	if (!controlledPawn)
+	{
+		return;
+	}
+	
+	APlayerCharacterSource* player = Cast<APlayerCharacterSource>(controlledPawn);
+	player->GetWeaponComponent()->Reload();
 }

@@ -18,6 +18,10 @@ public:
 	UInputMappingContext* mappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
 	UInputAction* moveInput;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
+	UInputAction* fireInput;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
+	UInputAction* reloadInput;
 
 	AMyPlayerController();
 
@@ -29,4 +33,6 @@ protected:
 private:
 	void HandleMovementInput(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);
+	void HandleFireInput();
+	void HandleReloadInput();
 };

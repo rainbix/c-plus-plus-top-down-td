@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Source/Tools/Interpolator.h"
 #include "ProgressBarWidget.generated.h"
 
 class UImage;
-struct FColor;
-class UProgressBar;
 class UTexture2D;
+class UProgressBar;
+struct FColor;
 
 UCLASS()
 class SOURCE_API UProgressBarWidget : public UUserWidget
@@ -27,45 +28,53 @@ public:
 	void InitializeWidget(int maxVal, int initVal = -1);
 	void SetValue(int newVal);
 
-#if WITH_EDITOR
-	
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-	
-#endif
-	
 protected:
 	
 	virtual void NativeConstruct() override;
 	
 private:
-	
+		
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	#pragma region Progress Bar References
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
+	UCurveLinearColor* colorCurve;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	TArray<float> backgroundTransitionBounds;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
-	TArray<FLinearColor> backgroundTransitionColors;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	TArray<TObjectPtr<UTexture2D>> backgroundTransitionIcons;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
-	FLinearColor emptyBarColor;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	TObjectPtr<UTexture2D> emptyBarIcon;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
+	FLinearColor unassignedColor;
+
+	#pragma region Animation
+
+	//Temporal reimplementation for default Lerp func
+	static float Lerp(const float& A, const float& B, const float Alpha);
+
+	void ProcessAnimation(float deltaTime);
+
+	TUniquePtr<Interpolator<float>> barInterpolator = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category="Progress Bar")
+	float animationTime = 0.2f;
+
+	#pragma endregion
+	#pragma endregion
+
 	float maximumVal;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Progress Bar")
 	float currentVal;
-	
-	void Update(float deltaTime);
-	void SetValueImmediate(float newVal);
-	void UpdateBar(float progress);
-	TTuple<FLinearColor, TObjectPtr<UTexture2D>> GetTransitionData(float curProgress);
+
+	void EnsureInterpolator();
+	void UpdateBarImmediate(float newProgress);
+	void UpdateBar(float newProgress);
+	TObjectPtr<UTexture2D> GetIcon(float curProgress);
 	
 	GENERATED_BODY()
 };

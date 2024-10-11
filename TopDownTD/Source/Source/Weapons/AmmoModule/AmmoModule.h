@@ -1,0 +1,23 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "AmmoModule.generated.h"
+
+UCLASS(Abstract, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+class SOURCE_API UAmmoModule : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_DELEGATE(FOnAmmoChanged)
+	FOnAmmoChanged OnAmmoChanged;
+	
+	UAmmoModule();
+
+	virtual void Reload()	{	}
+	virtual bool CanShoot() {return true;}
+	virtual void OnShot() {}
+	virtual int GetCurrentAmmo() const {return INFINITY;}
+	virtual int GetSpareAmmo() const {return INFINITY;}
+};
