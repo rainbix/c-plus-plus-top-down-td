@@ -20,4 +20,13 @@ public:
 	APlayerCharacterSource();
 	void MoveToDirection(FVector2D direction);
 	void LookAt(FVector direction, float speed, float deltaTime);
+	void SetMoveToDirection(FVector2D direction);
+	void SetLookAt(FVector direction);
+
+protected:
+	virtual void Tick(float DeltaTime) override;
+	
+private:
+	FVector2D m_moveDirection;
+	FVector m_lookDirection;
 };
