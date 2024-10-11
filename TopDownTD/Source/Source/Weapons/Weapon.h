@@ -34,9 +34,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Abilities")
-	TSubclassOf<UGameplayAbility> FireAbility;
-
+	UPROPERTY(EditAnywhere, Category="Parameters")
+	TObjectPtr<UAbilitySet> AbilitySet;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	class UAmmoModule* AmmoModule;
 
@@ -54,8 +54,6 @@ protected:
 
 	float LastBulletShotTime;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UAbilitySet> AbilitySet;
 
 	UPROPERTY()
 	FAbilitySet_GrantedHandles GrantedHandles;
