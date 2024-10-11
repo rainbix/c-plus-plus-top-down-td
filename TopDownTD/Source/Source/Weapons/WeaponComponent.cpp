@@ -9,13 +9,6 @@ UWeaponComponent::UWeaponComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UWeaponComponent::Fire()
-{
-	if(!CurrentWeapon) return;
-
-	CurrentWeapon->Fire();
-}
-
 void UWeaponComponent::Reload()
 {
 	if (!CurrentWeapon) return;

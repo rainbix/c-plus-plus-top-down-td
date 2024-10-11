@@ -1,9 +1,7 @@
 ﻿#include "Weapon.h"
 
-#include "AbilitySystemComponent.h"
 #include "AmmoModule/ClipAmmoModule.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Source/Source.h"
 
 AWeapon::AWeapon()
 {
@@ -27,34 +25,6 @@ void AWeapon::BeginPlay()
 
 void AWeapon::HandleAmmoChanged()
 {
-	OnAmmoChanged.Broadcast(this);
-}
-
-void AWeapon::Fire()
-{
-	if(!GetWorld()) return;
-	if(!CanShoot()) return;
-	if(!OwnerAbilitySystem) return;
-
-	// double currentTime = GetWorld()->GetTime().GetWorldTimeSeconds();
-	// if (currentTime - LastBulletShotTime < FireRate)
-	// {
-	// 	return;
-	// }
-	//
-	// LastBulletShotTime = currentTime;
-	if(!OwnerAbilitySystem->TryActivateAbility(FireAbilitySpec))
-	{
-		return;
-	}
-
-	UE_LOG(LogFWeapon, Display, TEXT("Fire)"))
-	
-	if (AmmoModule)
-	{
-		AmmoModule->OnShot();
-	}
-
 	OnAmmoChanged.Broadcast(this);
 }
 
@@ -93,17 +63,15 @@ EWeaponTypes AWeapon::GetWeaponType() const
 
 void AWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
 {
-	FireAbilitySpec = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbility, 1, INDEX_NONE, this));
-	OwnerAbilitySystem = AbilitySystemComponent;
+	if (AbilitySet)
+	{
+		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, &GrantedHandles, this);
+	}
 }
 
 void AWeapon::OnUnequip(UAbilitySystemComponent* AbilitySystemComponent)
 {
-	if (FireAbilitySpec.IsValid())
-	{
-		AbilitySystemComponent->ClearAbility(FireAbilitySpec);
-		OwnerAbilitySystem = nullptr;
-	}
+	GrantedHandles.TakeFromAbilitySystem(AbilitySystemComponent);
 }
 
 FVector AWeapon::GetShootStartPosition() const

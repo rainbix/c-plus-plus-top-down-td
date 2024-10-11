@@ -1,36 +1,22 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GA_RangedWeapon_Fire.h"
+#include "GameplayAbility_Weapon_Fire.h"
 
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Source/Weapons/Weapon.h"
+#include "NativeGameplayTags.h"
 
-UGA_RangedWeapon_Fire::UGA_RangedWeapon_Fire()
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponFireType, "Ability.Type.Fire");
+
+UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
 {
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+	InputId = EAbilityInputID::Fire;
+	AbilityTags.AddTag(TAG_WeaponFireType);
 }
 
-bool UGA_RangedWeapon_Fire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                               const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
-                                               const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	bool bResult = Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
-
-	if (bResult)
-	{
-		if(GetWeaponInstance() == nullptr)
-		{
-			//TODO: add log
-			bResult = false;	
-		}
-	}
-
-	return bResult;
-}
-
-void UGA_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void UGameplayAbility_Weapon_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                             const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                             const FGameplayEventData* TriggerEventData)
 {
@@ -55,34 +41,25 @@ void UGA_RangedWeapon_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	OnFire();
 }
 
-void UGA_RangedWeapon_Fire::EndAbility(const FGameplayAbilitySpecHandle Handle,
+void UGameplayAbility_Weapon_Fire::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 	bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-AWeapon* UGA_RangedWeapon_Fire::GetWeaponInstance() const
-{
-	if (FGameplayAbilitySpec* Spec =  GetCurrentAbilitySpec())
-	{
-		return Cast<AWeapon>(Spec->SourceObject.Get());
-	}
 
-	return nullptr;
-}
-
-void UGA_RangedWeapon_Fire::OnCompleted()
+void UGameplayAbility_Weapon_Fire::OnCompleted()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
 }
 
-void UGA_RangedWeapon_Fire::OnCancelled()
+void UGameplayAbility_Weapon_Fire::OnCancelled()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, true);
 }
 
-void UGA_RangedWeapon_Fire::OnFire()
+void UGameplayAbility_Weapon_Fire::OnFire()
 {
 	AWeapon* Weapon = GetWeaponInstance();
 

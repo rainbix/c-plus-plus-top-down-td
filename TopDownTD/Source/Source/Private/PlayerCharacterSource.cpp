@@ -6,6 +6,7 @@
 #include "Source/Health/HealthComponent.h"
 #include "Source/Weapons/WeaponComponent.h"
 #include "AbilitySystemComponent.h"
+#include "Source/AbilitySystem/EAbilityInputID.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
@@ -55,7 +56,8 @@ void APlayerCharacterSource::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &APlayerCharacterSource::MoveForward);
 	
 	//Weapon
-	inputComponent->BindAction(fireInput, ETriggerEvent::Triggered, this, &APlayerCharacterSource::Fire);
+	inputComponent->BindAction(fireInput, ETriggerEvent::Started, this, &APlayerCharacterSource::FirePressed);
+	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &APlayerCharacterSource::FireReleased);
 	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &APlayerCharacterSource::Reload);
 }
 
@@ -100,9 +102,26 @@ void APlayerCharacterSource::HandleMouseInput(float deltaTime)
 	LookAt(directionToMouse, mouseRotationSpeed, deltaTime);
 }
 
-void APlayerCharacterSource::Fire()
+void APlayerCharacterSource::SendInputToASC(bool IsPressed, const EAbilityInputID AbilityInputID) const
 {
-	WeaponComponent->Fire();
+	if (IsPressed)
+	{
+		AbilitySystem->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
+	}
+	else
+	{
+		AbilitySystem->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
+	}
+}
+
+void APlayerCharacterSource::FirePressed()
+{
+	SendInputToASC(true, EAbilityInputID::Fire);
+}
+
+void APlayerCharacterSource::FireReleased()
+{
+	SendInputToASC(false, EAbilityInputID::Fire);
 }
 
 void APlayerCharacterSource::Reload()

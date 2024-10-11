@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbility_WeaponBase.h"
 #include "Abilities/GameplayAbility.h"
-#include "GA_RangedWeapon_Fire.generated.h"
+#include "GameplayAbility_Weapon_Fire.generated.h"
 
 class AWeapon;
 /**
  * 
  */
 UCLASS()
-class SOURCE_API UGA_RangedWeapon_Fire : public UGameplayAbility
+class SOURCE_API UGameplayAbility_Weapon_Fire : public UGameplayAbility_WeaponBase
 {
 	GENERATED_BODY()
 
@@ -29,16 +30,12 @@ protected:
 	float FireDelay = 1.0f;
 
 public:
-	UGA_RangedWeapon_Fire();
-	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	                                const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
-	                                FGameplayTagContainer* OptionalRelevantTags) const override;
+	UGameplayAbility_Weapon_Fire();
 
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	AWeapon* GetWeaponInstance() const;
 	UFUNCTION()
 	void OnCompleted();
 	UFUNCTION()

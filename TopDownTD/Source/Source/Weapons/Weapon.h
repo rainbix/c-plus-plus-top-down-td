@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbilitySpecHandle.h"
 #include "GameFramework/Actor.h"
+#include "Source/AbilitySystem/AbilitySet.h"
 #include "Source/HUD/EWeaponTypes.h"
 #include "Weapon.generated.h"
 
+class UAbilitySet;
 class UGameplayAbility;
 class UAbilitySystemComponent;
 
@@ -19,7 +20,6 @@ public:
 	FOnAmmoChanged OnAmmoChanged;
 	
 	AWeapon();
-	void Fire();
 	void Reload() const;
 	bool CanShoot() const;
 	int GetCurrentAmmo() const;
@@ -54,11 +54,11 @@ protected:
 
 	float LastBulletShotTime;
 
-	UPROPERTY()
-	FGameplayAbilitySpecHandle FireAbilitySpec;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UAbilitySet> AbilitySet;
 
 	UPROPERTY()
-	UAbilitySystemComponent* OwnerAbilitySystem;
+	FAbilitySet_GrantedHandles GrantedHandles;
 private:
 	void HandleAmmoChanged();
 };

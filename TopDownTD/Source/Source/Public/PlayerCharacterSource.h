@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Source/SourcePlayerController.h"
 #include "AbilitySystemInterface.h"
+#include "Source/AbilitySystem/EAbilityInputID.h"
 #include "PlayerCharacterSource.generated.h"
 
 UCLASS()
@@ -50,6 +51,8 @@ private:
 	
 	void MoveForward(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);
-	void Fire();
+	void SendInputToASC(bool IsPressed, EAbilityInputID AbilityInputID) const;
+	void FirePressed();
+	void FireReleased();
 	void Reload();
 };
