@@ -9,8 +9,6 @@ ARangedWeapon::ARangedWeapon()
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	SetRootComponent(WeaponMesh);
-
-	AmmoModule = CreateDefaultSubobject<UClipAmmoModule>("AmmoModule");
 }
 
 void ARangedWeapon::BeginPlay()
@@ -19,6 +17,7 @@ void ARangedWeapon::BeginPlay()
 
 	if (AmmoModule)
 	{
+		AmmoModule->Initialize();
 		AmmoModule->OnAmmoChanged.BindUObject(this, &ARangedWeapon::HandleAmmoChanged);
 	}
 }
@@ -28,18 +27,18 @@ void ARangedWeapon::HandleAmmoChanged()
 	OnAmmoChanged.Broadcast(this);
 }
 
-void ARangedWeapon::Reload() const
-{
-	if(!AmmoModule) return;
-
-	AmmoModule->Reload();
-}
-
-bool ARangedWeapon::CanShoot() const
+bool ARangedWeapon::CheckShootCost() const
 {
 	if (!AmmoModule) return true;
 	
-	return AmmoModule->CanShoot();
+	return AmmoModule->CheckShootCost();
+}
+
+void ARangedWeapon::ApplyShootCost() const
+{
+	if (!AmmoModule) return;
+
+	AmmoModule->ApplyShootCost();
 }
 
 int ARangedWeapon::GetCurrentAmmo() const

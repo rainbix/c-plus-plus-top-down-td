@@ -1,70 +1,25 @@
 ﻿#include "ClipAmmoModule.h"
 #include "Source/Source.h"
 
-UClipAmmoModule::UClipAmmoModule()
+void UClipAmmoModule::Initialize()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	CurrentClipAmmo = MaxClipAmmo;
-	SpareAmmoLeft = MaxSpareAmmo;
-	ReloadStartTime = 0;
-	IsReloading = false;
-}
-
-// Called when the game starts
-void UClipAmmoModule::BeginPlay()
-{
-	Super::BeginPlay();
+	Super::Initialize();
 
 	CurrentClipAmmo = MaxClipAmmo;
 	SpareAmmoLeft = MaxSpareAmmo;
 }
 
-// Called every frame
-void UClipAmmoModule::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool UClipAmmoModule::CheckShootCost() const
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (!GetWorld()) return;
-	if (!IsReloading) return;
-
-	float currentTime = GetWorld()->GetTimeSeconds();
-
-	if (currentTime - ReloadStartTime > ReloadDuration)
-	{
-		IsReloading = false;
-		int ammoToAdd = FMath::Min(MaxClipAmmo - CurrentClipAmmo, SpareAmmoLeft);
-		CurrentClipAmmo += ammoToAdd;
-		SpareAmmoLeft -= ammoToAdd;
-		UE_LOG(LogFWeapon, Display, TEXT("Reload finished: SpareAmmoLeft [%i])"), SpareAmmoLeft)
-		OnAmmoChanged.Execute();
-	}
+	return CurrentClipAmmo >= AmmoPerShot;
 }
 
-void UClipAmmoModule::Reload()
+void UClipAmmoModule::ApplyShootCost()
 {
-	if (IsReloading) return;
-	if (CurrentClipAmmo >= MaxClipAmmo) return;
-	if (!GetWorld()) return;
-	if (SpareAmmoLeft <= 0) return;
+	Super::ApplyShootCost();
 
-	IsReloading = true;
-	ReloadStartTime = GetWorld()->GetTimeSeconds();
-	UE_LOG(LogFWeapon, Display, TEXT("Reload started)"))
-}
-
-bool UClipAmmoModule::CanShoot()
-{
-	return !IsReloading && CurrentClipAmmo > 0;
-}
-
-void UClipAmmoModule::OnShot()
-{
-	if (CurrentClipAmmo > 0)
-	{
-		CurrentClipAmmo--;
-		UE_LOG(LogFWeapon, Display, TEXT("Ammo left %i"), CurrentClipAmmo);
-		OnAmmoChanged.Execute();
-	}
+	CurrentClipAmmo -= AmmoPerShot;
+	OnAmmoChanged.Execute();
 }
 
 void UClipAmmoModule::AddAmmo(int Value)

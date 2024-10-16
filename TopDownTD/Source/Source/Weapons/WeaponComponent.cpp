@@ -12,8 +12,6 @@ UWeaponComponent::UWeaponComponent()
 void UWeaponComponent::Reload()
 {
 	if (!CurrentWeapon) return;
-
-	CurrentWeapon->Reload();
 }
 
 ARangedWeapon* UWeaponComponent::GetCurrentWeapon() const

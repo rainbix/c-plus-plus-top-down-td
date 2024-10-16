@@ -18,10 +18,10 @@ class SOURCE_API ARangedWeapon : public AActor
 public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, ARangedWeapon*)
 	FOnAmmoChanged OnAmmoChanged;
-	
+
 	ARangedWeapon();
-	void Reload() const;
-	bool CanShoot() const;
+	bool CheckShootCost() const;
+	void ApplyShootCost() const;
 	int GetCurrentAmmo() const;
 	int GetSpareAmmo() const;
 	EWeaponTypes GetWeaponType() const;
@@ -36,19 +36,19 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category="Parameters")
+	UPROPERTY(EditAnywhere, Category="Abilities")
 	TObjectPtr<UAbilitySet> AbilitySet;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
-	class UAmmoModule* AmmoModule;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon", Instanced)
+	TObjectPtr<class UInfiniteAmmoModule> AmmoModule;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category= "Weapon")
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(EditAnywhere, Category="Parameters")
+	UPROPERTY(EditAnywhere, Category="Weapon")
 	EWeaponTypes WeaponType;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	FName ShootPointSocket = "ShootSocket";
 
 	float LastFireTime;

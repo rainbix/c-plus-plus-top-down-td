@@ -7,6 +7,7 @@
 #include "Source/AbilitySystem/EAbilityInputID.h"
 #include "GameplayAbility_BaseAbility.generated.h"
 
+class UAbilityCost;
 /**
  * 
  */
@@ -22,4 +23,12 @@ public:
 protected:
 	UPROPERTY(EditAnywhere)
 	EAbilityInputID InputId;
+	
+	// Additional costs that must be paid to activate this ability
+	UPROPERTY(EditDefaultsOnly, Instanced, Category = Costs)
+	TArray<TObjectPtr<UAbilityCost>> AdditionalCosts;
+	
+	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+
 };

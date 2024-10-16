@@ -3,41 +3,41 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmmoModule.h"
+#include "InfiniteAmmoModule.h"
 #include "ClipAmmoModule.generated.h"
 
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class SOURCE_API UClipAmmoModule : public UAmmoModule
+UCLASS(DefaultToInstanced, EditInlineNew, DisplayName="Clip ammo")
+class SOURCE_API UClipAmmoModule : public UInfiniteAmmoModule
 {
 	GENERATED_BODY()
 
 public:
-	UClipAmmoModule();
+	UClipAmmoModule()
+	{
+	}
 
 protected:
 	UPROPERTY(EditAnywhere, Category="Parameters")
 	int MaxClipAmmo = 10;
-	int CurrentClipAmmo;
-
+	
 	UPROPERTY(EditAnywhere, Category="Parameters")
 	int MaxSpareAmmo = 50;
-	int SpareAmmoLeft;
-
+	
+	UPROPERTY(EditAnywhere, Category="Parameters")
+	int AmmoPerShot = 1;
+	
 	UPROPERTY(EditAnywhere, Category="Parameters")
 	float ReloadDuration = 2;
-	float ReloadStartTime;
-	bool IsReloading;
 	
-	virtual void BeginPlay() override;
+	float ReloadStartTime = 0;	
+	int CurrentClipAmmo = 10;
+	int SpareAmmoLeft = 50;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
-	virtual void Reload() override;
-	virtual bool CanShoot() override;
-	virtual void OnShot() override;
+public:	
+	virtual void Initialize() override;
+	virtual bool CheckShootCost() const override;
+	virtual void ApplyShootCost() override;
 	virtual void AddAmmo(int Value);
 	virtual int GetCurrentAmmo() const override;
 	virtual int GetSpareAmmo() const override;
