@@ -6,8 +6,6 @@
 #include "Source/Weapons/RangedWeapon.h"
 #include "NativeGameplayTags.h"
 
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponReloadType, "Ability.Type.Reload");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponFireType, "Ability.Type.Fire");
 
 UGameplayAbility_Weapon_Reload::UGameplayAbility_Weapon_Reload()
 {

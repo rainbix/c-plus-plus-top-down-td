@@ -4,8 +4,6 @@
 #include "GameplayAbility_Weapon_Fire.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Source/Weapons/RangedWeapon.h"
-#include "NativeGameplayTags.h"
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponFireType, "Ability.Type.Fire");
 
 UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
 {

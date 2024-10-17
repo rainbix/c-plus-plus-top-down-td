@@ -5,9 +5,14 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "Source/AbilitySystem/Abilities/GameplayAbility_BaseAbility.h"
+#include "NativeGameplayTags.h"
+
 #include "GameplayAbility_WeaponBase.generated.h"
 
 class ARangedWeapon;
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponReloadType)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponFireType)
 /**
  * 
  */
