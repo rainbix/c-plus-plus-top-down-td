@@ -16,7 +16,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
-#include "Source/Tools/GeneralPurposeUtils.h"
 #include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
@@ -154,7 +153,7 @@ void AGameplayHUD::TryBuild()
 		auto towerPlaceholder = Cast<ATowerSpawnPlaceholder>(foundActor);
 		if (!towerPlaceholder || !towerPlaceholder->IsInInteractionRange())
 			continue;
-
+		
 		towerPlaceholder->ProcessInputRequest();
 	}
 }

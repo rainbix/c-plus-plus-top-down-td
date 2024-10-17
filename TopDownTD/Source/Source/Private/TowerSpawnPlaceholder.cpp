@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Source/TowerActor.h"
 #include "TowerSpawnPlaceholder.h"
+#include "Source/TowerActor.h"
 #include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -215,7 +215,7 @@ void ATowerSpawnPlaceholder::ProcessInputRequest()
 {
 	if (!isInInteractionRange)
 		return;
-
+	
 	if (CanSpawnTower())
 	{
 		if (hud)
@@ -236,7 +236,7 @@ void ATowerSpawnPlaceholder::ProcessInputRequest()
 
 bool ATowerSpawnPlaceholder::IsInInteractionRange() const
 {
-	return  isInInteractionRange;
+	return isInInteractionRange;
 }
 
 #pragma endregion
