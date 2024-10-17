@@ -14,7 +14,7 @@ void UProgressBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	barInterpolator = MakeUnique<Interpolator<float>>(animationTime, 0, 1);
+	EnsureInterpolator();
 }
 
 void UProgressBarWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -37,6 +37,8 @@ void UProgressBarWidget::InitializeWidget(int maxVal, int initVal)
 //Set value with animation (called from outside when Widget is updated)
 void UProgressBarWidget::SetValue(int newVal)
 {
+	EnsureInterpolator();
+	
 	if (bar)
 	{
 		currentVal = newVal;
@@ -95,6 +97,13 @@ float UProgressBarWidget::Lerp(const float& A, const float& B, const float Alpha
 {
 	return A + Alpha * (B-A);
 }
+
+void UProgressBarWidget::EnsureInterpolator()
+{
+	if (!barInterpolator)
+		barInterpolator = MakeUnique<Interpolator<float>>(animationTime, 0, 1);
+}
+
 
 TObjectPtr<UTexture2D> UProgressBarWidget::GetIcon(float curProgress)
 {

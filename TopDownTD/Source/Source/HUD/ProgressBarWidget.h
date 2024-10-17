@@ -70,7 +70,8 @@ private:
 
 	float maximumVal;
 	float currentVal;
-	
+
+	void EnsureInterpolator();
 	void UpdateBarImmediate(float newProgress);
 	void UpdateBar(float newProgress);
 	TObjectPtr<UTexture2D> GetIcon(float curProgress);

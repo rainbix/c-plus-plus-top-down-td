@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "TowerSpawnPlaceholder.h"
+#include "Source/TowerActor.h"
+#include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
 #pragma region Overrides
@@ -15,30 +17,30 @@ ATowerSpawnPlaceholder::ATowerSpawnPlaceholder()
 void ATowerSpawnPlaceholder::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	InitializeWidgets();
-	InitializeInteractions();
+
+	try
+	{
+		InitializeWidgets();
+		InitializeInteractions();
+	}
+	catch (...)
+	{
+		GeneralPurposeUtils::DisplayScreenMessage("BeginPlay failed", FColor::Red);
+	}
 }
 
 void ATowerSpawnPlaceholder::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
+	
 	UpdateInteractionState(true);
 }
 
 void ATowerSpawnPlaceholder::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-
+	
 	UpdateInteractionState(false);
-}
-
-void ATowerSpawnPlaceholder::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	//TODO: Building progress bar should be implemented here
 }
 
 #pragma endregion
@@ -49,7 +51,7 @@ void ATowerSpawnPlaceholder::InitializeWidgets()
 {
 	try
 	{
-		InteractEmptyWidgetHolder = FindComponentByClass<UWidgetComponent>();
+		InteractEmptyWidgetHolder = InitializeFromComponent<UWidgetComponent>(0);
 	}
 	catch (...)
 	{
@@ -67,40 +69,72 @@ void ATowerSpawnPlaceholder::ToggleWidget(UWidgetComponent* widget, bool isActiv
 
 #pragma region Towers
 
-void ATowerSpawnPlaceholder::SpawnTower(const TSubclassOf<ATowerActor> towerToSpawn)
+void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild)
 {
-	if (towerToSpawn)
+	if (!towerToBuild)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-
-		FVector spawnPos = GetActorLocation();
-		FRotator spawnRot(0, 0, 0);
-
-		spawnedTower = GetWorld()->SpawnActor<ATowerActor>(towerToSpawn, spawnPos, spawnRot);
-		
-		if (spawnedTower)
-		{
-			//Disable Placeholder mesh 
-			placeholderMeshComponent->SetVisibility(false);
-			
-			//Force disable interaction widget
-			ToggleWidget(InteractEmptyWidgetHolder, false);
-
-			//Force disable further iteration until next BeginOverlap event
-			UpdateInteractionState(false);
-		}
+		GeneralPurposeUtils::DisplayScreenMessage("[TowerSpawnPlaceholder] Nothing to spawn", FColor::Red);
+		return;
 	}
-	else
+	
+	//Prepare spawn
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+
+	const FVector spawnPos = GetActorLocation();
+	const FRotator spawnRot(0, 0, 0);
+
+	//Spawn scaffolding first. When building timer will be finished corresponding tower is placed
+	SpawnedScaffolding = GetWorld()->SpawnActor<ATowerBuildingScaffolding>(ScaffoldingActorClass, spawnPos, spawnRot);
+	
+	if (SpawnedScaffolding)
 	{
-		GeneralPurposeUtils::DisplayScreenMessage("Nothing to spawn", FColor::Red);
+		//Initialize scaffolding
+		SpawnedScaffolding->OnBuildingFinishedDelegate.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildingFinishedHandler);
+		SpawnedScaffolding->InitializeActor(towerToBuild, BuildTime);
+		
+		//Disable Placeholder mesh
+		if (PlaceholderMeshComponent)
+			PlaceholderMeshComponent->SetVisibility(false);
+		
+		//Force disable interaction widget and build ready effect
+		ToggleWidget(InteractEmptyWidgetHolder, false);
+		ToggleEffect(BuildReadyEffectComponent, false);
+
+		//Force disable further iteration until next BeginOverlap event
+		UpdateInteractionState(false);
 	}
 }
+
+void ATowerSpawnPlaceholder::TowerBuildingFinishedHandler(ATowerActor* tower)
+{	
+	SpawnedScaffolding = nullptr;
+	SpawnedTower = tower;
+}
+
+#pragma region Tower State Properties
 
 bool ATowerSpawnPlaceholder::CanSpawnTower() const
 {
-	return isInInteractionRange && !spawnedTower;
+	return isInInteractionRange && IsEmpty();
 }
+
+bool ATowerSpawnPlaceholder::IsEmpty() const
+{
+	return !IsTowerBuilding() && !IsTowerReady();
+}
+
+bool ATowerSpawnPlaceholder::IsTowerBuilding() const
+{
+	return SpawnedScaffolding != nullptr;
+}
+
+bool ATowerSpawnPlaceholder::IsTowerReady() const
+{
+	return SpawnedTower != nullptr;
+}
+
+#pragma endregion
 
 #pragma endregion 
 
@@ -108,14 +142,16 @@ bool ATowerSpawnPlaceholder::CanSpawnTower() const
 
 void ATowerSpawnPlaceholder::InitializeInteractions()
 {
-	UpdateInteractionState(false);
-    	
     try
     {
-    	TArray<UStaticMeshComponent*> Components;
-    	GetComponents<UStaticMeshComponent>(Components);
+    	//Grab first static mesh and treat as a graphics mesh
+    	PlaceholderMeshComponent = InitializeFromComponent<UStaticMeshComponent>(0);
+    	
+    	//Grab first particle system and treat as a interaction effect
+    	BuildReadyEffectComponent = InitializeFromComponent<UParticleSystemComponent>(0);
 
-    	placeholderMeshComponent = Components[0];
+    	//Set initial state as not interacting with anything
+    	UpdateInteractionState(false);
     }
     catch (...)
     {
@@ -123,13 +159,48 @@ void ATowerSpawnPlaceholder::InitializeInteractions()
     }
 }
 
+template <typename T>
+T* ATowerSpawnPlaceholder::InitializeFromComponent(int indexToTake)
+{
+	//Get all components
+	TArray<T*> components;
+	GetComponents<T>(components);
+
+	//Fill object with specified index from received components list
+	if (components.Num() > indexToTake)
+		return components[indexToTake];
+
+	return nullptr;
+}
+
 void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 {
 	isInInteractionRange = isInteractionAllowed;
+	
+	//Enable/Disable Build Widget only if no tower built yet
+	if (IsEmpty())
+	{
+		ToggleWidget(InteractEmptyWidgetHolder, isInInteractionRange);
+		ToggleEffect(BuildReadyEffectComponent, isInInteractionRange);
+	}
+	else if (isInInteractionRange && IsTowerBuilding())
+	{
+		//Do some stuff if tower is building (speed up for coins, etc)
+	}
+	else if (isInInteractionRange && IsTowerReady())
+	{
+		//Do some stuff if tower is build and ready (upgrade, destroy, etc)
+	}
+}
 
-	//Enable Build widget only if no tower built yet
-	if (!spawnedTower)
-		ToggleWidget(InteractEmptyWidgetHolder, isInteractionAllowed);
+#pragma endregion
+
+#pragma region Effects
+
+void ATowerSpawnPlaceholder::ToggleEffect(UParticleSystemComponent* effectComponent, bool isActive)
+{
+	if (effectComponent)
+		effectComponent->SetActive(isActive);
 }
 
 #pragma endregion
@@ -142,7 +213,7 @@ void ATowerSpawnPlaceholder::TempInputProcess()
 		return;
 
 	if (CanSpawnTower())
-		SpawnTower(TempTowerToPlace);
+		BuildTower(TempTowerToPlace);
 }
 
 #pragma endregion

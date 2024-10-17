@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Source/Public/PlayerCharacterSource.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Source/Health/HealthComponent.h"
 #include "Source/Weapons/WeaponComponent.h"
 #include "AbilitySystemComponent.h"
@@ -10,8 +8,7 @@
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	moveSpeed = 1;
 	mouseRotationSpeed = 2;
 	
 	//Health
@@ -22,59 +19,25 @@ APlayerCharacterSource::APlayerCharacterSource()
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability"));
 }
 
-void APlayerCharacterSource::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
-}
-
 void APlayerCharacterSource::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	HandleMouseInput(DeltaTime);
-}
-
-void APlayerCharacterSource::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	UEnhancedInputComponent* inputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	APlayerController* pc = Cast<APlayerController>(Controller);
-	check(inputComponent && pc);
-
-	ULocalPlayer* LocalPlayer = pc->GetLocalPlayer();
-	check(LocalPlayer);
 	
-	// Get the Enhanced Input Local Player Subsystem from the Local Player related to our Player Controller.
-	if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
+	if (!m_moveDirection.IsZero())
 	{
-		subsystem->ClearAllMappings();
-		subsystem->AddMappingContext(mappingContext, 1);
+		MoveToDirection(m_moveDirection);
 	}
 	
-	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &APlayerCharacterSource::MoveForward);
-	
-	//Weapon
-	inputComponent->BindAction(fireInput, ETriggerEvent::Started, this, &APlayerCharacterSource::FirePressed);
-	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &APlayerCharacterSource::FireReleased);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &APlayerCharacterSource::ReloadPressed);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Completed, this, &APlayerCharacterSource::ReloadReleased);
-}
-
-void APlayerCharacterSource::MoveForward(const FInputActionValue& value)
-{
-	const FVector2D moveVector = value.Get<FVector2D>();
-	MoveToDirection(moveVector);
+	if (!m_lookDirection.IsZero())
+	{
+		LookAt(m_lookDirection, mouseRotationSpeed, DeltaTime);
+	}
 }
 
 void APlayerCharacterSource::MoveToDirection(FVector2D direction)
 {
-	FVector fwd = FVector(1, 0, 0);
-	AddMovementInput(fwd, direction.X);
-
-	FVector right = FVector(0, 1, 0);
-	AddMovementInput(right, direction.Y);
+	FVector moveDir = FVector(direction.X, direction.Y, 0);
+	AddMovementInput(moveDir, moveSpeed);
 }
 
 void APlayerCharacterSource::LookAt(FVector direction, float speed, float deltaTime)
@@ -88,52 +51,14 @@ void APlayerCharacterSource::LookAt(FVector direction, float speed, float deltaT
 	SetActorRotation(currentRotation);
 }
 
-void APlayerCharacterSource::HandleMouseInput(float deltaTime)
+void APlayerCharacterSource::SetMoveToDirection(FVector2D direction)
 {
-	UWorld* world = GetWorld();
-	const APlayerController* playerController = world->GetFirstPlayerController();
-
-	FHitResult hitResult;
-	playerController->GetHitResultUnderCursor(ECC_WorldStatic, true, hitResult);
-	
-	FVector const charPosition = playerController->GetPawn()->GetActorLocation();
-	FVector directionToMouse = hitResult.Location - charPosition;
-	directionToMouse.Normalize();
-
-	LookAt(directionToMouse, mouseRotationSpeed, deltaTime);
+	m_moveDirection = direction;
 }
 
-void APlayerCharacterSource::SendInputToASC(bool IsPressed, const EAbilityInputID AbilityInputID) const
+void APlayerCharacterSource::SetLookAt(FVector direction)
 {
-	if (IsPressed)
-	{
-		AbilitySystem->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
-	}
-	else
-	{
-		AbilitySystem->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
-	}
-}
-
-void APlayerCharacterSource::FirePressed()
-{
-	SendInputToASC(true, EAbilityInputID::Fire);
-}
-
-void APlayerCharacterSource::FireReleased()
-{
-	SendInputToASC(false, EAbilityInputID::Fire);
-}
-
-void APlayerCharacterSource::ReloadPressed()
-{
-	SendInputToASC(true, EAbilityInputID::Reload);
-
-}
-
-void APlayerCharacterSource::ReloadReleased()
-{
-	SendInputToASC(false, EAbilityInputID::Reload);
+	m_lookDirection = direction;
 }
 
 UHealthComponent* APlayerCharacterSource::GetHealthComponent() const
