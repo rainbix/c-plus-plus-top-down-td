@@ -6,10 +6,13 @@
 #include "PauseButtonWidget.h"
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
+#include "Source/TowerActor.h"
 #include "FWeaponData.h"
 #include "PauseWidget.h"
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
+#include "TowerShopWidget.h"
+#include "TowerSpawnPlaceholder.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
@@ -40,6 +43,8 @@ void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	Super::EndPlay(EndPlayReason);
 }
+
+#pragma region Widgets
 
 void AGameplayHUD::InitializeWidgets()
 {
@@ -79,7 +84,7 @@ void AGameplayHUD::InitializeWidgets()
 	
 	if (hudTestWidget)
 	{
-		hudTestWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
+		hudTestWidget->OnBuildDelegate.AddUObject(this, &AGameplayHUD::TryBuild);
 	}
 }
 
@@ -113,6 +118,81 @@ void AGameplayHUD::DisposeWidgets()
 	}
 }
 
+template <typename T>
+T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
+{
+	if (!widgetClass)
+		return nullptr;
+	
+	T* widget = CreateWidget<T>(world, widgetClass);
+	if (!widget)
+		return nullptr;
+	
+	widget->AddToViewport();
+
+	if (isCollapsed)
+		widget->SetVisibility(ESlateVisibility::Collapsed);
+	
+	return widget;
+}
+
+#pragma endregion
+
+#pragma region Tower Shop
+
+void AGameplayHUD::TryBuild()
+{
+	//TODO: This is temporal solution. Don't panic
+	TArray<AActor*> FoundPlaceholders;
+	UGameplayStatics::GetAllActorsOfClass(world, ATowerSpawnPlaceholder::StaticClass(), FoundPlaceholders);
+	for (auto foundActor : FoundPlaceholders)
+	{
+		if (!foundActor)
+			continue;
+		
+		auto towerPlaceholder = Cast<ATowerSpawnPlaceholder>(foundActor);
+		if (!towerPlaceholder || !towerPlaceholder->IsInInteractionRange())
+			continue;
+		
+		towerPlaceholder->ProcessInputRequest();
+	}
+}
+
+void AGameplayHUD::ShowTowerShopWidget()
+{
+	playerController->SetPause(true);
+	
+	if (towerShopWidget)
+	{
+		towerShopWidget->AddToViewport();
+	}
+	else
+	{
+		if (TowerShopClass)
+		{
+			towerShopWidget = SpawnWidget(TowerShopClass);
+			towerShopWidget->OnClosed.AddUObject(this, &AGameplayHUD::ShopTowerClosedHandler);
+			towerShopWidget->OnTowerSelected.AddUObject(this, &AGameplayHUD::ShopTowerSelectedHandler);
+		}
+	}
+}
+
+void AGameplayHUD::ShopTowerClosedHandler()
+{
+	playerController->SetPause(false);
+	towerShopWidget->RemoveFromParent();
+}
+
+void AGameplayHUD::ShopTowerSelectedHandler(TSubclassOf<ATowerActor> selectedTowerClass)
+{
+	if (selectedTowerClass)
+		OnTowerBuildRequest.Broadcast(selectedTowerClass);
+}
+
+#pragma endregion
+
+#pragma region Pause
+
 void AGameplayHUD::TogglePause()
 {
 	//Enter pause
@@ -131,27 +211,12 @@ void AGameplayHUD::TogglePause()
 		if (pauseWidget)
 			pauseWidget->RemoveFromParent();
 	}
-
+	
 	playerController->SetPause(!playerController->IsPaused());
 
 	//Expose pause function to blueprints
 	OnPauseToggleHandler(playerController->IsPaused());
 }
 
-template <typename T>
-T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
-{
-	if (!widgetClass)
-		return nullptr;
-	
-	T* widget = CreateWidget<T>(world, widgetClass);
-	if (!widget)
-		return nullptr;
-	
-	widget->AddToViewport();
+#pragma endregion 
 
-	if (isCollapsed)
-		widget->SetVisibility(ESlateVisibility::Collapsed);
-	
-	return widget;
-}

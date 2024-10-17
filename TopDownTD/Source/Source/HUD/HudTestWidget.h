@@ -36,6 +36,9 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnPause)
 	FOnPause OnPauseDelegate;
 
+	DECLARE_MULTICAST_DELEGATE(FOnBuild)
+	FOnBuild OnBuildDelegate;
+
 	#pragma endregion
 
 	#pragma region Functions
@@ -60,6 +63,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Pause();
+
+	UFUNCTION(BlueprintCallable)
+	void Build();
 
 	FWeaponData* GetActiveWeaponData();
 	
