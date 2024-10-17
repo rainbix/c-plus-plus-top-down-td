@@ -60,6 +60,20 @@ EWeaponTypes ARangedWeapon::GetWeaponType() const
 	return WeaponType;
 }
 
+bool ARangedWeapon::CanReload() const
+{
+	if (!AmmoModule) return false;
+
+	return AmmoModule->CanReload();
+}
+
+void ARangedWeapon::ApplyReload() const
+{
+	if (!AmmoModule) return;
+	
+	AmmoModule->ApplyReload();
+}
+
 void ARangedWeapon::OnEquip(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	if (AbilitySet)

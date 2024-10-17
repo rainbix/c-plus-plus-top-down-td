@@ -20,4 +20,6 @@ public:
 	virtual void ApplyShootCost() {}
 	virtual int GetCurrentAmmo() const {return INFINITY;}
 	virtual int GetSpareAmmo() const {return INFINITY;}
+	virtual bool CanReload() const {return false;}
+	virtual void ApplyReload() {}
 };

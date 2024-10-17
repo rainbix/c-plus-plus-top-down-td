@@ -18,7 +18,4 @@ class SOURCE_API UAbilityCost_RangedWeapon_ShootCost : public UAbilityCost
 public:
 	virtual bool CheckCost(const UGameplayAbility_BaseAbility* Ability, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const override;
 	virtual void ApplyCost(const UGameplayAbility_BaseAbility* Ability, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
-protected:
-	UPROPERTY()
-	int ConsumedAmmoCount;
 };

@@ -25,6 +25,8 @@ public:
 	int GetCurrentAmmo() const;
 	int GetSpareAmmo() const;
 	EWeaponTypes GetWeaponType() const;
+	bool CanReload() const;
+	void ApplyReload() const;
 
 	void OnEquip(UAbilitySystemComponent* AbilitySystemComponent);
 	void OnUnequip(UAbilitySystemComponent* AbilitySystemComponent);

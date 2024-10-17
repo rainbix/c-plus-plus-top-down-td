@@ -2,12 +2,9 @@
 
 
 #include "GameplayAbility_Weapon_Fire.h"
-
-#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Source/Weapons/RangedWeapon.h"
 #include "NativeGameplayTags.h"
-
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_WeaponFireType, "Ability.Type.Fire");
 
 UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
@@ -28,21 +25,9 @@ void UGameplayAbility_Weapon_Fire::ActivateAbility(const FGameplayAbilitySpecHan
 		return;
 	}
 	
-	if (FireHipMontage)
-	{
-		UAbilityTask_PlayMontageAndWait* AbilityTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, FireHipMontage, 1.0f, NAME_None, false, 1.0f);
-
-		AbilityTask->OnBlendOut.AddDynamic(this, &ThisClass::OnCompleted);
-		AbilityTask->OnCompleted.AddDynamic(this, &ThisClass::OnCompleted);
-		AbilityTask->OnInterrupted.AddDynamic(this, &ThisClass::OnCancelled);
-		AbilityTask->OnCancelled.AddDynamic(this, &ThisClass::OnCancelled);
-		AbilityTask->ReadyForActivation();
-	} else
-	{
-		UAbilityTask_WaitDelay* WaitDelayTask = UAbilityTask_WaitDelay::WaitDelay(this, FireDelay);
-		WaitDelayTask->OnFinish.AddDynamic(this, &ThisClass::OnCompleted);
-		WaitDelayTask->ReadyForActivation();
-	}
+	UAbilityTask_WaitDelay* WaitDelayTask = UAbilityTask_WaitDelay::WaitDelay(this, FireDelay);
+	WaitDelayTask->OnFinish.AddDynamic(this, &ThisClass::OnCompleted);
+	WaitDelayTask->ReadyForActivation();
 
 	ARangedWeapon* Weapon = GetWeaponInstance();
 	Weapon->UpdateFiringTime();

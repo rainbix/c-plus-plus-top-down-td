@@ -41,4 +41,6 @@ public:
 	virtual void AddAmmo(int Value);
 	virtual int GetCurrentAmmo() const override;
 	virtual int GetSpareAmmo() const override;
+	virtual bool CanReload() const override;
+	virtual void ApplyReload() override;
 };

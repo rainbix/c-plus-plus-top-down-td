@@ -54,5 +54,6 @@ private:
 	void SendInputToASC(bool IsPressed, EAbilityInputID AbilityInputID) const;
 	void FirePressed();
 	void FireReleased();
-	void Reload();
+	void ReloadPressed();
+	void ReloadReleased();
 };

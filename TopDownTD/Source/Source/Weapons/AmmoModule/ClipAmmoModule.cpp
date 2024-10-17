@@ -38,3 +38,18 @@ int UClipAmmoModule::GetSpareAmmo() const
 {
 	return SpareAmmoLeft;
 }
+
+bool UClipAmmoModule::CanReload() const
+{
+	return CurrentClipAmmo < MaxClipAmmo && SpareAmmoLeft > 0;
+}
+
+void UClipAmmoModule::ApplyReload()
+{
+	int MissingAmmo = MaxClipAmmo - CurrentClipAmmo;
+	int AmmoToLoad = FMath::Min(MissingAmmo, SpareAmmoLeft);
+
+	CurrentClipAmmo += AmmoToLoad;
+	SpareAmmoLeft -= AmmoToLoad;
+	OnAmmoChanged.Execute();
+}

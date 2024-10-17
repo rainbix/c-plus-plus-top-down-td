@@ -58,7 +58,8 @@ void APlayerCharacterSource::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	//Weapon
 	inputComponent->BindAction(fireInput, ETriggerEvent::Started, this, &APlayerCharacterSource::FirePressed);
 	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &APlayerCharacterSource::FireReleased);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &APlayerCharacterSource::Reload);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &APlayerCharacterSource::ReloadPressed);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Completed, this, &APlayerCharacterSource::ReloadReleased);
 }
 
 void APlayerCharacterSource::MoveForward(const FInputActionValue& value)
@@ -124,9 +125,15 @@ void APlayerCharacterSource::FireReleased()
 	SendInputToASC(false, EAbilityInputID::Fire);
 }
 
-void APlayerCharacterSource::Reload()
+void APlayerCharacterSource::ReloadPressed()
 {
-	WeaponComponent->Reload();
+	SendInputToASC(true, EAbilityInputID::Reload);
+
+}
+
+void APlayerCharacterSource::ReloadReleased()
+{
+	SendInputToASC(false, EAbilityInputID::Reload);
 }
 
 UHealthComponent* APlayerCharacterSource::GetHealthComponent() const

@@ -8,6 +8,7 @@
 #include "GameplayAbility_Weapon_Fire.generated.h"
 
 class ARangedWeapon;
+
 /**
  * 
  */
@@ -22,9 +23,6 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	TArray<TSubclassOf<UGameplayEffect>> AppliedEffects;
-	
-	UPROPERTY(EditAnywhere)
-	UAnimMontage* FireHipMontage = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float FireDelay = 1.0f;
