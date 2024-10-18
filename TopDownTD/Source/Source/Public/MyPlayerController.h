@@ -8,6 +8,8 @@
 #include "Source/SourcePlayerController.h"
 #include "MyPlayerController.generated.h"
 
+enum class EAbilityInputID : int8;
+
 UCLASS()
 class SOURCE_API AMyPlayerController : public APlayerController
 {
@@ -33,6 +35,9 @@ protected:
 private:
 	void HandleMovementInput(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);
-	void HandleFireInput();
-	void HandleReloadInput();
+	void SendInputToASC(bool IsPressed, EAbilityInputID AbilityInputID) const;
+	void HandleFirePressed();
+	void HandleFireReleased();
+	void HandleReloadPressed();
+	void HandleReloadReleased();
 };

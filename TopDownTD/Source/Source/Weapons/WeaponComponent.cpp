@@ -1,5 +1,7 @@
 ﻿#include "WeaponComponent.h"
-#include "Weapon.h"
+
+#include "AbilitySystemInterface.h"
+#include "RangedWeapon.h"
 #include "GameFramework/Character.h"
 
 UWeaponComponent::UWeaponComponent()
@@ -7,21 +9,12 @@ UWeaponComponent::UWeaponComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UWeaponComponent::Fire()
-{
-	if(!CurrentWeapon) return;
-
-	CurrentWeapon->Fire();
-}
-
 void UWeaponComponent::Reload()
 {
 	if (!CurrentWeapon) return;
-
-	CurrentWeapon->Reload();
 }
 
-AWeapon* UWeaponComponent::GetCurrentWeapon() const
+ARangedWeapon* UWeaponComponent::GetCurrentWeapon() const
 {
 	return CurrentWeapon;
 }
@@ -30,6 +23,8 @@ void UWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OwnerAbilitySystem = Cast<IAbilitySystemInterface>(GetOwner())->GetAbilitySystemComponent();
+	check(OwnerAbilitySystem);
 	SpawnWeapon();
 }
 
@@ -39,7 +34,7 @@ void UWeaponComponent::SpawnWeapon()
 
 	//todo: ACharacter cast makes it impossible to use weapon by other pawns
 	ACharacter* character = Cast<ACharacter>(GetOwner());
-	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+	CurrentWeapon = GetWorld()->SpawnActor<ARangedWeapon>(DefaultWeaponClass);
 	
 	if(!CurrentWeapon) return;
 	
@@ -54,6 +49,7 @@ void UWeaponComponent::SpawnWeapon()
 void UWeaponComponent::SubscribeOnWeapon()
 {
 	CurrentWeapon->OnAmmoChanged.AddUObject(this, &UWeaponComponent::HandleWeaponAmmoChanged);
+	CurrentWeapon->OnEquip(OwnerAbilitySystem);
 }
 
 void UWeaponComponent::UnsubscribeOnWeapon()
@@ -61,9 +57,10 @@ void UWeaponComponent::UnsubscribeOnWeapon()
 	if (!CurrentWeapon) return;
 	
 	CurrentWeapon->OnAmmoChanged.RemoveAll(this);
+	CurrentWeapon->OnUnequip(OwnerAbilitySystem);
 }
 
-void UWeaponComponent::HandleWeaponAmmoChanged(AWeapon* weapon) const
+void UWeaponComponent::HandleWeaponAmmoChanged(ARangedWeapon* weapon) const
 {
 	OnWeaponAmmoChange.Broadcast(weapon);
 }

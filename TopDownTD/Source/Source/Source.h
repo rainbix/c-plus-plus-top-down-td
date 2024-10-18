@@ -5,4 +5,5 @@
 #include "CoreMinimal.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogSource, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogSourceAbilitySystem, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogFWeapon, Log, All);

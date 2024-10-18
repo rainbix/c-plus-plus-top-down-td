@@ -2,6 +2,8 @@
 
 #include "MyPlayerController.h"
 #include <Source/Weapons/WeaponComponent.h>
+
+#include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PlayerCharacterSource.h"
@@ -43,8 +45,10 @@ void AMyPlayerController::SetupInputComponent()
 	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMovementInput);
 
 	//Weapon
-	inputComponent->BindAction(fireInput, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleFireInput);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleReloadInput);
+	inputComponent->BindAction(fireInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleFirePressed);
+	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleFireReleased);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleReloadPressed);
+	inputComponent->BindAction(reloadInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleReloadReleased);
 }
 
 void AMyPlayerController::HandleMovementInput(const FInputActionValue& value)
@@ -83,28 +87,39 @@ void AMyPlayerController::HandleMouseInput(float deltaTime)
 	player->LookAt(directionToMouse, player->mouseRotationSpeed, deltaTime);
 }
 
-void AMyPlayerController::HandleFireInput()
+void AMyPlayerController::SendInputToASC(bool IsPressed, const EAbilityInputID AbilityInputID) const
 {
 	APawn* controlledPawn = GetPawn();
 
-	if (!controlledPawn)
-	{
-		return;
-	}
+	UAbilitySystemComponent* AbilitySystem = Cast<IAbilitySystemInterface>(controlledPawn)->GetAbilitySystemComponent();
 	
-	APlayerCharacterSource* player = Cast<APlayerCharacterSource>(controlledPawn);
-	player->GetWeaponComponent()->Fire();
+	if (IsPressed)
+	{
+		AbilitySystem->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
+	}
+	else
+	{
+		AbilitySystem->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
+	}
 }
 
-void AMyPlayerController::HandleReloadInput()
+void AMyPlayerController::HandleFirePressed()
 {
-	APawn* controlledPawn = GetPawn();
+	SendInputToASC(true, EAbilityInputID::Fire);
+}
 
-	if (!controlledPawn)
-	{
-		return;
-	}
-	
-	APlayerCharacterSource* player = Cast<APlayerCharacterSource>(controlledPawn);
-	player->GetWeaponComponent()->Reload();
+void AMyPlayerController::HandleFireReleased()
+{
+	SendInputToASC(false, EAbilityInputID::Fire);
+}
+
+void AMyPlayerController::HandleReloadPressed()
+{
+	SendInputToASC(true, EAbilityInputID::Reload);
+
+}
+
+void AMyPlayerController::HandleReloadReleased()
+{
+	SendInputToASC(false, EAbilityInputID::Reload);
 }

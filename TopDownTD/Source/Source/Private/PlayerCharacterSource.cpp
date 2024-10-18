@@ -3,6 +3,8 @@
 #include "Source/Public/PlayerCharacterSource.h"
 #include "Source/Health/HealthComponent.h"
 #include "Source/Weapons/WeaponComponent.h"
+#include "AbilitySystemComponent.h"
+#include "Source/AbilitySystem/EAbilityInputID.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
@@ -13,6 +15,8 @@ APlayerCharacterSource::APlayerCharacterSource()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
+
+	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability"));
 }
 
 void APlayerCharacterSource::Tick(float DeltaTime)
@@ -65,4 +69,9 @@ UHealthComponent* APlayerCharacterSource::GetHealthComponent() const
 UWeaponComponent* APlayerCharacterSource::GetWeaponComponent() const
 {
 	return WeaponComponent;
+}
+
+UAbilitySystemComponent* APlayerCharacterSource::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
 }
