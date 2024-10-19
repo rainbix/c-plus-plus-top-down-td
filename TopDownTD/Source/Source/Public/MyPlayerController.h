@@ -24,8 +24,13 @@ public:
 	UInputAction* fireInput;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
 	UInputAction* reloadInput;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
+	UInputAction* buildInput;
 
 	AMyPlayerController();
+
+	DECLARE_MULTICAST_DELEGATE(FOnBuildInput)
+	FOnBuildInput OnBuildInputDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,4 +45,5 @@ private:
 	void HandleFireReleased();
 	void HandleReloadPressed();
 	void HandleReloadReleased();
+	void HandleBuildPressed();
 };

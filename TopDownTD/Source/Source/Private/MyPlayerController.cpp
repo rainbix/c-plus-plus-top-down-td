@@ -49,6 +49,9 @@ void AMyPlayerController::SetupInputComponent()
 	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleFireReleased);
 	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleReloadPressed);
 	inputComponent->BindAction(reloadInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleReloadReleased);
+
+	//Build
+	inputComponent->BindAction(buildInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleBuildPressed);
 }
 
 void AMyPlayerController::HandleMovementInput(const FInputActionValue& value)
@@ -122,4 +125,9 @@ void AMyPlayerController::HandleReloadPressed()
 void AMyPlayerController::HandleReloadReleased()
 {
 	SendInputToASC(false, EAbilityInputID::Reload);
+}
+
+void AMyPlayerController::HandleBuildPressed()
+{
+	OnBuildInputDelegate.Broadcast();
 }
