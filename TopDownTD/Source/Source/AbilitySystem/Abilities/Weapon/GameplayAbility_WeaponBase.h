@@ -11,8 +11,6 @@
 
 class ARangedWeapon;
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponReloadType)
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponFireType)
 /**
  * 
  */

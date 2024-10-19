@@ -63,10 +63,9 @@ void UAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* ASC, FAbilitySet_
 			continue;
 		}
 
-		UGameplayAbility_BaseAbility* Ability = AbilityToGrant.Ability->GetDefaultObject<UGameplayAbility_BaseAbility>();
 		FGameplayAbilitySpec AbilitySpec(AbilityToGrant.Ability, AbilityToGrant.AbilityLevel);
 		AbilitySpec.SourceObject = SourceObject;
-		AbilitySpec.InputID = Ability->GetInputId();
+		AbilitySpec.DynamicAbilityTags.AddTag(AbilityToGrant.InputTag);
 
 		const FGameplayAbilitySpecHandle AbilitySpecHandle = ASC->GiveAbility(AbilitySpec);
 

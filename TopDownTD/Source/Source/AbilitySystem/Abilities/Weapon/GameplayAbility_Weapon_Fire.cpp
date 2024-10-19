@@ -3,11 +3,11 @@
 
 #include "GameplayAbility_Weapon_Fire.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
+#include "Source/SourceGameplayTags.h"
 #include "Source/Weapons/RangedWeapon.h"
 
 UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
 {
-	InputId = EAbilityInputID::Fire;
 	AbilityTags.AddTag(TAG_WeaponFireType);
 }
 
@@ -26,7 +26,6 @@ void UGameplayAbility_Weapon_Fire::ActivateAbility(const FGameplayAbilitySpecHan
 	UAbilityTask_WaitDelay* WaitDelayTask = UAbilityTask_WaitDelay::WaitDelay(this, FireDelay);
 	WaitDelayTask->OnFinish.AddDynamic(this, &ThisClass::OnCompleted);
 	WaitDelayTask->ReadyForActivation();
-
 	ARangedWeapon* Weapon = GetWeaponInstance();
 	Weapon->UpdateFiringTime();
 

@@ -5,8 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
-#include "Source/AbilitySystem/EAbilityInputID.h"
 #include "PlayerCharacterSource.generated.h"
+
+class USourceAbilitySystemComponent;
 
 UCLASS()
 class SOURCE_API APlayerCharacterSource : public ACharacter, public IAbilitySystemInterface
@@ -39,7 +40,7 @@ private:
 	class UWeaponComponent* WeaponComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UAbilitySystemComponent* AbilitySystem;
+	USourceAbilitySystemComponent* AbilitySystem;
 	
 	FVector2D m_moveDirection;
 	FVector m_lookDirection;

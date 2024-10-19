@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "AbilitySet.generated.h"
 
@@ -22,6 +23,9 @@ struct FAbilitySet_GameplayAbility
 	
 	UPROPERTY(EditDefaultsOnly)
 	int32 AbilityLevel = 1;
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag InputTag;
 };
 
 USTRUCT()

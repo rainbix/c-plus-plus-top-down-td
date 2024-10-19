@@ -4,7 +4,7 @@
 #include "Source/Health/HealthComponent.h"
 #include "Source/Weapons/WeaponComponent.h"
 #include "AbilitySystemComponent.h"
-#include "Source/AbilitySystem/EAbilityInputID.h"
+#include "Source/AbilitySystem/SourceAbilitySystemComponent.h"
 
 APlayerCharacterSource::APlayerCharacterSource()
 {
@@ -16,7 +16,7 @@ APlayerCharacterSource::APlayerCharacterSource()
 
 	WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("Weapon"));
 
-	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("Ability"));
+	AbilitySystem = CreateDefaultSubobject<USourceAbilitySystemComponent>(TEXT("Ability"));
 }
 
 void APlayerCharacterSource::Tick(float DeltaTime)

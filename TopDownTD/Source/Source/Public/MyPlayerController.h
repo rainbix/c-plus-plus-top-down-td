@@ -6,6 +6,8 @@
 #include "InputActionValue.h"
 #include "GameFramework/PlayerController.h"
 #include "Source/SourcePlayerController.h"
+#include "Source/AbilitySystem/SourceAbilitySystemComponent.h"
+#include "Source/Input/InputConfig.h"
 #include "MyPlayerController.generated.h"
 
 enum class EAbilityInputID : int8;
@@ -21,29 +23,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
 	UInputAction* moveInput;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
-	UInputAction* fireInput;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
-	UInputAction* reloadInput;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Player Input")
 	UInputAction* buildInput;
 
 	AMyPlayerController();
+	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 
 	DECLARE_MULTICAST_DELEGATE(FOnBuildInput)
 	FOnBuildInput OnBuildInputDelegate;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category="Player Input")
+	TObjectPtr<UInputConfig> InputConfig;
+
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
 
+
 private:
+	USourceAbilitySystemComponent* GetSourceAbilitySystemComponent() const;
 	void HandleMovementInput(const FInputActionValue& value);
 	void HandleMouseInput(float deltaTime);
-	void SendInputToASC(bool IsPressed, EAbilityInputID AbilityInputID) const;
-	void HandleFirePressed();
-	void HandleFireReleased();
-	void HandleReloadPressed();
-	void HandleReloadReleased();
+	void AbilityInputTagPressed(FGameplayTag GameplayTag);
+	void AbilityInputTagReleased(FGameplayTag GameplayTag);
 	void HandleBuildPressed();
 };

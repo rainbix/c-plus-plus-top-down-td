@@ -1,0 +1,10 @@
+﻿#pragma once
+
+#include "NativeGameplayTags.h"
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponReloadType)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponFireType)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_WeaponFireType)
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Fire)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Reload)

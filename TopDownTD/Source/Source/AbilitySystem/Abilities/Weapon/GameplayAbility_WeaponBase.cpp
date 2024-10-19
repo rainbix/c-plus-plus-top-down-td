@@ -5,9 +5,6 @@
 #include "Source/Weapons/RangedWeapon.h"
 #include "Source/Source.h"
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_WeaponReloadType, "Ability.Type.Reload");
-UE_DEFINE_GAMEPLAY_TAG(TAG_WeaponFireType, "Ability.Type.Fire");
-
 bool UGameplayAbility_WeaponBase::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                         const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
                                         const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const

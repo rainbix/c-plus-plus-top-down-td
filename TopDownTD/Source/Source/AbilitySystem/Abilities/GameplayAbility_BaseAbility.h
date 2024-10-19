@@ -4,13 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "Source/AbilitySystem/EAbilityInputID.h"
 #include "GameplayAbility_BaseAbility.generated.h"
 
 class UAbilityCost;
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EAbilityActivationPolicy : uint8
+{
+	// Try to activate the ability when the input is triggered.
+	OnInputTriggered,
+
+	// Continually try to activate the ability while the input is active.
+	WhileInputActive,
+
+	// Try to activate the ability when an avatar is assigned.
+	OnSpawn
+};
+
+
+
 UCLASS(Abstract)
 class SOURCE_API UGameplayAbility_BaseAbility : public UGameplayAbility
 {
@@ -18,17 +33,18 @@ class SOURCE_API UGameplayAbility_BaseAbility : public UGameplayAbility
 	
 public:
 	UGameplayAbility_BaseAbility();
-	int32 GetInputId();
+	EAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 
 protected:
-	UPROPERTY(EditAnywhere)
-	EAbilityInputID InputId;
-	
+	UPROPERTY(EditDefaultsOnly, Category="Ability")
+	EAbilityActivationPolicy ActivationPolicy;
+
 	// Additional costs that must be paid to activate this ability
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = Costs)
 	TArray<TObjectPtr<UAbilityCost>> AdditionalCosts;
 	
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
-
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	void TryActivateAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) const;
 };

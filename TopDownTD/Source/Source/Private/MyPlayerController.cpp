@@ -27,6 +27,16 @@ void AMyPlayerController::Tick(float DeltaTime)
 	HandleMouseInput(DeltaTime);
 }
 
+void AMyPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
+{
+	Super::PostProcessInput(DeltaTime, bGamePaused);
+
+	if (USourceAbilitySystemComponent* SourceASC = GetSourceAbilitySystemComponent())
+	{
+		SourceASC->ProcessAbilityInput();
+	}
+}
+
 void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -44,14 +54,34 @@ void AMyPlayerController::SetupInputComponent()
 	UEnhancedInputComponent* inputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	inputComponent->BindAction(moveInput, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMovementInput);
 
-	//Weapon
-	inputComponent->BindAction(fireInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleFirePressed);
-	inputComponent->BindAction(fireInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleFireReleased);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleReloadPressed);
-	inputComponent->BindAction(reloadInput, ETriggerEvent::Completed, this, &AMyPlayerController::HandleReloadReleased);
-
+	if (InputConfig)
+	{
+		for (FInputTagAction InputTagAction : InputConfig->AbilityInputActions)
+		{
+			inputComponent->BindAction(InputTagAction.InputAction, ETriggerEvent::Started, this, &ThisClass::AbilityInputTagPressed, InputTagAction.InputTag);
+			inputComponent->BindAction(InputTagAction.InputAction, ETriggerEvent::Completed, this, &ThisClass::AbilityInputTagReleased, InputTagAction.InputTag);
+		}		
+	}
 	//Build
 	inputComponent->BindAction(buildInput, ETriggerEvent::Started, this, &AMyPlayerController::HandleBuildPressed);
+}
+
+USourceAbilitySystemComponent* AMyPlayerController::GetSourceAbilitySystemComponent() const
+{
+	USourceAbilitySystemComponent* SourceASC = nullptr;
+	
+	if (const APawn* ControlledPawn = GetPawn())
+	{
+		if (const IAbilitySystemInterface* AscInterface = Cast<IAbilitySystemInterface>(ControlledPawn))
+		{
+			if (UAbilitySystemComponent* ASC = AscInterface->GetAbilitySystemComponent())
+			{
+				SourceASC = Cast<USourceAbilitySystemComponent>(ASC);
+			}
+		}
+	}
+
+	return SourceASC;
 }
 
 void AMyPlayerController::HandleMovementInput(const FInputActionValue& value)
@@ -90,42 +120,23 @@ void AMyPlayerController::HandleMouseInput(float deltaTime)
 	player->LookAt(directionToMouse, player->mouseRotationSpeed, deltaTime);
 }
 
-void AMyPlayerController::SendInputToASC(bool IsPressed, const EAbilityInputID AbilityInputID) const
+void AMyPlayerController::AbilityInputTagPressed(FGameplayTag GameplayTag)
 {
-	APawn* controlledPawn = GetPawn();
-
-	UAbilitySystemComponent* AbilitySystem = Cast<IAbilitySystemInterface>(controlledPawn)->GetAbilitySystemComponent();
-	
-	if (IsPressed)
+	if (USourceAbilitySystemComponent* ASC = GetSourceAbilitySystemComponent())
 	{
-		AbilitySystem->AbilityLocalInputPressed(static_cast<int32>(AbilityInputID));
-	}
-	else
-	{
-		AbilitySystem->AbilityLocalInputReleased(static_cast<int32>(AbilityInputID));
+		ASC->AbilityInputTagPressed(GameplayTag);
 	}
 }
 
-void AMyPlayerController::HandleFirePressed()
+
+void AMyPlayerController::AbilityInputTagReleased(FGameplayTag GameplayTag)
 {
-	SendInputToASC(true, EAbilityInputID::Fire);
+	if (USourceAbilitySystemComponent* ASC = GetSourceAbilitySystemComponent())
+	{
+		ASC->AbilityInputTagReleased(GameplayTag);
+	}
 }
 
-void AMyPlayerController::HandleFireReleased()
-{
-	SendInputToASC(false, EAbilityInputID::Fire);
-}
-
-void AMyPlayerController::HandleReloadPressed()
-{
-	SendInputToASC(true, EAbilityInputID::Reload);
-
-}
-
-void AMyPlayerController::HandleReloadReleased()
-{
-	SendInputToASC(false, EAbilityInputID::Reload);
-}
 
 void AMyPlayerController::HandleBuildPressed()
 {

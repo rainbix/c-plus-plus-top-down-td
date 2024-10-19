@@ -5,11 +5,11 @@
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Source/Weapons/RangedWeapon.h"
 #include "NativeGameplayTags.h"
+#include "Source/SourceGameplayTags.h"
 
 
 UGameplayAbility_Weapon_Reload::UGameplayAbility_Weapon_Reload()
 {
-	InputId = EAbilityInputID::Reload;
 	AbilityTags.AddTag(TAG_WeaponReloadType);
 	BlockAbilitiesWithTag.AddTag(TAG_WeaponFireType);
 	ActivationBlockedTags.AddTag(TAG_WeaponFireType);
@@ -38,6 +38,9 @@ void UGameplayAbility_Weapon_Reload::ActivateAbility(const FGameplayAbilitySpecH
 	UAbilityTask_WaitDelay* WaitDelayTask = UAbilityTask_WaitDelay::WaitDelay(this, ReloadTime);
 	WaitDelayTask->OnFinish.AddDynamic(this, &ThisClass::OnCompleted);
 	WaitDelayTask->ReadyForActivation();
+
+	//Temporary text
+	GEngine->AddOnScreenDebugMessage(1001, ReloadTime, FColor::Yellow, TEXT("Reloading!"));	
 }
 
 void UGameplayAbility_Weapon_Reload::EndAbility(const FGameplayAbilitySpecHandle Handle,
@@ -51,6 +54,8 @@ void UGameplayAbility_Weapon_Reload::EndAbility(const FGameplayAbilitySpecHandle
 	}
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	GEngine->RemoveOnScreenDebugMessage(1001);	
+
 }
 
 void UGameplayAbility_Weapon_Reload::OnCompleted()
