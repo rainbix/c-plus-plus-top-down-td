@@ -54,11 +54,9 @@ public:
 	
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTowerSelected, TSubclassOf<ATowerActor> selectedTower)
 	FOnTowerSelected OnTowerBuildRequest;
-
-	void TryBuild();
+	
 	void ShowTowerShopWidget();
-	void ShopTowerClosedHandler();
-	void ShopTowerSelectedHandler(TSubclassOf<ATowerActor> selectedTowerClass);
+	void ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass) const;
 
 	#pragma endregion 
 

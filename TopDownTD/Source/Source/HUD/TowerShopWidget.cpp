@@ -2,7 +2,6 @@
 
 
 #include "TowerShopWidget.h"
-#include "Source/TowerActor.h"
 #include "Components/Button.h"
 
 void UTowerShopWidget::NativeConstruct()
@@ -30,21 +29,15 @@ void UTowerShopWidget::NativeConstruct()
 
 void UTowerShopWidget::CloseButtonPressHandler()
 {
-	OnClosed.Broadcast();
+	OnClosed.Broadcast(nullptr);
 }
 
 void UTowerShopWidget::TowerButtonAPressHandler()
 {
-	OnClosed.Broadcast();
-	
-	if (TempTowerToPlaceA)
-		OnTowerSelected.Broadcast(TempTowerToPlaceA);
+	OnClosed.Broadcast(TempTowerToPlaceA);
 }
 
 void UTowerShopWidget::TowerButtonBPressHandler()
 {
-	OnClosed.Broadcast();
-	
-	if (TempTowerToPlaceB)
-		OnTowerSelected.Broadcast(TempTowerToPlaceB);
+	OnClosed.Broadcast(TempTowerToPlaceB);
 }
