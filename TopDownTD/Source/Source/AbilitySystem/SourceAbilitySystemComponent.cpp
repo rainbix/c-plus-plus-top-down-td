@@ -66,7 +66,6 @@ void USourceAbilitySystemComponent::ProcessAbilityInput()
 				if (LyraAbilityCDO->GetActivationPolicy() == EAbilityActivationPolicy::WhileInputActive)
 				{
 					AbilitiesToActivate.AddUnique(AbilitySpec->Handle);
-					UE_LOG(LogAbilitySystemComponent, Display, TEXT("AbilitiesToActivate from InputHeldSpecHandles. Ability: [%s]"), *GetNameSafe(AbilitySpec->Ability));
 				}
 			}
 		}
@@ -95,7 +94,6 @@ void USourceAbilitySystemComponent::ProcessAbilityInput()
 					if (LyraAbilityCDO->GetActivationPolicy() == EAbilityActivationPolicy::OnInputTriggered)
 					{
 						AbilitiesToActivate.AddUnique(AbilitySpec->Handle);
-						UE_LOG(LogAbilitySystemComponent, Display, TEXT("AbilitiesToActivate from InputPressedSpecHandles. Ability: [%s]"), *GetNameSafe(AbilitySpec->Ability));
 					}
 				}
 			}
