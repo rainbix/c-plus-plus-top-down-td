@@ -59,13 +59,11 @@ void UGameplayAbility_Weapon_Reload::EndAbility(const FGameplayAbilitySpecHandle
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	GEngine->RemoveOnScreenDebugMessage(1001);	
-
 }
 
 void UGameplayAbility_Weapon_Reload::OnCompleted()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
-
 }
 
 void UGameplayAbility_Weapon_Reload::OnCancelled()

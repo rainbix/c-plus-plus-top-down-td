@@ -79,5 +79,4 @@ UAbilitySystemComponent* APlayerCharacterSource::GetAbilitySystemComponent() con
 USourceAbilitySystemComponent* APlayerCharacterSource::GetSourceAbilitySystemComponent() const
 {
 	return AbilitySystem;
-
 }
