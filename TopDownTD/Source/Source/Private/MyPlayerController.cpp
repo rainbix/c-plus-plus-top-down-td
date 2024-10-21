@@ -56,7 +56,7 @@ void AMyPlayerController::SetupInputComponent()
 
 	if (InputConfig)
 	{
-		for (FInputTagAction InputTagAction : InputConfig->AbilityInputActions)
+		for (FInputActionTag InputTagAction : InputConfig->AbilityInputActions)
 		{
 			inputComponent->BindAction(InputTagAction.InputAction, ETriggerEvent::Started, this, &ThisClass::AbilityInputTagPressed, InputTagAction.InputTag);
 			inputComponent->BindAction(InputTagAction.InputAction, ETriggerEvent::Completed, this, &ThisClass::AbilityInputTagReleased, InputTagAction.InputTag);
@@ -72,12 +72,9 @@ USourceAbilitySystemComponent* AMyPlayerController::GetSourceAbilitySystemCompon
 	
 	if (const APawn* ControlledPawn = GetPawn())
 	{
-		if (const IAbilitySystemInterface* AscInterface = Cast<IAbilitySystemInterface>(ControlledPawn))
+		if (const ISourceAbilitySystemInterface* AscInterface = Cast<ISourceAbilitySystemInterface>(ControlledPawn))
 		{
-			if (UAbilitySystemComponent* ASC = AscInterface->GetAbilitySystemComponent())
-			{
-				SourceASC = Cast<USourceAbilitySystemComponent>(ASC);
-			}
+			SourceASC = AscInterface->GetSourceAbilitySystemComponent();
 		}
 	}
 

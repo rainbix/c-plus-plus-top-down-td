@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "AbilitySystemInterface.h"
+#include "Source/AbilitySystem/SourceAbilitySystemInterface.h"
 #include "PlayerCharacterSource.generated.h"
 
 class USourceAbilitySystemComponent;
 
 UCLASS()
-class SOURCE_API APlayerCharacterSource : public ACharacter, public IAbilitySystemInterface
+class SOURCE_API APlayerCharacterSource : public ACharacter, public ISourceAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -28,6 +28,7 @@ public:
 	class UHealthComponent* GetHealthComponent() const;
 	class UWeaponComponent* GetWeaponComponent() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual USourceAbilitySystemComponent* GetSourceAbilitySystemComponent() const override;
 
 protected:
 	virtual void Tick(float DeltaTime) override;

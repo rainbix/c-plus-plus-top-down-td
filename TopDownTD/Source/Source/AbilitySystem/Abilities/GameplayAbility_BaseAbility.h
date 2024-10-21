@@ -11,7 +11,7 @@ class UAbilityCost;
  * 
  */
 
-UENUM(BlueprintType)
+UENUM()
 enum class EAbilityActivationPolicy : uint8
 {
 	// Try to activate the ability when the input is triggered.

@@ -12,7 +12,7 @@ class UInputAction;
  * FInputAction
  */
 USTRUCT()
-struct FInputTagAction
+struct FInputActionTag
 {
 	GENERATED_BODY()
 
@@ -33,5 +33,5 @@ class SOURCE_API UInputConfig : public UDataAsset
 
 public:
 	UPROPERTY(EditDefaultsOnly)
-	TArray<FInputTagAction> AbilityInputActions;
+	TArray<FInputActionTag> AbilityInputActions;
 };

@@ -33,7 +33,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Player Input")
-	TObjectPtr<UInputConfig> InputConfig;
+	TObjectPtr<UInputConfig> InputConfig = nullptr;
 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
