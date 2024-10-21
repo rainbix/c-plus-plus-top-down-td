@@ -9,6 +9,12 @@
 UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
 {
 	AbilityTags.AddTag(TAG_WeaponFireType);
+	ActivationOwnedTags.AddTag(TAG_WeaponFireEvent);
+
+	FAbilityTriggerData TriggerData;
+	TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
+	TriggerData.TriggerTag = TAG_Input_Fire;
+	AbilityTriggers.Add(TriggerData);
 }
 
 void UGameplayAbility_Weapon_Fire::ActivateAbility(const FGameplayAbilitySpecHandle Handle,

@@ -7,12 +7,16 @@
 #include "NativeGameplayTags.h"
 #include "Source/SourceGameplayTags.h"
 
-
 UGameplayAbility_Weapon_Reload::UGameplayAbility_Weapon_Reload()
 {
 	AbilityTags.AddTag(TAG_WeaponReloadType);
 	BlockAbilitiesWithTag.AddTag(TAG_WeaponFireType);
-	ActivationBlockedTags.AddTag(TAG_WeaponFireType);
+	ActivationOwnedTags.AddTag(TAG_WeaponReloadEvent);
+
+	FAbilityTriggerData TriggerData;
+	TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
+	TriggerData.TriggerTag = TAG_Input_Reload;
+	AbilityTriggers.Add(TriggerData);
 }
 
 bool UGameplayAbility_Weapon_Reload::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,

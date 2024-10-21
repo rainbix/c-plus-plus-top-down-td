@@ -24,8 +24,6 @@ void USourceAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& I
 			{
 				InputPressedSpecHandles.AddUnique(AbilitySpec.Handle);
 				InputHeldSpecHandles.AddUnique(AbilitySpec.Handle);
-				UE_LOG(LogAbilitySystemComponent, Display, TEXT("AbilityInputTagPressed Tag: [%s], Ability: [%s]"), *InputTag.ToString(), *GetNameSafe(AbilitySpec.Ability));
-
 			}
 		}
 	}
@@ -41,7 +39,6 @@ void USourceAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& 
 			{
 				InputReleasedSpecHandles.AddUnique(AbilitySpec.Handle);
 				InputHeldSpecHandles.Remove(AbilitySpec.Handle);
-				UE_LOG(LogAbilitySystemComponent, Display, TEXT("AbilityInputTagReleased Tag: [%s], Ability: [%s]"), *InputTag.ToString(), *GetNameSafe(AbilitySpec.Ability));
 			}
 		}
 	}
