@@ -11,10 +11,9 @@ class UWidgetComponent;
 class ATowerBuildingScaffolding;
 class UParticleSystemComponent;
 
-//TODO: Expose current state as enum
 enum class ETowerStates : uint8
 {
-	State1, State2, State3
+	IsEmpty, IsTowerBuilding, IsTowerReady
 };
 
 UCLASS()
@@ -30,9 +29,9 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
-	bool IsInInteractionRange() const;
-	bool CanSpawnTower() const;
 	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn, float buildTime);
+	bool IsInInteractionRange() const;
+	ETowerStates GetTowerState() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,14 +45,6 @@ private:
 	
 	void TowerBuildingFinishedHandler(ATowerActor* tower);
 
-	#pragma region Tower State Properties
-	
-	bool IsEmpty() const;
-	bool IsTowerBuilding() const;
-	bool IsTowerReady() const;
-
-	#pragma endregion
-	
 	#pragma endregion
 
 	#pragma region Scaffolding

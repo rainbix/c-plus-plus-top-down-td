@@ -63,8 +63,10 @@ void UTowerBuildController::TryShowTowerShop()
 		if (!towerPlaceholder || !towerPlaceholder->IsInInteractionRange())
 			continue;
 
-		//Find first placeholder that can spawn a tower
-		if (towerPlaceholder->CanSpawnTower())
+		const ETowerStates towerState = towerPlaceholder->GetTowerState();
+		
+		//Find first empty placeholder to spawn a tower
+		if (towerState == ETowerStates::IsEmpty)
 		{
 			//Save selected placeholder as active
 			activePlaceholder = towerPlaceholder;
@@ -75,6 +77,17 @@ void UTowerBuildController::TryShowTowerShop()
 			
 			break;
 		}
-		//else ... Add here other possible interactions (eg upgrade tower, destroy tower)
+
+		if (towerState == ETowerStates::IsTowerBuilding)
+		{
+			//... Add here other possible interactions (speed up, cancel)
+			break;
+		}
+
+		if (towerState == ETowerStates::IsTowerReady)
+		{
+			//... Add here other possible interactions (upgrade, destroy tower)
+			break;
+		}
 	}
 }

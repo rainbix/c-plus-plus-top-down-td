@@ -26,6 +26,7 @@ protected:
 private:
 	TArray<ATowerSpawnPlaceholder*> TowerSpawnPlaceholders;
 
+	//REPLACE BY DATA TABLE
 	UPROPERTY(EditDefaultsOnly, Category="Temp")
 	float BuildTime;
 	

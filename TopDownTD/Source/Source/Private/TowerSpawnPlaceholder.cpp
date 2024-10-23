@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TowerSpawnPlaceholder.h"
+#include "PlayerCharacterSource.h"
 #include "TowerBuildController.h"
 #include "Source/TowerActor.h"
 #include "TowerBuildingScaffolding.h"
@@ -43,15 +44,19 @@ void ATowerSpawnPlaceholder::BeginPlay()
 void ATowerSpawnPlaceholder::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	
-	UpdateInteractionState(true);
+
+	//Update interaction only if collides with a player
+	if (Cast<APlayerCharacterSource>(OtherActor))
+		UpdateInteractionState(true);
 }
 
 void ATowerSpawnPlaceholder::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-	
-	UpdateInteractionState(false);
+
+	//Update interaction only if collides with a player
+	if (Cast<APlayerCharacterSource>(OtherActor))
+		UpdateInteractionState(false);
 }
 
 #pragma endregion
@@ -123,29 +128,19 @@ void ATowerSpawnPlaceholder::TowerBuildingFinishedHandler(ATowerActor* tower)
 	spawnedTower = tower;
 }
 
-#pragma region Tower State Properties
-
-bool ATowerSpawnPlaceholder::CanSpawnTower() const
+ETowerStates ATowerSpawnPlaceholder::GetTowerState() const
 {
-	return isInInteractionRange && IsEmpty();
-}
+	//Is Ready
+	if (spawnedTower != nullptr)
+		return ETowerStates::IsTowerReady;
 
-bool ATowerSpawnPlaceholder::IsEmpty() const
-{
-	return !IsTowerBuilding() && !IsTowerReady();
-}
+	//Is Building
+	if (spawnedScaffolding != nullptr)
+		return ETowerStates::IsTowerBuilding;
 
-bool ATowerSpawnPlaceholder::IsTowerBuilding() const
-{
-	return spawnedScaffolding != nullptr;
+	//Is Empty
+	return ETowerStates::IsEmpty;
 }
-
-bool ATowerSpawnPlaceholder::IsTowerReady() const
-{
-	return spawnedTower != nullptr;
-}
-
-#pragma endregion
 
 #pragma endregion 
 
@@ -187,19 +182,23 @@ T* ATowerSpawnPlaceholder::InitializeFromComponent(int indexToTake)
 void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 {
 	isInInteractionRange = isInteractionAllowed;
+
+	const ETowerStates state = GetTowerState();
 	
 	//Enable/Disable Build Widget only if no tower built yet
-	if (IsEmpty())
+	if (state == ETowerStates::IsEmpty)
 	{
 		ToggleWidget(InteractEmptyWidgetHolder, isInInteractionRange);
 		ToggleEffect(BuildReadyEffectComponent, isInInteractionRange);
 	}
-	else if (isInInteractionRange && IsTowerBuilding())
+	else if (state == ETowerStates::IsTowerBuilding)
 	{
+		//if (isInInteractionRange)
 		//Do some stuff if tower is building (speed up for coins, etc)
 	}
-	else if (isInInteractionRange && IsTowerReady())
+	else if (state == ETowerStates::IsTowerReady)
 	{
+		//if (isInInteractionRange)
 		//Do some stuff if tower is build and ready (upgrade, destroy, etc)
 	}
 }
