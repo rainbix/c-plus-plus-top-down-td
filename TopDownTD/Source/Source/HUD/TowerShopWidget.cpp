@@ -2,12 +2,29 @@
 
 
 #include "TowerShopWidget.h"
+#include "Source/TowerActor.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Source/Data/TowerShopData.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
 
 void UTowerShopWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	
+	InitializeButtonHandlers();
+	
+	InitializeTowerView(towerAName, towerAPrice, towerABuildTime, TowerAImage, TowerARowName);
+	InitializeTowerView(towerBName, towerBPrice, towerBBuildTime, TowerBImage, TowerBRowName);
+	
+	//Example for iterating over all table
+	//TArray<FTowerShopData*> Towers;
+	//DataTableHandle.DataTable->GetAllRows("", Towers);
+}
 
+void UTowerShopWidget::InitializeButtonHandlers()
+{
 	if (closeButton)
 	{
 		closeButton->OnClicked.Clear();
@@ -27,6 +44,35 @@ void UTowerShopWidget::NativeConstruct()
 	}
 }
 
+void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* towerPrice, UTextBlock* towerBuildTime, UImage* towerImage,const FName& rowName)
+{
+	if (const auto towerData = GetTowerDataFromTable(rowName))
+	{
+		if (towerName)
+		{
+			towerName->SetText(towerData->TowerName);
+		}
+
+		if (towerPrice)
+		{
+			const FString costStr = FString::Printf(TEXT("$ %d"), towerData->Cost);
+			towerPrice->SetText(FText::FromString(costStr));
+		}
+
+		if (towerBuildTime)
+		{
+			const FString buildTimeStr = FString::Printf(TEXT("%d sec"), towerData->BuildTime);
+			towerBuildTime->SetText(FText::FromString(buildTimeStr));
+		}
+
+		if (towerImage && towerData->TowerIcon.IsValid())
+		{
+			const auto image = towerData->TowerIcon.Get();
+			towerImage->SetBrushFromTexture(image);
+		}
+	}
+}
+
 void UTowerShopWidget::CloseButtonPressHandler()
 {
 	OnClosed.Broadcast(nullptr);
@@ -34,10 +80,34 @@ void UTowerShopWidget::CloseButtonPressHandler()
 
 void UTowerShopWidget::TowerButtonAPressHandler()
 {
-	OnClosed.Broadcast(TempTowerToPlaceA);
+	BroadCastWithTowerSelection(TowerARowName);
 }
 
 void UTowerShopWidget::TowerButtonBPressHandler()
 {
-	OnClosed.Broadcast(TempTowerToPlaceB);
+	BroadCastWithTowerSelection(TowerBRowName);
+}
+
+void UTowerShopWidget::BroadCastWithTowerSelection(const FName& towerRowName) const
+{
+	const auto towerDataEntry = GetTowerDataFromTable(towerRowName);
+	if (towerDataEntry && towerDataEntry->TowerClass.IsValid())
+	{
+		OnClosed.Broadcast(towerDataEntry->TowerClass.Get());
+	}
+	else
+	{
+		if (towerDataEntry == nullptr)
+			GeneralPurposeUtils::DisplayScreenMessage("TowerDataEntry not valid", FColor::Red);
+		else if (!towerDataEntry->TowerClass.IsValid())
+			GeneralPurposeUtils::DisplayScreenMessage("TowerClass pointer not valid", FColor::Red);
+	}
+}
+
+const FTowerShopData* UTowerShopWidget::GetTowerDataFromTable(const FName& rowName) const
+{
+	if (DataTableHandle.DataTable)
+		return DataTableHandle.DataTable->FindRow<FTowerShopData>(rowName, "");
+	
+	return nullptr;
 }
