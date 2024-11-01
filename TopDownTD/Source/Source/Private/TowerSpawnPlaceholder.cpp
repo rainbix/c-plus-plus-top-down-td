@@ -85,13 +85,16 @@ void ATowerSpawnPlaceholder::ToggleWidget(UWidgetComponent* widget, bool isActiv
 
 #pragma region Towers
 
-void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild, float buildTime)
+void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild, int buildTime)
 {
 	if (!towerToBuild)
 	{
 		GeneralPurposeUtils::DisplayScreenMessage("[TowerSpawnPlaceholder] Nothing to spawn", FColor::Red);
 		return;
 	}
+
+	//Clamp min build time to 1 sec
+	buildTime = FMath::Clamp(buildTime, 1, buildTime);
 	
 	//Prepare spawn
 	FActorSpawnParameters SpawnParams;

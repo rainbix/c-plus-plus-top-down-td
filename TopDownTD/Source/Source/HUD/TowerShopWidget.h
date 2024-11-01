@@ -19,7 +19,7 @@ class SOURCE_API UTowerShopWidget : public UUserWidget
 
 public:
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnClosed, TSubclassOf<ATowerActor> selectedTower)
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClosed, TSubclassOf<ATowerActor>, int)
 	FOnClosed OnClosed;
 
 protected:

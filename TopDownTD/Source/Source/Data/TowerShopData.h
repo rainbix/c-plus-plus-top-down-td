@@ -20,8 +20,8 @@ struct SOURCE_API FTowerShopData : public FTableRowBase
 	int Cost;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UTexture2D> TowerIcon;
+	TObjectPtr<UTexture2D> TowerIcon;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<ATowerActor> TowerClass;
+	TSubclassOf<ATowerActor> TowerClass;
 };

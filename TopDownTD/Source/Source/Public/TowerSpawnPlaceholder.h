@@ -29,7 +29,7 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
-	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn, float buildTime);
+	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn, int buildTime);
 	bool IsInInteractionRange() const;
 	ETowerStates GetTowerState() const;
 

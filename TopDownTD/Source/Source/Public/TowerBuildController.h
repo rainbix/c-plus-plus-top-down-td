@@ -25,10 +25,6 @@ protected:
 
 private:
 	TArray<ATowerSpawnPlaceholder*> TowerSpawnPlaceholders;
-
-	//REPLACE BY DATA TABLE
-	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	float BuildTime;
 	
 	UPROPERTY()
 	AGameplayHUD* hud;
@@ -43,7 +39,7 @@ private:
 	void BuildInputHandler();
 	
 	//Gets called when user picks a tower in tower shop
-	void TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass);
+	void TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime);
 	
 	void TryShowTowerShop();
 };

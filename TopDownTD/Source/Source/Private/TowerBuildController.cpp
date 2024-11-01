@@ -42,11 +42,11 @@ void UTowerBuildController::BuildInputHandler()
 }
 
 
-void UTowerBuildController::TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass)
+void UTowerBuildController::TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime)
 {
 	if (selectedTowerClass && activePlaceholder)
 	{
-		activePlaceholder->BuildTower(selectedTowerClass, BuildTime);
+		activePlaceholder->BuildTower(selectedTowerClass, buildTime);
 		activePlaceholder = nullptr;
 	}
 	else

@@ -52,11 +52,11 @@ public:
 
 	#pragma region Tower Shop
 	
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTowerSelected, TSubclassOf<ATowerActor> selectedTower)
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTowerSelected, TSubclassOf<ATowerActor>, int)
 	FOnTowerSelected OnTowerBuildRequest;
 	
 	void ShowTowerShopWidget();
-	void ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass) const;
+	void ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime) const;
 
 	#pragma endregion 
 

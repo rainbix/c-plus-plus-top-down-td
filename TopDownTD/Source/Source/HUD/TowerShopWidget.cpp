@@ -65,17 +65,16 @@ void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* to
 			towerBuildTime->SetText(FText::FromString(buildTimeStr));
 		}
 
-		if (towerImage && towerData->TowerIcon.IsValid())
+		if (towerImage && towerData->TowerIcon)
 		{
-			const auto image = towerData->TowerIcon.Get();
-			towerImage->SetBrushFromTexture(image);
+			towerImage->SetBrushFromTexture(towerData->TowerIcon);
 		}
 	}
 }
 
 void UTowerShopWidget::CloseButtonPressHandler()
 {
-	OnClosed.Broadcast(nullptr);
+	OnClosed.Broadcast(nullptr, -1);
 }
 
 void UTowerShopWidget::TowerButtonAPressHandler()
@@ -91,15 +90,15 @@ void UTowerShopWidget::TowerButtonBPressHandler()
 void UTowerShopWidget::BroadCastWithTowerSelection(const FName& towerRowName) const
 {
 	const auto towerDataEntry = GetTowerDataFromTable(towerRowName);
-	if (towerDataEntry && towerDataEntry->TowerClass.IsValid())
+	if (towerDataEntry && towerDataEntry->TowerClass)
 	{
-		OnClosed.Broadcast(towerDataEntry->TowerClass.Get());
+		OnClosed.Broadcast(towerDataEntry->TowerClass, towerDataEntry->BuildTime);
 	}
 	else
 	{
 		if (towerDataEntry == nullptr)
 			GeneralPurposeUtils::DisplayScreenMessage("TowerDataEntry not valid", FColor::Red);
-		else if (!towerDataEntry->TowerClass.IsValid())
+		else if (!towerDataEntry->TowerClass)
 			GeneralPurposeUtils::DisplayScreenMessage("TowerClass pointer not valid", FColor::Red);
 	}
 }
