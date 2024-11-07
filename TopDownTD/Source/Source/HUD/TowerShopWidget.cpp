@@ -2,6 +2,8 @@
 
 
 #include "TowerShopWidget.h"
+
+#include "GameplayGameState.h"
 #include "Source/TowerActor.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
@@ -17,10 +19,15 @@ void UTowerShopWidget::NativeConstruct()
 	
 	InitializeTowerView(towerAName, towerAPrice, towerABuildTime, TowerAImage, TowerARowName);
 	InitializeTowerView(towerBName, towerBPrice, towerBBuildTime, TowerBImage, TowerBRowName);
-	
-	//Example for iterating over all table
-	//TArray<FTowerShopData*> Towers;
-	//DataTableHandle.DataTable->GetAllRows("", Towers);
+
+	if (currentMoneyText)
+	{
+		if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
+		{
+			const FString costStr = FString::Printf(TEXT("$ %d"), gameState->GetCurrentMoney());
+			currentMoneyText->SetText(FText::FromString(costStr));
+		}
+	}
 }
 
 void UTowerShopWidget::InitializeButtonHandlers()
@@ -46,6 +53,10 @@ void UTowerShopWidget::InitializeButtonHandlers()
 
 void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* towerPrice, UTextBlock* towerBuildTime, UImage* towerImage,const FName& rowName)
 {
+	//Example for iterating over all table
+	//TArray<FTowerShopData*> Towers;
+	//DataTableHandle.DataTable->GetAllRows("", Towers);
+	
 	if (const auto towerData = GetTowerDataFromTable(rowName))
 	{
 		if (towerName)
