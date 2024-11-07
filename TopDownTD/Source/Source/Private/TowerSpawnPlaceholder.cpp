@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TowerSpawnPlaceholder.h"
+#include "PlayerCharacterSource.h"
+#include "TowerBuildController.h"
 #include "Source/TowerActor.h"
 #include "TowerBuildingScaffolding.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Source/HUD/GameplayHUD.h"
 #include "Source/Tools/GeneralPurposeUtils.h"
 
 #pragma region Overrides
@@ -25,32 +26,37 @@ void ATowerSpawnPlaceholder::BeginPlay()
 		InitializeWidgets();
 		InitializeInteractions();
 
-		//Get reference to HUD class
-		const APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		hud = Cast<AGameplayHUD>(playerController->GetHUD());
-		if (hud)
+		//Register itself in TowerBuildController
+		if (const APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 		{
-			//hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
+			if (UTowerBuildController* towerBuildController = playerController->FindComponentByClass<UTowerBuildController>())
+			{
+				towerBuildController->RegisterPlaceholder(this);
+			}
 		}
 	}
 	catch (...)
 	{
-		GeneralPurposeUtils::DisplayScreenMessage("BeginPlay failed", FColor::Red);
+		GeneralPurposeUtils::DisplayScreenMessage("[ATowerSpawnPlaceholder] BeginPlay failed", FColor::Red);
 	}
 }
 
 void ATowerSpawnPlaceholder::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	
-	UpdateInteractionState(true);
+
+	//Update interaction only if collides with a player
+	if (Cast<APlayerCharacterSource>(OtherActor))
+		UpdateInteractionState(true);
 }
 
 void ATowerSpawnPlaceholder::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-	
-	UpdateInteractionState(false);
+
+	//Update interaction only if collides with a player
+	if (Cast<APlayerCharacterSource>(OtherActor))
+		UpdateInteractionState(false);
 }
 
 #pragma endregion
@@ -79,21 +85,16 @@ void ATowerSpawnPlaceholder::ToggleWidget(UWidgetComponent* widget, bool isActiv
 
 #pragma region Towers
 
-void ATowerSpawnPlaceholder::TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass)
-{
-	hud->OnTowerBuildRequest.Remove(towerBuildRequestDelegateHandle);
-	
-	if (selectedTowerClass)
-		BuildTower(selectedTowerClass);
-}
-
-void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild)
+void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBuild, int buildTime)
 {
 	if (!towerToBuild)
 	{
 		GeneralPurposeUtils::DisplayScreenMessage("[TowerSpawnPlaceholder] Nothing to spawn", FColor::Red);
 		return;
 	}
+
+	//Clamp min build time to 1 sec
+	buildTime = FMath::Clamp(buildTime, 1, buildTime);
 	
 	//Prepare spawn
 	FActorSpawnParameters SpawnParams;
@@ -103,13 +104,13 @@ void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBu
 	const FRotator spawnRot(0, 0, 0);
 
 	//Spawn scaffolding first. When building timer will be finished corresponding tower is placed
-	SpawnedScaffolding = GetWorld()->SpawnActor<ATowerBuildingScaffolding>(ScaffoldingActorClass, spawnPos, spawnRot);
+	spawnedScaffolding = GetWorld()->SpawnActor<ATowerBuildingScaffolding>(ScaffoldingActorClass, spawnPos, spawnRot);
 	
-	if (SpawnedScaffolding)
+	if (spawnedScaffolding)
 	{
 		//Initialize scaffolding
-		SpawnedScaffolding->OnBuildingFinishedDelegate.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildingFinishedHandler);
-		SpawnedScaffolding->InitializeActor(towerToBuild, BuildTime);
+		spawnedScaffolding->OnBuildingFinishedDelegate.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildingFinishedHandler);
+		spawnedScaffolding->InitializeActor(towerToBuild, buildTime);
 		
 		//Disable Placeholder mesh
 		if (PlaceholderMeshComponent)
@@ -126,33 +127,23 @@ void ATowerSpawnPlaceholder::BuildTower(const TSubclassOf<ATowerActor> towerToBu
 
 void ATowerSpawnPlaceholder::TowerBuildingFinishedHandler(ATowerActor* tower)
 {	
-	SpawnedScaffolding = nullptr;
+	spawnedScaffolding = nullptr;
 	spawnedTower = tower;
 }
 
-#pragma region Tower State Properties
-
-bool ATowerSpawnPlaceholder::CanSpawnTower() const
+ETowerStates ATowerSpawnPlaceholder::GetTowerState() const
 {
-	return isInInteractionRange && IsEmpty();
-}
+	//Is Ready
+	if (spawnedTower != nullptr)
+		return ETowerStates::IsTowerReady;
 
-bool ATowerSpawnPlaceholder::IsEmpty() const
-{
-	return !IsTowerBuilding() && !IsTowerReady();
-}
+	//Is Building
+	if (spawnedScaffolding != nullptr)
+		return ETowerStates::IsTowerBuilding;
 
-bool ATowerSpawnPlaceholder::IsTowerBuilding() const
-{
-	return SpawnedScaffolding != nullptr;
+	//Is Empty
+	return ETowerStates::IsEmpty;
 }
-
-bool ATowerSpawnPlaceholder::IsTowerReady() const
-{
-	return spawnedTower != nullptr;
-}
-
-#pragma endregion
 
 #pragma endregion 
 
@@ -194,44 +185,25 @@ T* ATowerSpawnPlaceholder::InitializeFromComponent(int indexToTake)
 void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 {
 	isInInteractionRange = isInteractionAllowed;
+
+	const ETowerStates state = GetTowerState();
 	
 	//Enable/Disable Build Widget only if no tower built yet
-	if (IsEmpty())
+	if (state == ETowerStates::IsEmpty)
 	{
 		ToggleWidget(InteractEmptyWidgetHolder, isInInteractionRange);
 		ToggleEffect(BuildReadyEffectComponent, isInInteractionRange);
 	}
-	else if (isInInteractionRange && IsTowerBuilding())
+	else if (state == ETowerStates::IsTowerBuilding)
 	{
+		//if (isInInteractionRange)
 		//Do some stuff if tower is building (speed up for coins, etc)
 	}
-	else if (isInInteractionRange && IsTowerReady())
+	else if (state == ETowerStates::IsTowerReady)
 	{
+		//if (isInInteractionRange)
 		//Do some stuff if tower is build and ready (upgrade, destroy, etc)
 	}
-}
-
-void ATowerSpawnPlaceholder::ProcessInputRequest()
-{
-	if (!isInInteractionRange)
-		return;
-	
-	if (CanSpawnTower())
-	{
-		if (hud)
-		{
-			hud->OnTowerBuildRequest.Remove(towerBuildRequestDelegateHandle);
-			towerBuildRequestDelegateHandle = hud->OnTowerBuildRequest.AddUObject(this, &ATowerSpawnPlaceholder::TowerBuildRequestHandler);
-			
-			hud->ShowTowerShopWidget();	
-		}
-		else
-		{
-			GeneralPurposeUtils::DisplayScreenMessage("No reference to HUD", FColor::Red);
-		}
-	}
-	else
-		GeneralPurposeUtils::DisplayScreenMessage("Can't place tower", FColor::Red);
 }
 
 bool ATowerSpawnPlaceholder::IsInInteractionRange() const

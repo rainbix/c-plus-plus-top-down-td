@@ -8,6 +8,9 @@
 
 class UButton;
 class ATowerActor;
+class UTextBlock;
+class UImage;
+struct FTowerShopData;
 
 UCLASS()
 class SOURCE_API UTowerShopWidget : public UUserWidget
@@ -16,10 +19,7 @@ class SOURCE_API UTowerShopWidget : public UUserWidget
 
 public:
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTowerSelected, TSubclassOf<ATowerActor> selectedTower)
-	FOnTowerSelected OnTowerSelected;
-
-	DECLARE_MULTICAST_DELEGATE(FOnClosed)
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClosed, TSubclassOf<ATowerActor>, int)
 	FOnClosed OnClosed;
 
 protected:
@@ -27,6 +27,44 @@ protected:
 	
 private:
 
+	#pragma region Tower View Data
+	
+	//Tower A
+	UPROPERTY(EditDefaultsOnly, Category="Towers")
+	FName TowerARowName;
+	
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerAName;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerAPrice;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerABuildTime;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UImage* TowerAImage;
+
+	//Tower B
+	UPROPERTY(EditDefaultsOnly, Category="Towers")
+	FName TowerBRowName;
+	
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerBName;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerBPrice;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* towerBBuildTime;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UImage* TowerBImage;
+
+	void InitializeTowerView(UTextBlock* toweName, UTextBlock* towerPrice, UTextBlock* towerBuildTime, UImage* towerImage, const FName& rowName);
+	
+	#pragma endregion 
+	
 	#pragma region Buttons
 	
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -41,6 +79,9 @@ private:
 	#pragma endregion 
 	
 	#pragma region ButtonHandlers
+
+	UFUNCTION()
+	void InitializeButtonHandlers();
 	
 	UFUNCTION()
 	void CloseButtonPressHandler();
@@ -53,17 +94,15 @@ private:
 
 #pragma endregion 
 
-#pragma region TEMP
+	#pragma region Data
 	
-	//TODO: TO be replaced by config file params
-	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	TSubclassOf<ATowerActor> TempTowerToPlaceA;
+	UPROPERTY(EditDefaultsOnly, Category="Data", meta=(RowType="TowerShopData"))
+	FDataTableRowHandle DataTableHandle;
 
-	//TODO: TO be replaced by config file params
-	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	TSubclassOf<ATowerActor> TempTowerToPlaceB;
-
-#pragma endregion 
+	void BroadCastWithTowerSelection(const FName& towerRowName) const;
+	const FTowerShopData* GetTowerDataFromTable(const FName& rowName) const;
+	
+	#pragma endregion 
 	
 	GENERATED_BODY()
 };
