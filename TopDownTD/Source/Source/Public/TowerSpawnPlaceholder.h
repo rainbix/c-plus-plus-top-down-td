@@ -7,10 +7,14 @@
 #include "TowerSpawnPlaceholder.generated.h"
 
 class ATowerActor;
-class AGameplayHUD;
 class UWidgetComponent;
 class ATowerBuildingScaffolding;
 class UParticleSystemComponent;
+
+enum class ETowerStates : uint8
+{
+	IsEmpty, IsTowerBuilding, IsTowerReady
+};
 
 UCLASS()
 class SOURCE_API ATowerSpawnPlaceholder : public AActor
@@ -25,37 +29,22 @@ public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
+	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn, int buildTime);
 	bool IsInInteractionRange() const;
-	void ProcessInputRequest();
+	ETowerStates GetTowerState() const;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 
-	UPROPERTY()
-	AGameplayHUD* hud;
-	
 	#pragma region Towers
-
-	FDelegateHandle towerBuildRequestDelegateHandle;
 	
 	UPROPERTY()
 	ATowerActor* spawnedTower;
 	
-	void TowerBuildRequestHandler(TSubclassOf<ATowerActor> selectedTowerClass);
-	void BuildTower(const TSubclassOf<ATowerActor> towerToSpawn);
 	void TowerBuildingFinishedHandler(ATowerActor* tower);
 
-	#pragma region Tower State Properties
-	
-	bool CanSpawnTower() const;
-	bool IsEmpty() const;
-	bool IsTowerBuilding() const;
-	bool IsTowerReady() const;
-
-	#pragma endregion
-	
 	#pragma endregion
 
 	#pragma region Scaffolding
@@ -64,7 +53,7 @@ private:
 	TSubclassOf<ATowerBuildingScaffolding> ScaffoldingActorClass;
 	
 	UPROPERTY()
-	ATowerBuildingScaffolding* SpawnedScaffolding;
+	ATowerBuildingScaffolding* spawnedScaffolding;
 
 	#pragma endregion
 	
@@ -101,15 +90,4 @@ private:
 	static void ToggleWidget(UWidgetComponent* widget, bool isActive);
 	
 	#pragma endregion
-
-	#pragma region TEMP
-
-	//TODO: TO be replaced by PlayerController input when Anton finishes his refactor
-	
-	
-	//TODO: TO be replaced by config file params
-	UPROPERTY(EditDefaultsOnly, Category="Temp")
-	int BuildTime;
-	
-	#pragma endregion 
 };

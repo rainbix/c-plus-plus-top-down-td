@@ -12,7 +12,6 @@
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
 #include "TowerShopWidget.h"
-#include "TowerSpawnPlaceholder.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
@@ -88,11 +87,6 @@ void AGameplayHUD::InitializeWidgets()
 	{
 		pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
 	}
-	
-	if (hudTestWidget)
-	{
-		hudTestWidget->OnBuildDelegate.AddUObject(this, &AGameplayHUD::TryBuild);
-	}
 }
 
 void AGameplayHUD::DisposeWidgets()
@@ -148,53 +142,35 @@ T* AGameplayHUD::SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed)
 
 #pragma region Tower Shop
 
-void AGameplayHUD::TryBuild()
-{
-	//TODO: This is temporal solution. Don't panic
-	TArray<AActor*> FoundPlaceholders;
-	UGameplayStatics::GetAllActorsOfClass(world, ATowerSpawnPlaceholder::StaticClass(), FoundPlaceholders);
-	for (auto foundActor : FoundPlaceholders)
-	{
-		if (!foundActor)
-			continue;
-		
-		auto towerPlaceholder = Cast<ATowerSpawnPlaceholder>(foundActor);
-		if (!towerPlaceholder || !towerPlaceholder->IsInInteractionRange())
-			continue;
-		
-		towerPlaceholder->ProcessInputRequest();
-	}
-}
-
 void AGameplayHUD::ShowTowerShopWidget()
 {
 	playerController->SetPause(true);
-	
+
+	//Show cached widget if it already has been initialized 
 	if (towerShopWidget)
 	{
 		towerShopWidget->AddToViewport();
 	}
 	else
 	{
+		//Lazy initialization of Tower Shop Widget
 		if (TowerShopClass)
 		{
 			towerShopWidget = SpawnWidget(TowerShopClass);
 			towerShopWidget->OnClosed.AddUObject(this, &AGameplayHUD::ShopTowerClosedHandler);
-			towerShopWidget->OnTowerSelected.AddUObject(this, &AGameplayHUD::ShopTowerSelectedHandler);
 		}
 	}
 }
 
-void AGameplayHUD::ShopTowerClosedHandler()
+void AGameplayHUD::ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime) const
 {
+	//Hide widget
 	playerController->SetPause(false);
 	towerShopWidget->RemoveFromParent();
-}
 
-void AGameplayHUD::ShopTowerSelectedHandler(TSubclassOf<ATowerActor> selectedTowerClass)
-{
+	//If a tower was chosen (not merely shop closed) broadcast event
 	if (selectedTowerClass)
-		OnTowerBuildRequest.Broadcast(selectedTowerClass);
+		OnTowerBuildRequest.Broadcast(selectedTowerClass, buildTime);
 }
 
 #pragma endregion
