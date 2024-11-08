@@ -3,11 +3,13 @@
 #include "GameplayHUD.h"
 #include "MinimapWidget.h"
 #include "LevelStateWidget.h"
+#include "MoneyWidget.h"
 #include "PauseButtonWidget.h"
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
 #include "Source/TowerActor.h"
 #include "FWeaponData.h"
+#include "GameplayGameState.h"
 #include "PauseWidget.h"
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
@@ -15,6 +17,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
 #include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
@@ -29,8 +32,8 @@ void AGameplayHUD::BeginPlay()
 	levelStateWidget = SpawnWidget(LevelStateWidgetClass);
 	playerHealthWidget = SpawnWidget(PlayerHealthWidgetClass);
 	pauseButtonWidget = SpawnWidget(PauseButtonClass);
-
-	//TODO: Test widget. Remove after all widget bindings are done
+	moneyWidget = SpawnWidget(MoneyWidgetClass);
+	
 	hudTestWidget = SpawnWidget(HudTestWidgetClass);
 	
 	InitializeWidgets();
@@ -48,6 +51,7 @@ void AGameplayHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AGameplayHUD::InitializeWidgets()
 {
 	APawn* PlayerPawn = playerController->AcknowledgedPawn;
+	AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>();
 	APlayerCharacterSource* sourcePlayerCharacter = Cast<APlayerCharacterSource>(PlayerPawn);
 	check(sourcePlayerCharacter);
 
@@ -87,6 +91,13 @@ void AGameplayHUD::InitializeWidgets()
 	{
 		pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
 	}
+
+	if (moneyWidget)
+	{
+		moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
+		gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
+		gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
+	}
 }
 
 void AGameplayHUD::DisposeWidgets()
@@ -112,11 +123,6 @@ void AGameplayHUD::DisposeWidgets()
 
 		WeaponComponent->OnWeaponChanged.RemoveAll(activeWeaponWidget);
 		WeaponComponent->OnWeaponAmmoChange.RemoveAll(activeWeaponWidget);
-	}
-	
-	if (hudTestWidget)
-	{
-		hudTestWidget->OnPauseDelegate.RemoveAll(this);
 	}
 }
 

@@ -3,6 +3,7 @@
 
 #include "HudTestWidget.h"
 #include "FWeaponData.h"
+#include "GameplayGameState.h"
 
 void UHudTestWidget::IncreaseHealth(int amount)
 {
@@ -57,6 +58,18 @@ void UHudTestWidget::Pause()
 void UHudTestWidget::Build()
 {
 	OnBuildDelegate.Broadcast();
+}
+
+void UHudTestWidget::AddMoney()
+{
+	AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>();
+	gameState->AddMoney(25);
+}
+
+void UHudTestWidget::RemoveMoney()
+{
+	AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>();
+	gameState->RemoveMoney(10);
 }
 
 void UHudTestWidget::NativeConstruct()
