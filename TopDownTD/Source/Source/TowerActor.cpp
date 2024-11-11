@@ -1,24 +1,34 @@
 #include "TowerActor.h"
 #include "SourceCharacter.h"  // Включіть файл заголовка вашого гравця
+#include "SourceGameplayTags.h"
+#include "AbilitySystem/AbilitySet.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Engine/World.h"
 
 ATowerActor::ATowerActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	FireRate = 1.0f;
 	Range = 1000.0f;
+
+	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TowerMesh"));
+	RootComponent = MeshComponent;
+	
+	AbilitySystemComponent = CreateDefaultSubobject<USourceAbilitySystemComponent>(TEXT("AbilitySystem"));
+	AbilitySet = nullptr;
 }
 
 void ATowerActor::BeginPlay()
 {
 	Super::BeginPlay();
-    
-	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATowerActor::Fire, 1.0f / FireRate, true);
 
 	MainCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	SetInstigator(MainCharacter);
+
+	if (AbilitySet)
+	{
+		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr, this);
+	}
 }
 
 void ATowerActor::Tick(float DeltaTime)
@@ -27,22 +37,36 @@ void ATowerActor::Tick(float DeltaTime)
 
 	if (MainCharacter)
 	{
-		FRotator LookAtRotation = (MainCharacter->GetActorLocation() - GetActorLocation()).Rotation();
+		FVector Direction = MainCharacter->GetActorLocation() - GetActorLocation();
+		float Distance = Direction.Length();
+		FVector DirectionNormalized = Direction / Distance;
+
+		if (Distance > Range)
+		{
+			if (HadTarget)
+			{
+				HadTarget = false;
+				AbilitySystemComponent->RemoveLooseGameplayTag(TAG_Input_Fire);
+			}
+			
+			return;
+		}
+
+		if (!HadTarget)
+		{
+			HadTarget = true;
+			AbilitySystemComponent->AddLooseGameplayTag(TAG_Input_Fire);
+		}
+
+		
+		FRotator LookAtRotation = DirectionNormalized.Rotation();
+		LookAtRotation.Pitch = 0;
 		SetActorRotation(LookAtRotation);
 	}
 }
 
-void ATowerActor::Fire()
+
+AActor* ATowerActor::GetTarget() const
 {
-	if (MainCharacter && ProjectileClass)
-	{
-		FVector MuzzleLocation = GetActorLocation(); 
-		FRotator MuzzleRotation = (MainCharacter->GetActorLocation() - MuzzleLocation).Rotation();
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = GetInstigator();
-
-		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-	}
+	return MainCharacter;
 }

@@ -1,4 +1,6 @@
 #include "Projectile.h"
+
+#include "Source.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,8 +20,6 @@ AProjectile::AProjectile()
 	ProjectileMeshComponent->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	ProjectileMeshComponent->SetNotifyRigidBodyCollision(true);
 	ProjectileMeshComponent->SetSimulatePhysics(false);
-
-	Damage = 10.0f;
 }
 
 void AProjectile::BeginPlay()
@@ -27,6 +27,10 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	ProjectileMeshComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+
+	SetLifeSpan(Range / ProjectileMovementComponent->InitialSpeed);
+
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
 }
 
 void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -48,9 +52,24 @@ void AProjectile::FireInDirection(const FVector& ShootDirection) const
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor && OtherActor != this && OtherComp)
+	AActor* OwnerActor = GetOwner();
+	AActor* InstigatorActor = GetInstigator();
+
+
+	if (OtherActor && OtherActor != this && OtherComp && OtherActor != GetOwner() && OtherActor != GetInstigator())
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
+		UE_LOG(LogSource, Display, TEXT("Hit actor [%s], Owner: [%s], Instigator: [%s]"), *GetNameSafe(OtherActor), *GetNameSafe(OwnerActor), *GetNameSafe(InstigatorActor))
+
+		if (IAbilitySystemInterface* SourceAbilitySystemInterface = Cast<IAbilitySystemInterface>(OtherActor))
+		{
+			if (UAbilitySystemComponent* AbilitySystemComponent = SourceAbilitySystemInterface->GetAbilitySystemComponent())
+			{
+				for (FGameplayEffectSpecHandle EffectSpecHandle : EffectsToApply)
+				{
+					AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+				}
+			}
+		}
 
 		Destroy();
 	}

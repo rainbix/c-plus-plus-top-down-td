@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class SOURCE_API UGameplayAbility_Weapon_Reload : public UGameplayAbility_WeaponBase
 {
 	GENERATED_BODY()

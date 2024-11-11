@@ -12,7 +12,7 @@ class ARangedWeapon;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class SOURCE_API UGameplayAbility_Weapon_Fire : public UGameplayAbility_WeaponBase
 {
 	GENERATED_BODY()

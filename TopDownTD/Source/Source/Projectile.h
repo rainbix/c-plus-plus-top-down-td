@@ -1,10 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TowerActor.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
-UCLASS()
+struct FGameplayEffectSpecHandle;
+
+UCLASS(Abstract)
 class AProjectile : public AActor
 {
 	GENERATED_BODY()
@@ -15,7 +18,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
 public:    
 	virtual void Tick(float DeltaTime) override;
 
@@ -27,8 +30,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UStaticMeshComponent* ProjectileMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-	float Damage;
+	TArray<FGameplayEffectSpecHandle> EffectsToApply;
+	float Range;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
