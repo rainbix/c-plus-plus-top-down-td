@@ -39,6 +39,11 @@ void UGameplayAbility_Tower_ProjectileFire::Fire()
 	ATowerActor* Tower = GetTowerInstance();
 	const AActor* Target = Tower->GetTarget();
 
+	if (!Target)
+	{
+		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), false, true);
+	}
+
 	const FVector MuzzleLocation = Tower->GetSkeletalMesh()->GetSocketLocation(ShootPointSocketName);
 	FVector Direction = (Target->GetActorLocation() - MuzzleLocation);
 	Direction.Normalize();

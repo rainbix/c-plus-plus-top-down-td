@@ -22,51 +22,116 @@ void ATowerActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MainCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* MainCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	SetInstigator(MainCharacter);
 
+	GetWorldTimerManager().SetTimer(SearchTargetTimerHandle, this, &ATowerActor::FindTarget, 1.0f / TargetSearchDelay, true);
+	
 	if (AbilitySet)
 	{
 		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr, this);
 	}
 }
 
+void ATowerActor::FindTarget()
+{
+	float DistanceSqr;
+	if (IsValidTarget(TargetCharacter, DistanceSqr))
+	{
+		return;
+	}
+	
+	TArray<FOverlapResult> OverlapTargets;
+	FCollisionShape Shape = FCollisionShape::MakeSphere(Range);
+	FCollisionQueryParams Params;
+	FCollisionResponseParams ResponseParams(ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Overlap);
+	GetWorld()->OverlapMultiByChannel(OverlapTargets, GetActorLocation(), GetActorQuat(), ECC_Pawn, Shape, Params, ResponseParams);
+
+	ACharacter* ClosestTarget = nullptr;
+	float ClosestDistanceSqr = FLT_MAX;
+
+	for (FOverlapResult Result : OverlapTargets)
+	{
+		if (ACharacter* Character = Cast<ACharacter>(Result.GetActor()))
+		{
+			if (!IsValidTarget(Character, DistanceSqr))
+			{
+				continue;
+			}
+
+			if (DistanceSqr < ClosestDistanceSqr)
+			{
+				ClosestDistanceSqr = DistanceSqr;
+				ClosestTarget = Character;
+			}
+		}
+	}
+
+	TargetCharacter = ClosestTarget;
+}
+
+bool ATowerActor::IsValidTarget(const ACharacter* Character, float& DistanceSqr) const
+{
+	if (!Character)
+	{
+		return false;
+	}
+
+	if (Character == GetInstigator())
+	{
+		return false;
+	}
+
+	DistanceSqr = (Character->GetActorLocation() - GetActorLocation()).SquaredLength();
+
+	if (DistanceSqr > Range * Range)
+	{
+		return false;
+	}
+	
+	if (UHealthComponent* Health = Character->FindComponentByClass<UHealthComponent>())
+	{
+		if (Health->IsDead())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 void ATowerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (MainCharacter)
+	float DistanceSquared;
+	
+	if (!IsValidTarget(TargetCharacter, DistanceSquared))
 	{
-		FVector Direction = MainCharacter->GetActorLocation() - GetActorLocation();
-		float Distance = Direction.Length();
-		FVector DirectionNormalized = Direction / Distance;
-
-		if (Distance > Range)
+		if (HadTarget)
 		{
-			if (HadTarget)
-			{
-				HadTarget = false;
-				AbilitySystemComponent->RemoveLooseGameplayTag(TAG_Input_Fire);
-			}
-			
-			return;
+			HadTarget = false;
+			AbilitySystemComponent->RemoveLooseGameplayTag(TAG_Input_Fire);
 		}
-
-		if (!HadTarget)
-		{
-			HadTarget = true;
-			AbilitySystemComponent->AddLooseGameplayTag(TAG_Input_Fire);
-		}
-
-		
-		FRotator LookAtRotation = DirectionNormalized.Rotation();
-		LookAtRotation.Pitch = 0;
-		SetActorRotation(LookAtRotation);
+		return;
 	}
+
+	if (!HadTarget)
+	{
+		HadTarget = true;
+		AbilitySystemComponent->AddLooseGameplayTag(TAG_Input_Fire);
+	}
+
+	FVector Direction = TargetCharacter->GetActorLocation() - GetActorLocation();
+	Direction.Normalize();
+	FRotator LookAtRotation = Direction.Rotation();
+	LookAtRotation.Pitch = 0;
+	SetActorRotation(LookAtRotation);
 }
 
 
 AActor* ATowerActor::GetTarget() const
 {
-	return MainCharacter;
+	return TargetCharacter;
 }
