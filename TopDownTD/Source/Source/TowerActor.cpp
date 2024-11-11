@@ -22,10 +22,10 @@ void ATowerActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ACharacter* MainCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	SetInstigator(MainCharacter);
+	ACharacter* OwnerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	SetInstigator(OwnerCharacter);
 
-	GetWorldTimerManager().SetTimer(SearchTargetTimerHandle, this, &ATowerActor::FindTarget, 1.0f / TargetSearchDelay, true);
+	GetWorldTimerManager().SetTimer(SearchTargetTimerHandle, this, &ATowerActor::FindTarget, TargetSearchDelay, true);
 	
 	if (AbilitySet)
 	{
@@ -44,9 +44,10 @@ void ATowerActor::FindTarget()
 	TArray<FOverlapResult> OverlapTargets;
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Range);
 	FCollisionQueryParams Params;
-	FCollisionResponseParams ResponseParams(ECR_Ignore);
-	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Overlap);
-	GetWorld()->OverlapMultiByChannel(OverlapTargets, GetActorLocation(), GetActorQuat(), ECC_Pawn, Shape, Params, ResponseParams);
+	Params.bDebugQuery = true;
+
+	FCollisionObjectQueryParams ObjectQueryParams(ECC_Pawn);
+	GetWorld()->OverlapMultiByObjectType(OverlapTargets, GetActorLocation(), GetActorQuat(), ObjectQueryParams, Shape, Params);
 
 	ACharacter* ClosestTarget = nullptr;
 	float ClosestDistanceSqr = FLT_MAX;
@@ -90,9 +91,9 @@ bool ATowerActor::IsValidTarget(const ACharacter* Character, float& DistanceSqr)
 		return false;
 	}
 	
-	if (UHealthComponent* Health = Character->FindComponentByClass<UHealthComponent>())
+	if (UHealthComponent* HealthComponent = Character->FindComponentByClass<UHealthComponent>())
 	{
-		if (Health->IsDead())
+		if (HealthComponent->IsDead())
 		{
 			return false;
 		}
