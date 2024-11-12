@@ -14,12 +14,15 @@
 void UTowerShopWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	InitializeButtonHandlers();
-	
-	InitializeTowerView(towerAName, towerAPrice, towerABuildTime, TowerAImage, TowerARowName);
-	InitializeTowerView(towerBName, towerBPrice, towerBBuildTime, TowerBImage, TowerBRowName);
 
+	InitializeCurrentMoney();
+	InitializeButtonHandlers();
+	InitializeTowerView(towerAName, towerAPrice, towerABuildTime, TowerAImage, towerAButton, TowerARowName);
+	InitializeTowerView(towerBName, towerBPrice, towerBBuildTime, TowerBImage, towerBButton, TowerBRowName);
+}
+
+void UTowerShopWidget::InitializeCurrentMoney()
+{
 	if (currentMoneyText)
 	{
 		if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
@@ -51,7 +54,8 @@ void UTowerShopWidget::InitializeButtonHandlers()
 	}
 }
 
-void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* towerPrice, UTextBlock* towerBuildTime, UImage* towerImage,const FName& rowName)
+void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* towerPrice, UTextBlock* towerBuildTime,
+	UImage* towerImage, UButton* towerButton, const FName& rowName)
 {
 	//Example for iterating over all table
 	//TArray<FTowerShopData*> Towers;
@@ -68,6 +72,13 @@ void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* to
 		{
 			const FString costStr = FString::Printf(TEXT("$ %d"), towerData->Cost);
 			towerPrice->SetText(FText::FromString(costStr));
+
+			//Set proper color depending on whether it is enough money to buy a tower
+			if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
+			{
+				const auto labelColor = gameState->HasEnoughMoney(towerData->Cost) ? EnoughMoneyColor : NotEnoughMoneyColor;
+				towerPrice->SetColorAndOpacity(labelColor);
+			}
 		}
 
 		if (towerBuildTime)
@@ -80,12 +91,27 @@ void UTowerShopWidget::InitializeTowerView(UTextBlock* towerName, UTextBlock* to
 		{
 			towerImage->SetBrushFromTexture(towerData->TowerIcon);
 		}
+
+		//Tweak a buy button depending on whether it is enough money to buy a tower
+		if (towerButton)
+		{
+			if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
+			{
+				const bool hasEnoughMoney = gameState->HasEnoughMoney(towerData->Cost);
+				
+				auto btnColor = towerButton->GetColorAndOpacity();
+				btnColor.A = hasEnoughMoney ? 1.0 : 0.75;
+		
+				towerButton->SetColorAndOpacity(btnColor);
+				towerButton->SetIsEnabled(hasEnoughMoney);
+			}			
+		}
 	}
 }
 
 void UTowerShopWidget::CloseButtonPressHandler()
 {
-	OnClosed.Broadcast(nullptr, -1);
+	OnClosed.Broadcast(nullptr, -1, 0);
 }
 
 void UTowerShopWidget::TowerButtonAPressHandler()
@@ -103,7 +129,7 @@ void UTowerShopWidget::BroadCastWithTowerSelection(const FName& towerRowName) co
 	const auto towerDataEntry = GetTowerDataFromTable(towerRowName);
 	if (towerDataEntry && towerDataEntry->TowerClass)
 	{
-		OnClosed.Broadcast(towerDataEntry->TowerClass, towerDataEntry->BuildTime);
+		OnClosed.Broadcast(towerDataEntry->TowerClass, towerDataEntry->BuildTime, towerDataEntry->Cost);
 	}
 	else
 	{

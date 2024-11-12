@@ -60,7 +60,7 @@ public:
 	FOnTowerSelected OnTowerBuildRequest;
 	
 	void ShowTowerShopWidget();
-	void ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime) const;
+	void ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime, int price) const;
 
 	#pragma endregion 
 
