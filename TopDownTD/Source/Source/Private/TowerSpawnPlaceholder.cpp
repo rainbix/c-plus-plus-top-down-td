@@ -192,7 +192,7 @@ void ATowerSpawnPlaceholder::UpdateInteractionState(bool isInteractionAllowed)
 	if (state == ETowerStates::IsEmpty)
 	{
 		ToggleWidget(InteractEmptyWidgetHolder, isInInteractionRange);
-		ToggleEffect(BuildReadyEffectComponent, isInInteractionRange);
+		ToggleEffect(BuildReadyEffectComponent, !isInInteractionRange);
 	}
 	else if (state == ETowerStates::IsTowerBuilding)
 	{
