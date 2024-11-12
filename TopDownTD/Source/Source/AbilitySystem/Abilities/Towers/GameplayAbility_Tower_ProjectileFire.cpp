@@ -45,7 +45,7 @@ void UGameplayAbility_Tower_ProjectileFire::Fire()
 	}
 
 	const FVector MuzzleLocation = Tower->GetSkeletalMesh()->GetSocketLocation(ShootPointSocketName);
-	FVector Direction = (Target->GetActorLocation() - MuzzleLocation);
+	FVector Direction = (Target->GetActorLocation() - Tower->GetActorLocation());
 	Direction.Normalize();
 	const FRotator MuzzleRotation = Direction.Rotation();
 
@@ -57,7 +57,6 @@ void UGameplayAbility_Tower_ProjectileFire::Fire()
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(Effect, GetAbilityLevel());
 		Projectile->EffectsToApply.Add(EffectSpecHandle);
 		Projectile->Range = Tower->GetRange();
-		Projectile->FireInDirection(Direction);
 	}
 
 	Projectile->FinishSpawning(ProjectileTransform);

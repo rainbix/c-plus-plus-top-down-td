@@ -22,13 +22,11 @@ protected:
 public:    
 	virtual void Tick(float DeltaTime) override;
 
-	void FireInDirection(const FVector& ShootDirection) const;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UStaticMeshComponent* ProjectileMeshComponent;
+	UStaticMeshComponent* ProjectileMeshComponent;
 
 	TArray<FGameplayEffectSpecHandle> EffectsToApply;
 	float Range;

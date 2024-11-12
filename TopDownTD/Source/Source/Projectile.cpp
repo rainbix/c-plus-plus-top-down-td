@@ -12,14 +12,17 @@ AProjectile::AProjectile()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->InitialSpeed = 3000.f;
 	ProjectileMovementComponent->MaxSpeed = 3000.f;
-	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-	ProjectileMovementComponent->bShouldBounce = true;
+	ProjectileMovementComponent->bRotationFollowsVelocity = false;
+	ProjectileMovementComponent->bShouldBounce = false;
+	ProjectileMovementComponent->bInitialVelocityInLocalSpace = true;
+	ProjectileMovementComponent->Velocity = FVector::ForwardVector;
+	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 
 	ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMeshComponent"));
 	RootComponent = ProjectileMeshComponent;
-	ProjectileMeshComponent->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	ProjectileMeshComponent->SetNotifyRigidBodyCollision(true);
 	ProjectileMeshComponent->SetSimulatePhysics(false);
+	ProjectileMeshComponent->SetCollisionProfileName(TEXT("Bullet"));
 }
 
 void AProjectile::BeginPlay()
@@ -45,20 +48,14 @@ void AProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AProjectile::FireInDirection(const FVector& ShootDirection) const
-{
-	ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
-}
-
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	AActor* OwnerActor = GetOwner();
 	AActor* InstigatorActor = GetInstigator();
 
-
 	if (OtherActor && OtherActor != this && OtherComp && OtherActor != GetOwner() && OtherActor != GetInstigator())
 	{
-		UE_LOG(LogSource, Display, TEXT("Hit actor [%s], Owner: [%s], Instigator: [%s]"), *GetNameSafe(OtherActor), *GetNameSafe(OwnerActor), *GetNameSafe(InstigatorActor))
+		UE_LOG(LogSource, Display, TEXT("Hit actor [%s], Hit Component: [%s] Owner: [%s], Instigator: [%s]"), *GetNameSafe(OtherActor), *GetNameSafe(OtherComp), *GetNameSafe(OwnerActor), *GetNameSafe(InstigatorActor))
 
 		if (IAbilitySystemInterface* SourceAbilitySystemInterface = Cast<IAbilitySystemInterface>(OtherActor))
 		{

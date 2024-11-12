@@ -74,11 +74,11 @@ void UGameplayAbility_Weapon_Fire::OnFire()
 		DrawDebugLine(GetWorld(), StartPosition, HitResult.ImpactPoint, FColor::Blue, false, 3.0f,0, 3.0f);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 7.0f, 20, FColor::Blue,false, 3.0f);
 
-		FGameplayAbilityTargetData_SingleTargetHit* targetData= new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+		FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
 
 		for (TSubclassOf<UGameplayEffect> Effect : AppliedEffects)
 		{
-			ApplyGameplayEffectToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, targetData, Effect, GetAbilityLevel());
+			ApplyGameplayEffectToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, TargetData, Effect, GetAbilityLevel());
 		}
 	}
 	else
