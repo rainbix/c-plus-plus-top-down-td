@@ -16,7 +16,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
 	float spawnInterval;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
+	float decreaseSpawnIntervalOverTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
+	float decreaseSpawnIntervalValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
+	float minimumSpawnInterval;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
+	float firstSpawnDelay;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
 	int maxSpawnCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
+	AActor* destinationLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
 	TSubclassOf<APlayerCharacterSource> characterPrefab;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
@@ -28,6 +38,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	void SpawnCharacter(FVector location);
+	
+	float m_currentDelay;
 	float m_currentSpawnInterval;
+	float m_currentDecreaseTime;
 	TArray<APlayerCharacterSource*> m_spawnedEnemies;
 };

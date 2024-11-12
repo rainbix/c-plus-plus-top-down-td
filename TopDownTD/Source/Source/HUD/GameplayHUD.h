@@ -15,6 +15,7 @@ class UHudTestWidget;
 class UPauseWidget;
 class UTowerShopWidget;
 class ATowerActor;
+class UMoneyWidget;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -43,6 +44,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UTowerShopWidget> TowerShopClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UMoneyWidget> MoneyWidgetClass = nullptr;
 	
 	//Test widget
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
@@ -107,6 +111,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UTowerShopWidget> towerShopWidget = nullptr;
+
+	UPROPERTY()
+	TObjectPtr<UMoneyWidget> moneyWidget = nullptr;
 
 	#pragma endregion 
 

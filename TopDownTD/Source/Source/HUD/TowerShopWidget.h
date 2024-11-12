@@ -27,6 +27,9 @@ protected:
 	
 private:
 
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UTextBlock* currentMoneyText;
+
 	#pragma region Tower View Data
 	
 	//Tower A
