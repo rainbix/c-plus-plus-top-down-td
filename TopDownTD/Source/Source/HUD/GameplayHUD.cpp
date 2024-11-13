@@ -168,7 +168,7 @@ void AGameplayHUD::ShowTowerShopWidget()
 	}
 }
 
-void AGameplayHUD::ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime) const
+void AGameplayHUD::ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTowerClass, int buildTime, int price) const
 {
 	//Hide widget
 	playerController->SetPause(false);
@@ -176,7 +176,14 @@ void AGameplayHUD::ShopTowerClosedHandler(TSubclassOf<ATowerActor> selectedTower
 
 	//If a tower was chosen (not merely shop closed) broadcast event
 	if (selectedTowerClass)
+	{
 		OnTowerBuildRequest.Broadcast(selectedTowerClass, buildTime);
+		
+		if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
+		{
+			gameState->RemoveMoney(price);
+		}
+	}
 }
 
 #pragma endregion

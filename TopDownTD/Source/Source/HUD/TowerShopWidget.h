@@ -19,7 +19,7 @@ class SOURCE_API UTowerShopWidget : public UUserWidget
 
 public:
 
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClosed, TSubclassOf<ATowerActor>, int)
+	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnClosed, TSubclassOf<ATowerActor>, int, int)
 	FOnClosed OnClosed;
 
 protected:
@@ -27,10 +27,22 @@ protected:
 	
 private:
 
+	#pragma region Current Money
+	
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UTextBlock* currentMoneyText;
 
+	void InitializeCurrentMoney();
+	
+	#pragma endregion 
+
 	#pragma region Tower View Data
+
+	UPROPERTY(EditDefaultsOnly, Category="Towers")
+	FLinearColor EnoughMoneyColor;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Towers")
+	FLinearColor NotEnoughMoneyColor;
 	
 	//Tower A
 	UPROPERTY(EditDefaultsOnly, Category="Towers")
@@ -64,7 +76,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UImage* TowerBImage;
 
-	void InitializeTowerView(UTextBlock* toweName, UTextBlock* towerPrice, UTextBlock* towerBuildTime, UImage* towerImage, const FName& rowName);
+	void InitializeTowerView(UTextBlock* toweName, UTextBlock* towerPrice, UTextBlock* towerBuildTime,
+		UImage* towerImage, UButton* towerButton, const FName& rowName);
 	
 	#pragma endregion 
 	

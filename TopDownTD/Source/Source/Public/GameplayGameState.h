@@ -23,6 +23,7 @@ public:
 	void AddMoney(int amount);
 	void RemoveMoney(int amount);
 	int GetCurrentMoney() const;
+	bool HasEnoughMoney(int price) const;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Money")
