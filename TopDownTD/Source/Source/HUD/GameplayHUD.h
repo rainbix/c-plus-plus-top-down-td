@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "GameplayHUD.generated.h"
 
+class UScoreWidget;
 class UPauseButtonWidget;
 class UProgressBarWidget;
 class UMinimapWidget;
@@ -16,6 +17,7 @@ class UPauseWidget;
 class UTowerShopWidget;
 class ATowerActor;
 class UMoneyWidget;
+class UGameOverWidget;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -47,6 +49,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UMoneyWidget> MoneyWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UScoreWidget> ScoreWidgetClass = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UGameOverWidget> GameOverClass = nullptr;
 	
 	//Test widget
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
@@ -115,6 +123,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMoneyWidget> moneyWidget = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<UScoreWidget> scoreWidget = nullptr;
+
 	#pragma endregion 
 
 	#pragma region Widgets
@@ -125,7 +136,9 @@ private:
 	template <typename T>
 	T* SpawnWidget(TSubclassOf<T> widgetClass, bool isCollapsed = false);
 
-	#pragma endregion 
+	#pragma endregion
+
+	void FinishGame(int score);
 	
 	GENERATED_BODY()
 };

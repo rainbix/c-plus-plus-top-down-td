@@ -5,6 +5,7 @@
 #include "LevelStateWidget.h"
 #include "MoneyWidget.h"
 #include "PauseButtonWidget.h"
+#include "GameOverWidget.h"
 #include "HudTestWidget.h"
 #include "ActiveWeaponWidget.h"
 #include "Source/TowerActor.h"
@@ -13,11 +14,11 @@
 #include "PauseWidget.h"
 #include "PlayerCharacterSource.h"
 #include "ProgressBarWidget.h"
+#include "ScoreWidget.h"
 #include "TowerShopWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
-#include "Source/Tools/GeneralPurposeUtils.h"
 #include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
@@ -33,6 +34,7 @@ void AGameplayHUD::BeginPlay()
 	playerHealthWidget = SpawnWidget(PlayerHealthWidgetClass);
 	pauseButtonWidget = SpawnWidget(PauseButtonClass);
 	moneyWidget = SpawnWidget(MoneyWidgetClass);
+	scoreWidget = SpawnWidget(ScoreWidgetClass);
 	
 	hudTestWidget = SpawnWidget(HudTestWidgetClass);
 	
@@ -97,6 +99,17 @@ void AGameplayHUD::InitializeWidgets()
 		moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
 		gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
 		gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
+	}
+	
+	if (scoreWidget)
+	{
+		scoreWidget->UpdateScore(0, gameState->GetScore());
+		gameState->OnScoreAdded.AddUObject(scoreWidget, &UScoreWidget::UpdateScore);
+	}
+
+	if(gameState)
+	{
+		gameState->OnGameFinished.AddUObject(this, &AGameplayHUD::FinishGame);
 	}
 }
 
@@ -215,5 +228,13 @@ void AGameplayHUD::TogglePause()
 	OnPauseToggleHandler(playerController->IsPaused());
 }
 
-#pragma endregion 
+#pragma endregion
+
+void AGameplayHUD::FinishGame(int score)
+{
+	if (const auto gameOverWidget = SpawnWidget(GameOverClass))
+	{
+		gameOverWidget->InitializeWidget(score);
+	}
+}
 

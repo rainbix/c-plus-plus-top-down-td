@@ -2,11 +2,14 @@
 
 #include "MyPlayerController.h"
 #include <Source/Weapons/WeaponComponent.h>
-
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameplayGameState.h"
 #include "PlayerCharacterSource.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
+
+class AGameplayGameState;
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -19,6 +22,11 @@ void AMyPlayerController::BeginPlay()
 	Super::BeginPlay();
 	
 	bShowMouseCursor = true;
+
+	if (AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>())
+	{
+		gameState->OnGameFinished.AddUFunction(this, FName("HandleGameOver"));
+	}
 }
 
 void AMyPlayerController::Tick(float DeltaTime)
@@ -138,4 +146,9 @@ void AMyPlayerController::AbilityInputTagReleased(FGameplayTag GameplayTag)
 void AMyPlayerController::HandleBuildPressed()
 {
 	OnBuildInputDelegate.Broadcast();
+}
+
+void AMyPlayerController::HandleGameOver()
+{
+	SetPause(true);
 }

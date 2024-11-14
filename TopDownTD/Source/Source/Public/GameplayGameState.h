@@ -14,21 +14,44 @@ protected:
 
 public:
 
+	#pragma region Money
+	
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMoneyAdd, int delta, int newAmount)
 	FOnMoneyAdd OnMoneyAdded;
 
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMoneyRemove, int delta, int newAmount)
 	FOnMoneyRemove OnMoneyRemoved;
+
+	UPROPERTY(EditDefaultsOnly, Category="Money")
+	int InitialMoney;
+
+	int currentMoney;
 	
 	void AddMoney(int amount);
 	void RemoveMoney(int amount);
 	int GetCurrentMoney() const;
 	bool HasEnoughMoney(int price) const;
 
-private:
-	UPROPERTY(EditDefaultsOnly, Category="Money")
-	int InitialMoney;
+	#pragma endregion
 
-	UPROPERTY(VisibleDefaultsOnly, Category="Money")
-	int CurrentMoney;
+	#pragma region Score
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnScoreAdded, int delta, int newAmount)
+	FOnScoreAdded OnScoreAdded;
+
+	int currentScore;
+	
+	void AddScore(int amount);
+	int GetScore() const;
+
+	#pragma endregion
+	
+	#pragma region FinishGame
+	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameFinished, int score)
+	FOnGameFinished OnGameFinished;
+	
+	void FinishGame() const;
+
+	#pragma endregion
 };

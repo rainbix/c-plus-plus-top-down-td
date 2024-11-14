@@ -73,6 +73,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveMoney();
 
+	UFUNCTION(BlueprintCallable)
+	void AddScore();
+	
+	UFUNCTION(BlueprintCallable)
+	void FinishGame();
+	
 	FWeaponData* GetActiveWeaponData();
 	
 	#pragma endregion 

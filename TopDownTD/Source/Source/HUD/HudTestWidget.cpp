@@ -72,6 +72,18 @@ void UHudTestWidget::RemoveMoney()
 	gameState->RemoveMoney(10);
 }
 
+void UHudTestWidget::AddScore()
+{
+	AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>();
+	gameState->AddScore(1);
+}
+
+void UHudTestWidget::FinishGame()
+{
+	AGameplayGameState* gameState = GetWorld()->GetGameState<AGameplayGameState>();
+	gameState->FinishGame();
+}
+
 void UHudTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

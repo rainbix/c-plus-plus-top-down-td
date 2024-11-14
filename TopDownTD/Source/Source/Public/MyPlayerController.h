@@ -47,4 +47,7 @@ private:
 	void AbilityInputTagPressed(FGameplayTag GameplayTag);
 	void AbilityInputTagReleased(FGameplayTag GameplayTag);
 	void HandleBuildPressed();
+
+	UFUNCTION()
+	void HandleGameOver();
 };
