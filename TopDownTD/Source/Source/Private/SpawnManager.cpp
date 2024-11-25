@@ -1,7 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SpawnManager.h"
+#include "GameplayGameState.h"
 #include "PlayerCharacterSource.h"
+#include "ProfitHolderComponent.h"
+#include "Source/Health/HealthComponent.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
+
+int ASpawnManager::totalSpawnIterations = 0;
 
 // Sets default values
 ASpawnManager::ASpawnManager()
@@ -17,6 +23,8 @@ ASpawnManager::ASpawnManager()
 	
 	m_currentSpawnInterval = 0;
 	m_currentDecreaseTime = 0;
+
+	totalSpawnIterations = 0;
 }
 
 // Called every frame
@@ -53,25 +61,33 @@ void ASpawnManager::Tick(float DeltaTime)
 			spawnLocation.Y += FMath::RandRange(-locationRandomRange.Y, locationRandomRange.Y);
 		}
 
+		totalSpawnIterations++;
 		SpawnCharacter(spawnLocation);
 	}
 }
 
+void ASpawnManager::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Reset spawn iterations
+	totalSpawnIterations = 0;
+}
+
 void ASpawnManager::SpawnCharacter(FVector location)
 {
-	FRotator rotator = FRotator::ZeroRotator;
+	const FRotator rotator = FRotator::ZeroRotator;
 	FActorSpawnParameters spawnInfo;
-		
-	APlayerCharacterSource* character =
-		GetWorld()->SpawnActor<APlayerCharacterSource>(characterPrefab, location, rotator, spawnInfo);
+
+	const auto character = GetWorld()->SpawnActor<APlayerCharacterSource>(characterPrefab, location, rotator, spawnInfo);
 
 	m_spawnedEnemies.Add(character);
 
 	FVector2D direction;
 	if (destinationLocation)
 	{
-		FVector destination = destinationLocation->GetActorLocation();
-		FVector delta = destination - location;
+		const FVector destination = destinationLocation->GetActorLocation();
+		const FVector delta = destination - location;
 		direction = FVector2D(delta.X, delta.Y);
 	}
 	else
@@ -80,9 +96,50 @@ void ASpawnManager::SpawnCharacter(FVector location)
 	}
 	
 	direction.Normalize();
-	FVector resultDirection = FVector(direction.X, direction.Y, 0);
+	const FVector resultDirection = FVector(direction.X, direction.Y, 0);
 		
 	character->SetMoveToDirection(direction);
 	character->SetLookAt(resultDirection);
+
+	//Add profit
+	const auto profitComponent = NewObject<UProfitHolderComponent>(character);
+	profitComponent->InitializeData(
+		CalculateMoneyForEnemy(totalSpawnIterations),
+		CalculateScoreForEnemy(totalSpawnIterations));
+	
+	character->AddInstanceComponent(profitComponent);
+
+	//Enemy death event
+	if (const auto healthComponent = character->GetHealthComponent())
+	{
+		healthComponent->OnDieDelegate.AddUObject(this, &ASpawnManager::HandleCharacterDieEvent);
+	}
+}
+
+void ASpawnManager::HandleCharacterDieEvent(AActor* senderActor)
+{
+	if (const auto gameState = GetWorld()->GetGameState<AGameplayGameState>())
+		gameState->ProcessEnemyKill(senderActor);
+}
+
+int ASpawnManager::CalculateMoneyForEnemy(int counter)
+{ 
+	const int baseAmount = 3;
+	const int deltaAmount = FMath::RandRange(1, 2);
+	const int incrementThreshold = 10; // Increment money each N enemies 
+	
+	return baseAmount + deltaAmount * (counter / incrementThreshold);
+}
+
+int ASpawnManager::CalculateScoreForEnemy(int counter)
+{
+	const int baseAmount = 1;
+	const int extraAmount = 1;
+	const int extraThreshold = 10; // Increment money each N enemies 
+
+	if (counter % extraThreshold == 0)
+		return baseAmount + extraAmount;
+	
+	return baseAmount;
 }
 

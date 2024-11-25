@@ -13,6 +13,9 @@ class SOURCE_API ASpawnManager : public AActor
 	GENERATED_BODY()
 	
 public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterDied, APlayerCharacterSource*)
+	FOnCharacterDied OnCharacterDied;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
 	float spawnInterval;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Spawn Parameters")
@@ -37,9 +40,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+protected:
+	virtual void BeginPlay() override;
+
 private:
 	void SpawnCharacter(FVector location);
-	
+	void HandleCharacterDieEvent(AActor* senderActor);
+	int CalculateMoneyForEnemy(int counter);
+	int CalculateScoreForEnemy(int counter);
+
+	static int totalSpawnIterations;
 	float m_currentDelay;
 	float m_currentSpawnInterval;
 	float m_currentDecreaseTime;

@@ -54,7 +54,7 @@ private:
 	
 	void HealthInitializeHandler(int currentHealth, int maxHealth);
 	void HealthChangedHandler(int currentHealth);
-	void DieHandler();
+	void DieHandler(AActor* senderActor);
 
 	#pragma endregion
 };

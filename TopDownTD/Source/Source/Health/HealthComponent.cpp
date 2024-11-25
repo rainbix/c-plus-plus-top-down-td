@@ -67,7 +67,7 @@ void UHealthComponent::HandleMaxHealthChanged(const FOnAttributeChangeData& OnAt
 
 void UHealthComponent::OnDeath()
 {
-	OnDieDelegate.Broadcast();
+	OnDieDelegate.Broadcast(GetOwner());
 	
 	GetOwner()->Destroy();
 }

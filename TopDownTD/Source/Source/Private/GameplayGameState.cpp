@@ -1,13 +1,15 @@
 #include "GameplayGameState.h"
-
-#pragma region Money
+#include "ProfitHolderComponent.h"
 
 void AGameplayGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
 	currentMoney = InitialMoney;
+	currentScore = 0;
 }
+
+#pragma region Money
 
 void AGameplayGameState::AddMoney(int amount)
 {
@@ -52,9 +54,32 @@ int AGameplayGameState::GetScore() const
 
 #pragma endregion
 
+#pragma region FinishGame
+
 void AGameplayGameState::FinishGame() const
 {
 	OnGameFinished.Broadcast(GetScore());
 }
 
+#pragma endregion
 
+#pragma region Profit
+
+void AGameplayGameState::ProcessEnemyKill(const AActor* killedActor)
+{
+	if (!killedActor)
+		return;
+	
+	FetchProfit(killedActor->GetComponentByClass<UProfitHolderComponent>());
+}
+
+void AGameplayGameState::FetchProfit(const UProfitHolderComponent* profitComponent)
+{
+	if (!profitComponent)
+		return;
+	
+		AddMoney(profitComponent->GetMoney());
+		AddScore(profitComponent->GetScore());
+}
+
+#pragma endregion 

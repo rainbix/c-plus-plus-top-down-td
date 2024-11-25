@@ -30,7 +30,7 @@ public:
 	FOnHealthChange OnCurrentHealthChangeDelegate;
 	FOnHealthChange OnMaxHealthChangeDelegate;
 
-	DECLARE_MULTICAST_DELEGATE(FOnDie)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnDie, AActor*)
 	FOnDie OnDieDelegate;
 
 #pragma endregion 

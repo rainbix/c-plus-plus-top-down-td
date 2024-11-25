@@ -4,16 +4,15 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameplayGameState.generated.h"
 
+class UProfitHolderComponent;
+
 UCLASS()
 class SOURCE_API AGameplayGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void BeginPlay() override;
-
 public:
-
+	
 	#pragma region Money
 	
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMoneyAdd, int delta, int newAmount)
@@ -25,8 +24,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Money")
 	int InitialMoney;
 
-	int currentMoney;
-	
 	void AddMoney(int amount);
 	void RemoveMoney(int amount);
 	int GetCurrentMoney() const;
@@ -38,8 +35,6 @@ public:
 
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnScoreAdded, int delta, int newAmount)
 	FOnScoreAdded OnScoreAdded;
-
-	int currentScore;
 	
 	void AddScore(int amount);
 	int GetScore() const;
@@ -54,4 +49,18 @@ public:
 	void FinishGame() const;
 
 	#pragma endregion
+
+	#pragma region Profit
+
+	void FetchProfit(const UProfitHolderComponent* profitComponent);
+	void ProcessEnemyKill(const AActor* killedActor);
+	
+	#pragma endregion 
+	
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	int currentScore;
+	int currentMoney;
 };

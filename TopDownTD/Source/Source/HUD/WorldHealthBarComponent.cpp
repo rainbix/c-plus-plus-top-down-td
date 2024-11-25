@@ -90,7 +90,7 @@ void UWorldHealthBarComponent::HealthChangedHandler(int newHealth)
 	HealthBarWidget->SetValue(newHealth);
 }
 
-void UWorldHealthBarComponent::DieHandler()
+void UWorldHealthBarComponent::DieHandler(AActor* senderActor)
 {
 }
 

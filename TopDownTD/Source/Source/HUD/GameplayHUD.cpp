@@ -94,22 +94,22 @@ void AGameplayHUD::InitializeWidgets()
 		pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
 	}
 
-	if (moneyWidget)
-	{
-		moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
-		gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
-		gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
-	}
-	
-	if (scoreWidget)
-	{
-		scoreWidget->UpdateScore(0, gameState->GetScore());
-		gameState->OnScoreAdded.AddUObject(scoreWidget, &UScoreWidget::UpdateScore);
-	}
-
 	if(gameState)
 	{
 		gameState->OnGameFinished.AddUObject(this, &AGameplayHUD::FinishGame);
+		
+		if (moneyWidget)
+		{
+			moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
+			gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
+			gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
+		}
+	
+		if (scoreWidget)
+		{
+			scoreWidget->UpdateScore(0, gameState->GetScore());
+			gameState->OnScoreAdded.AddUObject(scoreWidget, &UScoreWidget::UpdateScore);
+		}
 	}
 }
 
