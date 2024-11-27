@@ -21,6 +21,9 @@ public:
 	void HandleWeaponAmmoChanged(const ARangedWeapon* weapon);
 	void HandleWeaponChange(const ARangedWeapon* weapon);
 	
+protected:
+	virtual void NativeConstruct() override;
+
 private:
 	
 	void UpdateAmmo(int curAmmo, int maxAmmo);
@@ -41,6 +44,15 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> ammoCountText;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<UWidget> AmmoBox;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<UWidget> ReloadBox;
+
+	void StartReload();
+	void FinishReload();
 	
 	GENERATED_BODY()
 };

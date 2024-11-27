@@ -6,6 +6,13 @@
 #include "Components/TextBlock.h"
 #include "Source/Weapons/RangedWeapon.h"
 
+void UActiveWeaponWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	ReloadBox->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 void UActiveWeaponWidget::InitializeWidget(const ARangedWeapon* weapon)
 {
 	UpdateAmmo(weapon->GetCurrentAmmo(), weapon->GetSpareAmmo());
@@ -53,4 +60,22 @@ TObjectPtr<UTexture2D> UActiveWeaponWidget::GetWeaponIcon(EWeaponTypes weaponTyp
 		return *ptrToIconPtr;	
 
 	return errorTexture;
+}
+
+void UActiveWeaponWidget::StartReload()
+{
+	if (!AmmoBox || !ReloadBox)
+		return;
+
+	AmmoBox->SetVisibility(ESlateVisibility::Collapsed);
+	ReloadBox->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UActiveWeaponWidget::FinishReload()
+{
+	if (!AmmoBox || !ReloadBox)
+		return;
+
+	AmmoBox->SetVisibility(ESlateVisibility::Visible);
+	ReloadBox->SetVisibility(ESlateVisibility::Collapsed);
 }

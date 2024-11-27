@@ -18,6 +18,7 @@ public:
 	// Sets default values for this component's properties
 	UWeaponComponent();
 	void Reload();
+	bool GetIsInitialized();
 	ARangedWeapon* GetCurrentWeapon() const;
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const ARangedWeapon* newWeapon)
@@ -25,6 +26,9 @@ public:
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const ARangedWeapon* weapon)
 	FOnWeaponChanged OnWeaponAmmoChange;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnComponentInitialze, const ARangedWeapon* weapon)
+	FOnComponentInitialze OnComponentInitializeDelegate;
 	
 protected:
 	// Called when the game starts
@@ -36,6 +40,8 @@ protected:
 	FName WeaponSocketName = "WeaponSocket";
 	
 private:
+	bool isInitialized;
+	
 	UPROPERTY()
 	ARangedWeapon* CurrentWeapon = nullptr;
 

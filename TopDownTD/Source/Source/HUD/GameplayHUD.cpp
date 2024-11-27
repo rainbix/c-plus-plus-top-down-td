@@ -19,12 +19,14 @@
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Source/Health/HealthComponent.h"
+#include "Source/Tools/GeneralPurposeUtils.h"
+#include "Source/Weapons/RangedWeapon.h"
 #include "Source/Weapons/WeaponComponent.h"
 
 void AGameplayHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	world = GetWorld();
 	playerController = UGameplayStatics::GetPlayerController(world, 0);
 	
@@ -57,59 +59,88 @@ void AGameplayHUD::InitializeWidgets()
 	APlayerCharacterSource* sourcePlayerCharacter = Cast<APlayerCharacterSource>(PlayerPawn);
 	check(sourcePlayerCharacter);
 
-	if (playerHealthWidget)
-	{
-		UHealthComponent* HealthComponent = sourcePlayerCharacter->GetHealthComponent();
-		
-		int maxHealth = HealthComponent->GetMaxHealth();
-		int curHealth = HealthComponent->GetCurrentHealth();
+	InitializeHealthWidget(sourcePlayerCharacter);
+	InitializeWeaponWidget(sourcePlayerCharacter);
+	InitializePauseButtonWidget();
+	InitializeMoneyScoreWidgets(gameState);
+}
 
-		if (HealthComponent->GetIsInitialized())
+void AGameplayHUD::InitializeHealthWidget(const APlayerCharacterSource* sourcePlayerCharacter)
+{
+	if (!playerHealthWidget)
+		return;
+	
+	UHealthComponent* HealthComponent = sourcePlayerCharacter->GetHealthComponent();
+	
+	int maxHealth = HealthComponent->GetMaxHealth();
+	int curHealth = HealthComponent->GetCurrentHealth();
+
+	if (HealthComponent->GetIsInitialized())
+	{
+		playerHealthWidget->InitializeWidget(maxHealth, curHealth);
+	}
+	else
+	{
+		HealthComponent->OnComponentInitializeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::InitializeWidget);
+	}
+	
+	HealthComponent->OnCurrentHealthChangeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
+	
+}
+
+void AGameplayHUD::InitializeWeaponWidget(const APlayerCharacterSource* sourcePlayerCharacter)
+{
+	if (!activeWeaponWidget)
+		return;
+	
+	UWeaponComponent* weaponComponent = sourcePlayerCharacter->GetWeaponComponent();
+
+	weaponComponent->OnWeaponChanged.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
+	weaponComponent->OnWeaponAmmoChange.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponAmmoChanged);
+	
+	if (weaponComponent->GetIsInitialized())
+	{
+		if (const auto weapon = weaponComponent->GetCurrentWeapon())
 		{
-			playerHealthWidget->InitializeWidget(maxHealth, curHealth);
+			activeWeaponWidget->InitializeWidget(weapon);
 		}
 		else
 		{
-			HealthComponent->OnComponentInitializeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::InitializeWidget);
-		}
-		
-		HealthComponent->OnCurrentHealthChangeDelegate.AddUObject(playerHealthWidget, &UProgressBarWidget::SetValue);
-	}
-
-	if (activeWeaponWidget)
-	{
-		UWeaponComponent* WeaponComponent = sourcePlayerCharacter->GetWeaponComponent();
-
-		WeaponComponent->OnWeaponChanged.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponChange);
-		WeaponComponent->OnWeaponAmmoChange.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::HandleWeaponAmmoChanged);
-
-		if (auto Weapon = WeaponComponent->GetCurrentWeapon())
-		{
-			activeWeaponWidget->InitializeWidget(Weapon);
+			weaponComponent->OnComponentInitializeDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::InitializeWidget);
 		}
 	}
-
-	if (pauseButtonWidget)
+	else
 	{
-		pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
+		weaponComponent->OnComponentInitializeDelegate.AddUObject(activeWeaponWidget, &UActiveWeaponWidget::InitializeWidget);
 	}
+}
 
-	if(gameState)
-	{
-		gameState->OnGameFinished.AddUObject(this, &AGameplayHUD::FinishGame);
-		
-		if (moneyWidget)
-		{
-			moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
-			gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
-			gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
-		}
+void AGameplayHUD::InitializePauseButtonWidget()
+{
+	if (!pauseButtonWidget)
+		return;
 	
-		if (scoreWidget)
-		{
-			scoreWidget->UpdateScore(0, gameState->GetScore());
-			gameState->OnScoreAdded.AddUObject(scoreWidget, &UScoreWidget::UpdateScore);
-		}
+	pauseButtonWidget->OnPauseDelegate.AddUObject(this, &AGameplayHUD::TogglePause);
+}
+
+void AGameplayHUD::InitializeMoneyScoreWidgets(AGameplayGameState* gameState)
+{
+	if(!gameState)
+		return;
+	
+	gameState->OnGameFinished.AddUObject(this, &AGameplayHUD::FinishGame);
+	
+	if (moneyWidget)
+	{
+		moneyWidget->InitializeWidget(gameState->GetCurrentMoney());
+		gameState->OnMoneyAdded.AddUObject(moneyWidget, &UMoneyWidget::Add);
+		gameState->OnMoneyRemoved.AddUObject(moneyWidget, &UMoneyWidget::Remove);
+	}
+
+	if (scoreWidget)
+	{
+		scoreWidget->UpdateScore(0, gameState->GetScore());
+		gameState->OnScoreAdded.AddUObject(scoreWidget, &UScoreWidget::UpdateScore);
 	}
 }
 

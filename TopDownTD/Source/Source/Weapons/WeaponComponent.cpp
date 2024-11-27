@@ -1,5 +1,4 @@
 ﻿#include "WeaponComponent.h"
-
 #include "AbilitySystemInterface.h"
 #include "RangedWeapon.h"
 #include "GameFramework/Character.h"
@@ -7,11 +6,17 @@
 UWeaponComponent::UWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	isInitialized = false;
 }
 
 void UWeaponComponent::Reload()
 {
 	if (!CurrentWeapon) return;
+}
+
+bool UWeaponComponent::GetIsInitialized()
+{
+	return isInitialized;
 }
 
 ARangedWeapon* UWeaponComponent::GetCurrentWeapon() const
@@ -26,6 +31,9 @@ void UWeaponComponent::BeginPlay()
 	OwnerAbilitySystem = Cast<IAbilitySystemInterface>(GetOwner())->GetAbilitySystemComponent();
 	check(OwnerAbilitySystem);
 	SpawnWeapon();
+	
+	isInitialized = true;
+	OnComponentInitializeDelegate.Broadcast(GetCurrentWeapon());
 }
 
 void UWeaponComponent::SpawnWeapon()

@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "GameplayHUD.generated.h"
 
+class UWeaponComponent;
 class UScoreWidget;
 class UPauseButtonWidget;
 class UProgressBarWidget;
@@ -18,6 +19,8 @@ class UTowerShopWidget;
 class ATowerActor;
 class UMoneyWidget;
 class UGameOverWidget;
+class APlayerCharacterSource;
+class AGameplayGameState;
 
 UCLASS()
 class SOURCE_API AGameplayHUD : public AHUD
@@ -85,7 +88,7 @@ protected:
 	UFUNCTION()
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
 private:
 
 	UPROPERTY()
@@ -131,6 +134,11 @@ private:
 	#pragma region Widgets
 	
 	void InitializeWidgets();
+	
+	void InitializeHealthWidget(const APlayerCharacterSource* sourcePlayerCharacter);
+	void InitializeWeaponWidget(const APlayerCharacterSource* sourcePlayerCharacter);
+	void InitializePauseButtonWidget();
+	void InitializeMoneyScoreWidgets(AGameplayGameState* gameState);
 	void DisposeWidgets();
 	
 	template <typename T>
