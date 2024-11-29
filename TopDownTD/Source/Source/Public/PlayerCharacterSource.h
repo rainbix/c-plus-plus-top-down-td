@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Source/TeamProvider.h"
 #include "Source/AbilitySystem/SourceAbilitySystemInterface.h"
 #include "PlayerCharacterSource.generated.h"
 
 class USourceAbilitySystemComponent;
 
 UCLASS()
-class SOURCE_API APlayerCharacterSource : public ACharacter, public ISourceAbilitySystemInterface
+class SOURCE_API APlayerCharacterSource : public ACharacter, public ISourceAbilitySystemInterface, public ITeamProvider
 {
 	GENERATED_BODY()
 
@@ -29,8 +30,12 @@ public:
 	class UWeaponComponent* GetWeaponComponent() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual USourceAbilitySystemComponent* GetSourceAbilitySystemComponent() const override;
+	virtual ETeamType GetTeamType() override { return TeamType; }
 
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	ETeamType TeamType = ETeamType::Player;
+	
 	virtual void Tick(float DeltaTime) override;
 	
 private:

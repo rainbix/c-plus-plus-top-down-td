@@ -1,48 +1,153 @@
 #include "TowerActor.h"
+
+#include "PlayerCharacterSource.h"
 #include "SourceCharacter.h"  // Включіть файл заголовка вашого гравця
+#include "SourceGameplayTags.h"
+#include "TeamSubsystem.h"
+#include "AbilitySystem/AbilitySet.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Engine/World.h"
 
 ATowerActor::ATowerActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	FireRate = 1.0f;
 	Range = 1000.0f;
+
+	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TowerMesh"));
+	RootComponent = MeshComponent;
+	
+	AbilitySystemComponent = CreateDefaultSubobject<USourceAbilitySystemComponent>(TEXT("AbilitySystem"));
+	AbilitySet = nullptr;
 }
 
 void ATowerActor::BeginPlay()
 {
 	Super::BeginPlay();
-    
-	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATowerActor::Fire, 1.0f / FireRate, true);
 
-	MainCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ACharacter* OwnerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	SetInstigator(OwnerCharacter);
+
+	GetWorldTimerManager().SetTimer(SearchTargetTimerHandle, this, &ATowerActor::FindTarget, TargetSearchDelay, true);
+
+	if (ITeamProvider* OwnerTeamProvider = Cast<ITeamProvider>(OwnerCharacter))
+	{
+		TeamType = OwnerTeamProvider->GetTeamType();
+	}
+	
+	if (AbilitySet)
+	{
+		AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, nullptr, this);
+	}
+}
+
+void ATowerActor::FindTarget()
+{
+	float DistanceSqr;
+	if (IsValidTarget(TargetCharacter, DistanceSqr))
+	{
+		return;
+	}
+	
+	TArray<FOverlapResult> OverlapTargets;
+	FCollisionShape Shape = FCollisionShape::MakeSphere(Range);
+	FCollisionQueryParams Params;
+	ETeamType ignoreTeams = ETeamType::Player;
+	Params.IgnoreMask = static_cast<int8>(ignoreTeams);
+	Params.bDebugQuery = true;
+
+	FCollisionObjectQueryParams ObjectQueryParams(ECC_Pawn);
+	GetWorld()->OverlapMultiByObjectType(OverlapTargets, GetActorLocation(), GetActorQuat(), ObjectQueryParams, Shape, Params);
+
+	ACharacter* ClosestTarget = nullptr;
+	float ClosestDistanceSqr = FLT_MAX;
+
+	for (FOverlapResult Result : OverlapTargets)
+	{
+		if (ACharacter* Character = Cast<ACharacter>(Result.GetActor()))
+		{
+			if (!IsValidTarget(Character, DistanceSqr))
+			{
+				continue;
+			}
+
+			if (DistanceSqr < ClosestDistanceSqr)
+			{
+				ClosestDistanceSqr = DistanceSqr;
+				ClosestTarget = Character;
+			}
+		}
+	}
+
+	TargetCharacter = ClosestTarget;
+}
+
+bool ATowerActor::IsValidTarget(ACharacter* Character, float& DistanceSqr)
+{
+	if (!Character)
+	{
+		return false;
+	}
+
+	if (Character == GetInstigator())
+	{
+		return false;
+	}
+
+	DistanceSqr = (Character->GetActorLocation() - GetActorLocation()).SquaredLength();
+
+	if (DistanceSqr > Range * Range)
+	{
+		return false;
+	}
+	
+	if (UHealthComponent* HealthComponent = Character->FindComponentByClass<UHealthComponent>())
+	{
+		if (HealthComponent->IsDead())
+		{
+			return false;
+		}
+	}
+
+	if (UTeamSubsystem::IsSameTeam(Character, this))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void ATowerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (MainCharacter)
+	float DistanceSquared;
+
+	if (!IsValidTarget(TargetCharacter, DistanceSquared))
 	{
-		FRotator LookAtRotation = (MainCharacter->GetActorLocation() - GetActorLocation()).Rotation();
-		SetActorRotation(LookAtRotation);
+		if (HadTarget)
+		{
+			HadTarget = false;
+			AbilitySystemComponent->RemoveLooseGameplayTag(TAG_Input_Fire);
+		}
+		return;
 	}
+
+	if (!HadTarget)
+	{
+		HadTarget = true;
+		AbilitySystemComponent->AddLooseGameplayTag(TAG_Input_Fire);
+	}
+
+	FVector Direction = TargetCharacter->GetActorLocation() - GetActorLocation();
+	Direction.Normalize();
+	FRotator LookAtRotation = Direction.Rotation();
+	LookAtRotation.Pitch = 0;
+	SetActorRotation(LookAtRotation);
 }
 
-void ATowerActor::Fire()
+
+AActor* ATowerActor::GetTarget() const
 {
-	if (MainCharacter && ProjectileClass)
-	{
-		FVector MuzzleLocation = GetActorLocation(); 
-		FRotator MuzzleRotation = (MainCharacter->GetActorLocation() - MuzzleLocation).Rotation();
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = GetInstigator();
-
-		AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
-	}
+	return TargetCharacter;
 }

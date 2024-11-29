@@ -1,11 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TeamProvider.h"
+#include "TowerActor.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
-UCLASS()
-class AProjectile : public AActor
+struct FGameplayEffectSpecHandle;
+
+UCLASS(Abstract)
+class AProjectile : public AActor, public ITeamProvider
 {
 	GENERATED_BODY()
     
@@ -15,21 +19,23 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, signed int OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult);
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+	ETeamType TeamType = ETeamType::None;;
+	
 public:    
 	virtual void Tick(float DeltaTime) override;
-
-	void FireInDirection(const FVector& ShootDirection) const;
-
+	virtual ETeamType GetTeamType() override { return TeamType; }
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UStaticMeshComponent* ProjectileMeshComponent;
+	UStaticMeshComponent* ProjectileMeshComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-	float Damage;
-
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	TArray<FGameplayEffectSpecHandle> EffectsToApply;
+	float Range;
 };

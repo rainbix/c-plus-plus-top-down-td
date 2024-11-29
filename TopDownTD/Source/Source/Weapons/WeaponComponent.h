@@ -33,7 +33,6 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
 	TSubclassOf<ARangedWeapon> DefaultWeaponClass;
 	UPROPERTY(EditDefaultsOnly, Category= "Weapon")
