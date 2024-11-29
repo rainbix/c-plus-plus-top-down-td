@@ -7,6 +7,3 @@
 
 // Trace against Actors/Components which provide interactions.
 #define Source_ObjectType_Bullet					ECC_GameTraceChannel1
-
-// Allocated to aim assist by the ShooterCore game feature
-// ECC_GameTraceChannel5
