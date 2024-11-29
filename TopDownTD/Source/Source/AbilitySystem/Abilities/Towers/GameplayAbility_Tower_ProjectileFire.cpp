@@ -45,9 +45,10 @@ void UGameplayAbility_Tower_ProjectileFire::Fire()
 	}
 
 	const FVector MuzzleLocation = Tower->GetSkeletalMesh()->GetSocketLocation(ShootPointSocketName);
-	FVector Direction = (Target->GetActorLocation() - Tower->GetActorLocation());
+	FVector Direction = Target->GetActorLocation() - MuzzleLocation;
 	Direction.Normalize();
-	const FRotator MuzzleRotation = Direction.Rotation();
+	FRotator MuzzleRotation = Direction.Rotation();
+	MuzzleRotation.Pitch = 0;
 
 	const FTransform ProjectileTransform(MuzzleRotation, MuzzleLocation);
 	AProjectile* Projectile = GetWorld()->SpawnActorDeferred<AProjectile>(ProjectileClass, ProjectileTransform, Tower, Tower->GetInstigator(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);

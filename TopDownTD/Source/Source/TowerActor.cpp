@@ -1,6 +1,9 @@
 #include "TowerActor.h"
+
+#include "PlayerCharacterSource.h"
 #include "SourceCharacter.h"  // Включіть файл заголовка вашого гравця
 #include "SourceGameplayTags.h"
+#include "TeamSubsystem.h"
 #include "AbilitySystem/AbilitySet.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
@@ -26,6 +29,11 @@ void ATowerActor::BeginPlay()
 	SetInstigator(OwnerCharacter);
 
 	GetWorldTimerManager().SetTimer(SearchTargetTimerHandle, this, &ATowerActor::FindTarget, TargetSearchDelay, true);
+
+	if (ITeamProvider* OwnerTeamProvider = Cast<ITeamProvider>(OwnerCharacter))
+	{
+		TeamType = OwnerTeamProvider->GetTeamType();
+	}
 	
 	if (AbilitySet)
 	{
@@ -44,6 +52,8 @@ void ATowerActor::FindTarget()
 	TArray<FOverlapResult> OverlapTargets;
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Range);
 	FCollisionQueryParams Params;
+	ETeamType ignoreTeams = ETeamType::Player;
+	Params.IgnoreMask = static_cast<int8>(ignoreTeams);
 	Params.bDebugQuery = true;
 
 	FCollisionObjectQueryParams ObjectQueryParams(ECC_Pawn);
@@ -72,7 +82,7 @@ void ATowerActor::FindTarget()
 	TargetCharacter = ClosestTarget;
 }
 
-bool ATowerActor::IsValidTarget(const ACharacter* Character, float& DistanceSqr) const
+bool ATowerActor::IsValidTarget(ACharacter* Character, float& DistanceSqr)
 {
 	if (!Character)
 	{
@@ -99,6 +109,11 @@ bool ATowerActor::IsValidTarget(const ACharacter* Character, float& DistanceSqr)
 		}
 	}
 
+	if (UTeamSubsystem::IsSameTeam(Character, this))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -107,7 +122,7 @@ void ATowerActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	float DistanceSquared;
-	
+
 	if (!IsValidTarget(TargetCharacter, DistanceSquared))
 	{
 		if (HadTarget)

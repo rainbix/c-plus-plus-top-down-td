@@ -20,6 +20,11 @@ void ARangedWeapon::BeginPlay()
 		AmmoModule->Initialize();
 		AmmoModule->OnAmmoChanged.BindUObject(this, &ARangedWeapon::HandleAmmoChanged);
 	}
+
+	if (ITeamProvider* OwnerTeamProvider = Cast<ITeamProvider>(Owner))
+	{
+		TeamType = OwnerTeamProvider->GetTeamType();
+	}
 }
 
 void ARangedWeapon::HandleAmmoChanged()

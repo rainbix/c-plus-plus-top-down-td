@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Source/TeamProvider.h"
 #include "Source/AbilitySystem/AbilitySet.h"
 #include "Source/HUD/EWeaponTypes.h"
 #include "RangedWeapon.generated.h"
@@ -11,7 +12,7 @@ class UGameplayAbility;
 class UAbilitySystemComponent;
 
 UCLASS()
-class SOURCE_API ARangedWeapon : public AActor
+class SOURCE_API ARangedWeapon : public AActor, public ITeamProvider
 {
 	GENERATED_BODY()
 
@@ -34,6 +35,7 @@ public:
 	FVector GetShootDirection() const;
 	void UpdateFiringTime();
 	float GetTimeSinceLastFire() const;
+	virtual ETeamType GetTeamType() override { return TeamType; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,6 +55,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon")
 	FName ShootPointSocket = "ShootSocket";
 
+	ETeamType TeamType;
 	float LastFireTime;
 
 	UPROPERTY()

@@ -1,9 +1,10 @@
 #include "Projectile.h"
 
+#include "PlayerCharacterSource.h"
 #include "Source.h"
+#include "TeamSubsystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 AProjectile::AProjectile()
 {
@@ -23,6 +24,7 @@ AProjectile::AProjectile()
 	ProjectileMeshComponent->SetNotifyRigidBodyCollision(true);
 	ProjectileMeshComponent->SetSimulatePhysics(false);
 	ProjectileMeshComponent->SetCollisionProfileName(TEXT("Bullet"));
+	ProjectileMeshComponent->SetGenerateOverlapEvents(true);
 }
 
 void AProjectile::BeginPlay()
@@ -30,33 +32,32 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	ProjectileMeshComponent->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	ProjectileMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnBeginOverlap);
 
 	SetLifeSpan(Range / ProjectileMovementComponent->InitialSpeed);
 
-	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (ITeamProvider* InstigatorTeamProvide = Cast<ITeamProvider>(GetInstigator()))
+	{
+		TeamType = InstigatorTeamProvide->GetTeamType();
+	}
 }
 
 void AProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	
+
 	ProjectileMeshComponent->OnComponentHit.RemoveDynamic(this, &AProjectile::OnHit);
+	ProjectileMeshComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AProjectile::OnBeginOverlap);
 }
 
-void AProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AProjectile::OnBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, signed int OtherBodyIndex, bool bFromSweep, const FHitResult& HitResult)
 {
 	AActor* OwnerActor = GetOwner();
 	AActor* InstigatorActor = GetInstigator();
 
-	if (OtherActor && OtherActor != this && OtherComp && OtherActor != GetOwner() && OtherActor != GetInstigator())
+	if (OtherActor && OtherActor != this && OtherActor && OtherActor != GetOwner() && OtherActor != InstigatorActor && !UTeamSubsystem::IsSameTeam(OtherActor, OwnerActor))
 	{
-		UE_LOG(LogSource, Display, TEXT("Hit actor [%s], Hit Component: [%s] Owner: [%s], Instigator: [%s]"), *GetNameSafe(OtherActor), *GetNameSafe(OtherComp), *GetNameSafe(OwnerActor), *GetNameSafe(InstigatorActor))
-
 		if (IAbilitySystemInterface* SourceAbilitySystemInterface = Cast<IAbilitySystemInterface>(OtherActor))
 		{
 			if (UAbilitySystemComponent* AbilitySystemComponent = SourceAbilitySystemInterface->GetAbilitySystemComponent())
@@ -70,4 +71,17 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 		Destroy();
 	}
+}
+
+void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor && OtherActor != this && OtherActor)
+	{
+		Destroy();
+	}
+}
+
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }

@@ -4,6 +4,8 @@
 #include "GameplayAbility_Weapon_Fire.h"
 #include "Abilities/Tasks/AbilityTask_WaitDelay.h"
 #include "Source/SourceGameplayTags.h"
+#include "Source/TeamSubsystem.h"
+#include "Source/Physics/SourceCollisionChannels.h"
 #include "Source/Weapons/RangedWeapon.h"
 
 UGameplayAbility_Weapon_Fire::UGameplayAbility_Weapon_Fire()
@@ -66,15 +68,32 @@ void UGameplayAbility_Weapon_Fire::OnFire()
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(GetAvatarActorFromActorInfo());
 
-	FHitResult HitResult;
-	GetWorld()->LineTraceSingleByChannel(HitResult, StartPosition, TraceEnd, ECC_PhysicsBody, CollisionParams);
+	TArray<FHitResult> HitResults;
+	GetWorld()->LineTraceMultiByChannel(HitResults, StartPosition, TraceEnd, Source_ObjectType_Bullet, CollisionParams);
 
-	if (HitResult.bBlockingHit)
+	FHitResult ClosestHit;
+	
+	for (int i = 0; i < HitResults.Num(); i++)
 	{
-		DrawDebugLine(GetWorld(), StartPosition, HitResult.ImpactPoint, FColor::Blue, false, 3.0f,0, 3.0f);
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 7.0f, 20, FColor::Blue,false, 3.0f);
+		FHitResult HitResult = HitResults[i];
+		
+		APawn* HitPawn = Cast<APawn>(HitResult.GetActor());
+		
+		if (HitPawn && UTeamSubsystem::IsSameTeam(HitPawn, Weapon))
+		{
+			continue;
+		}
+		
+		ClosestHit = HitResult;
+		break;
+	}
+	
+	if (ClosestHit.GetActor())
+	{
+		DrawDebugLine(GetWorld(), StartPosition, ClosestHit.ImpactPoint, FColor::Blue, false, 3.0f,0, 3.0f);
+		DrawDebugSphere(GetWorld(), ClosestHit.ImpactPoint, 7.0f, 20, FColor::Blue,false, 3.0f);
 
-		FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+		FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit(ClosestHit);
 
 		for (TSubclassOf<UGameplayEffect> Effect : AppliedEffects)
 		{

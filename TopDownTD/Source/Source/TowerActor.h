@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TeamProvider.h"
 #include "AbilitySystem/SourceAbilitySystemInterface.h"
 #include "AbilitySystem/SourceAbilitySystemComponent.h"
 #include "GameFramework/Actor.h"
@@ -9,7 +10,7 @@
 class UAbilitySet;
 
 UCLASS()
-class ATowerActor : public AActor, public ISourceAbilitySystemInterface
+class ATowerActor : public AActor, public ISourceAbilitySystemInterface, public ITeamProvider
 {
 	GENERATED_BODY()
 public:    
@@ -34,11 +35,13 @@ protected:
 	FTimerHandle SearchTargetTimerHandle;
 	UPROPERTY()
 	ACharacter* TargetCharacter;
+
 	bool HadTarget;
+	ETeamType TeamType;
 
 	virtual void BeginPlay() override;
 	void FindTarget();
-	bool IsValidTarget(const ACharacter* Character, float& DistanceSqr) const;
+	bool IsValidTarget(ACharacter* Character, float& DistanceSqr);
 	
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -47,4 +50,5 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override {return AbilitySystemComponent; }
 	AActor* GetTarget() const;
 	float GetRange() const { return Range; }
+	virtual ETeamType GetTeamType() override { return TeamType; }
 };
